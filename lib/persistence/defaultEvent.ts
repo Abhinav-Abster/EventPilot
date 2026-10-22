@@ -1,0 +1,135 @@
+import { EventPlan } from "../types/event";
+import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
+import { generateDefaultVendors } from "../vendor/vendorEngine";
+import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
+
+export function createCanonicalEventPlan(): EventPlan {
+  // Event date set ~25 days into future from today
+  const targetDate = addDaysToDate(formatISODate(new Date()), 25);
+
+  const profile = {
+    id: "ep-aanya-18th-anime",
+    name: "Aanya's 18th Anime Birthday Bash",
+    type: "birthday" as const,
+    date: targetDate,
+    time: "17:30",
+    location: {
+      city: "Pune",
+      venueType: "outdoor" as const,
+      venueName: "Green Meadows Open Lawn, Kothrud, Pune",
+    },
+    guestCount: 60,
+    totalBudgetMinor: 4000000, // ₹40,000 (in Paise)
+    currency: "INR" as const,
+    theme: "Anime & Manga Aesthetics (Studio Ghibli & Shonen)",
+    dietaryPreferences: ["vegetarian" as const],
+    accessibilityRequirements: ["Ground level wheelchair access to lawn"],
+    mustHaves: [
+      "Anime-Themed Decor & Cake",
+      "100% Pure Vegetarian Food",
+      "Outdoor Evening Setup",
+    ],
+    excludedFeatures: ["Alcohol", "Loud Firecrackers"],
+    priorities: ["food" as const, "decor" as const, "budget" as const],
+    notes:
+      "Sister's milestone 18th birthday celebration. She is an avid manga fan. Target 60 close friends and family in Pune for a memorable outdoor evening.",
+  };
+
+  const budgetItems = [
+    {
+      id: "bi-venue",
+      category: "venue" as const,
+      name: "Green Meadows Lawn Rental (Evening 5 PM - 10 PM)",
+      estimatedCostMinor: 800000, // ₹8,000
+      actualCostMinor: 800000,
+      flexible: false,
+      isProtected: false,
+      notes: "Includes lawn space, perimeter lights, 60 guest chairs, and restrooms.",
+    },
+    {
+      id: "bi-catering",
+      category: "food_beverage" as const,
+      name: "Swad Pure Veg Buffet (60 guests @ ₹300/head)",
+      estimatedCostMinor: 1800000, // ₹18,000
+      actualCostMinor: 1750000,
+      flexible: false,
+      isProtected: true,
+      notes: "100% vegetarian: 2 mocktails, 2 starters, 3 mains, live chaat, gulab jamun.",
+    },
+    {
+      id: "bi-cake",
+      category: "food_beverage" as const,
+      name: "Custom 2kg Anime Fondant Cake (The Sugar Art Studio)",
+      estimatedCostMinor: 250000, // ₹2,500
+      actualCostMinor: 250000,
+      flexible: true,
+      isProtected: true,
+      notes: "Eggless Belgian chocolate cake with custom manga wafer topper.",
+    },
+    {
+      id: "bi-decor",
+      category: "decorations" as const,
+      name: "Anime Stage Backdrop, Standees & Balloon Arch",
+      estimatedCostMinor: 500000, // ₹5,000
+      actualCostMinor: 500000,
+      flexible: true,
+      isProtected: true,
+      notes: "Custom character standees, organic sage/gold balloon arch, and fairy light canopy.",
+    },
+    {
+      id: "bi-photo",
+      category: "photography" as const,
+      name: "Freelance Photographer (3 Hours Candid & Cake Cutting)",
+      estimatedCostMinor: 350000, // ₹3,500
+      actualCostMinor: 350000,
+      flexible: true,
+      isProtected: false,
+      notes: "High-res color-graded digital gallery + 1 Instagram highlight reel.",
+    },
+    {
+      id: "bi-sound",
+      category: "entertainment" as const,
+      name: "Portable Bluetooth PA Sound System Rental & Mics",
+      estimatedCostMinor: 100000, // ₹1,000
+      actualCostMinor: 100000,
+      flexible: true,
+      isProtected: false,
+      notes: "Curated anime openings + Hindi pop playlist and trivia buzzers.",
+    },
+    {
+      id: "bi-invites",
+      category: "invitations" as const,
+      name: "Bespoke Animated Video Invites & RSVP Tracking",
+      estimatedCostMinor: 50000, // ₹500
+      actualCostMinor: 50000,
+      flexible: true,
+      isProtected: false,
+      notes: "WhatsApp motion graphic invite with RSVP Google Form link.",
+    },
+    {
+      id: "bi-contingency",
+      category: "contingency_reserve" as const,
+      name: "Emergency Contingency Reserve",
+      estimatedCostMinor: 150000, // ₹1,500 (3.75%)
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Unplanned supplies, extra water crates, or urgent local errands.",
+    },
+  ];
+
+  const tasks = generateDefaultTasks(targetDate, true);
+  const vendors = generateDefaultVendors();
+  const ideas = generatePersonalizedIdeas(profile);
+
+  return {
+    profile,
+    budgetItems,
+    tasks,
+    vendors,
+    ideas,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    version: 1,
+  };
+}
