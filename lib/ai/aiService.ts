@@ -5,8 +5,10 @@ import { EventPlanSchema } from "../schemas/eventSchemas";
 import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
 import { addDaysToDate } from "../timeline/timelineEngine";
 import { buildCompactReplanningSummary } from "./replanningSummary";
+import { normalizeDiets } from "./normalizers";
+import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
-export { buildCompactReplanningSummary };
+export { buildCompactReplanningSummary, normalizeDiets };
 
 export interface IntakeResult {
   reply: string;
@@ -135,32 +137,9 @@ export function normalizeProfile(
   }
 
   // Dietary preferences normalization
-  const validDiets = ["vegetarian", "non-vegetarian", "vegan", "jain", "halal", "gluten-free", "nut-allergy"] as const;
-  const dietaryPreferences: (typeof validDiets)[number][] = [];
-  if (Array.isArray(p.dietaryPreferences)) {
-    for (const d of p.dietaryPreferences) {
-      if (typeof d !== "string") continue;
-      const clean = d.toLowerCase().trim();
-      if ((clean.includes("veg") || clean.includes("vegetarian")) && !clean.includes("non")) {
-        if (!dietaryPreferences.includes("vegetarian")) dietaryPreferences.push("vegetarian");
-      } else if (clean.includes("non-veg") || clean.includes("non vegetarian") || clean.includes("meat")) {
-        if (!dietaryPreferences.includes("non-vegetarian")) dietaryPreferences.push("non-vegetarian");
-      } else if (clean.includes("vegan")) {
-        if (!dietaryPreferences.includes("vegan")) dietaryPreferences.push("vegan");
-      } else if (clean.includes("jain")) {
-        if (!dietaryPreferences.includes("jain")) dietaryPreferences.push("jain");
-      } else if (clean.includes("halal")) {
-        if (!dietaryPreferences.includes("halal")) dietaryPreferences.push("halal");
-      } else if (clean.includes("gluten")) {
-        if (!dietaryPreferences.includes("gluten-free")) dietaryPreferences.push("gluten-free");
-      } else if (clean.includes("nut")) {
-        if (!dietaryPreferences.includes("nut-allergy")) dietaryPreferences.push("nut-allergy");
-      }
-    }
-  }
-  if (dietaryPreferences.length === 0) {
-    dietaryPreferences.push("vegetarian");
-  }
+  const sanitizedDiets = normalizeDiets(p.dietaryPreferences);
+  const dietaryPreferences =
+    sanitizedDiets.length > 0 ? sanitizedDiets : [...DEFAULT_DIETARY_PREFERENCES];
 
   // Priorities normalization
   const validPriorities = ["food", "decor", "photography", "entertainment", "venue", "budget"] as const;
@@ -178,7 +157,7 @@ export function normalizeProfile(
 
   // Location normalization
   const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<string, unknown>;
-  const city = typeof loc.city === "string" && loc.city.trim().length > 0 ? loc.city.trim() : "Pune";
+  const city = typeof loc.city === "string" && loc.city.trim().length > 0 ? loc.city.trim() : DEFAULT_CITY;
   const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
   const venueType = (["indoor", "outdoor", "hybrid", "unselected"].includes(rawVenue) ? rawVenue : "outdoor") as any;
 
@@ -601,28 +580,8 @@ Only include fields that were stated or can be inferred safely in extractedProfi
   // Clean extracted profile fields
   const extracted = result.extractedProfile as Partial<EventProfile>;
   const merged = { ...currentProfile, ...extracted };
-  if (merged.dietaryPreferences && Array.isArray(merged.dietaryPreferences)) {
-    const validDiets = ["vegetarian", "non-vegetarian", "vegan", "jain", "halal", "gluten-free", "nut-allergy"] as const;
-    const sanitizedDiets: (typeof validDiets)[number][] = [];
-    for (const d of merged.dietaryPreferences) {
-      if (typeof d !== "string") continue;
-      const clean = d.toLowerCase().trim();
-      if ((clean.includes("veg") || clean.includes("vegetarian")) && !clean.includes("non")) {
-        if (!sanitizedDiets.includes("vegetarian")) sanitizedDiets.push("vegetarian");
-      } else if (clean.includes("non-veg") || clean.includes("meat")) {
-        if (!sanitizedDiets.includes("non-vegetarian")) sanitizedDiets.push("non-vegetarian");
-      } else if (clean.includes("vegan")) {
-        if (!sanitizedDiets.includes("vegan")) sanitizedDiets.push("vegan");
-      } else if (clean.includes("jain")) {
-        if (!sanitizedDiets.includes("jain")) sanitizedDiets.push("jain");
-      } else if (clean.includes("halal")) {
-        if (!sanitizedDiets.includes("halal")) sanitizedDiets.push("halal");
-      } else if (clean.includes("gluten")) {
-        if (!sanitizedDiets.includes("gluten-free")) sanitizedDiets.push("gluten-free");
-      } else if (clean.includes("nut")) {
-        if (!sanitizedDiets.includes("nut-allergy")) sanitizedDiets.push("nut-allergy");
-      }
-    }
+  if (merged.dietaryPreferences) {
+    const sanitizedDiets = normalizeDiets(merged.dietaryPreferences);
     if (sanitizedDiets.length > 0) {
       merged.dietaryPreferences = sanitizedDiets;
     }

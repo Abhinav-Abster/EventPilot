@@ -11,6 +11,7 @@ import {
   normalizeProfile,
   normalizePlanOutput,
 } from "../lib/ai/aiService";
+import { normalizeDiets } from "../lib/ai/normalizers";
 import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 
 describe("Validation & Gemini configuration", () => {
@@ -132,6 +133,57 @@ describe("Validation & Gemini configuration", () => {
     // Verify total budget was auto-balanced to not exceed totalBudgetMinor
     const totalEst = normalizedPlan.budgetItems.reduce((acc: number, item: any) => acc + item.estimatedCostMinor, 0);
     expect(totalEst).toBeLessThanOrEqual(normalizedProf.totalBudgetMinor);
+  });
+});
+
+describe("Dietary Normalization & Vegan Classification Fix", () => {
+  it("correctly classifies 'vegan' as 'vegan' (bug fix verification)", () => {
+    expect(normalizeDiets(["vegan"])).toEqual(["vegan"]);
+    expect(normalizeDiets(["Vegan"])).toEqual(["vegan"]);
+    expect(normalizeDiets(["100% vegan food"])).toEqual(["vegan"]);
+
+    const profile = normalizeProfile({ dietaryPreferences: ["vegan"] });
+    expect(profile.dietaryPreferences).toEqual(["vegan"]);
+  });
+
+  it("normalizes vegetarian and veg aliases", () => {
+    expect(normalizeDiets(["vegetarian"])).toEqual(["vegetarian"]);
+    expect(normalizeDiets(["veg"])).toEqual(["vegetarian"]);
+    expect(normalizeDiets(["pure veg"])).toEqual(["vegetarian"]);
+  });
+
+  it("normalizes non-vegetarian, non veg, and meat aliases", () => {
+    expect(normalizeDiets(["non-vegetarian"])).toEqual(["non-vegetarian"]);
+    expect(normalizeDiets(["non veg"])).toEqual(["non-vegetarian"]);
+    expect(normalizeDiets(["meat"])).toEqual(["non-vegetarian"]);
+  });
+
+  it("normalizes jain, halal, gluten-free, and nut allergy", () => {
+    expect(normalizeDiets(["jain"])).toEqual(["jain"]);
+    expect(normalizeDiets(["halal"])).toEqual(["halal"]);
+    expect(normalizeDiets(["gluten free"])).toEqual(["gluten-free"]);
+    expect(normalizeDiets(["gluten-free"])).toEqual(["gluten-free"]);
+    expect(normalizeDiets(["nut allergy"])).toEqual(["nut-allergy"]);
+  });
+
+  it("removes duplicate dietary preferences", () => {
+    expect(normalizeDiets(["vegan", "Vegan", "VEGAN"])).toEqual(["vegan"]);
+    expect(normalizeDiets(["veg", "vegetarian", "pure veg"])).toEqual(["vegetarian"]);
+  });
+
+  it("ignores non-string and empty items safely", () => {
+    expect(normalizeDiets([123, null, undefined, {}, "", "  ", "vegan"])).toEqual(["vegan"]);
+    expect(normalizeDiets("vegan")).toEqual(["vegan"]);
+  });
+
+  it("preserves fallback behavior when empty", () => {
+    expect(normalizeDiets([])).toEqual([]);
+    expect(normalizeDiets(null)).toEqual([]);
+    expect(normalizeDiets(undefined)).toEqual([]);
+
+    // normalizeProfile falls back to default vegetarian
+    const defaultProfile = normalizeProfile({});
+    expect(defaultProfile.dietaryPreferences).toEqual(["vegetarian"]);
   });
 });
 
