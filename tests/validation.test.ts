@@ -65,7 +65,7 @@ describe("Validation & Gemini configuration", () => {
       name: "A", // too short
       type: "birthday party",
       date: "not-a-date",
-      guestCount: "75" as any,
+      guestCount: "75" as unknown as number,
       totalBudgetMinor: 5000000,
       dietaryPreferences: ["pure veg", "halal"],
       location: { city: "" },
@@ -118,20 +118,20 @@ describe("Validation & Gemini configuration", () => {
     expect(planValidation.success).toBe(true);
 
     // Verify category mapping
-    expect(normalizedPlan.budgetItems.find((b: any) => b.name === "Custom Anime Cake")?.category).toBe("food_beverage");
-    expect(normalizedPlan.budgetItems.find((b: any) => b.name === "Live DJ & Sound")?.category).toBe("entertainment");
+    expect(normalizedPlan.budgetItems.find((b) => b.name === "Custom Anime Cake")?.category).toBe("food_beverage");
+    expect(normalizedPlan.budgetItems.find((b) => b.name === "Live DJ & Sound")?.category).toBe("entertainment");
 
     // Verify vendor phone became string and bookingStatus defaulted safely
-    const bakeryVendor = normalizedPlan.vendors.find((v: any) => v.name === "Sugar Bakery");
+    const bakeryVendor = normalizedPlan.vendors.find((v) => v.name === "Sugar Bakery");
     expect(typeof bakeryVendor?.contact.phone).toBe("string");
     expect(bakeryVendor?.category).toBe("caterer");
 
     // Verify task without nulls
-    const djTask = normalizedPlan.tasks.find((t: any) => t.title === "Book DJ");
+    const djTask = normalizedPlan.tasks.find((t) => t.title === "Book DJ");
     expect(djTask?.vendorId).toBeUndefined();
 
     // Verify total budget was auto-balanced to not exceed totalBudgetMinor
-    const totalEst = normalizedPlan.budgetItems.reduce((acc: number, item: any) => acc + item.estimatedCostMinor, 0);
+    const totalEst = normalizedPlan.budgetItems.reduce((acc, item) => acc + item.estimatedCostMinor, 0);
     expect(totalEst).toBeLessThanOrEqual(normalizedProf.totalBudgetMinor);
   });
 });

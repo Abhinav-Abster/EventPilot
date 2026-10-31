@@ -3,15 +3,18 @@
  * Strict typing for event profiles, budget items, tasks, vendors, ideas, and replanning proposals.
  */
 
-export type EventType =
-  | "birthday"
-  | "wedding"
-  | "community"
-  | "corporate"
-  | "anniversary"
-  | "other";
+export const EVENT_TYPES = [
+  "birthday",
+  "wedding",
+  "community",
+  "corporate",
+  "anniversary",
+  "other",
+] as const;
+export type EventType = (typeof EVENT_TYPES)[number];
 
-export type VenueType = "indoor" | "outdoor" | "hybrid" | "unselected";
+export const VENUE_TYPES = ["indoor", "outdoor", "hybrid", "unselected"] as const;
+export type VenueType = (typeof VENUE_TYPES)[number];
 
 export type DietaryPreference =
   | "vegetarian"
@@ -22,13 +25,15 @@ export type DietaryPreference =
   | "gluten-free"
   | "nut-allergy";
 
-export type PlanningPriority =
-  | "food"
-  | "decor"
-  | "photography"
-  | "entertainment"
-  | "venue"
-  | "budget";
+export const PLANNING_PRIORITIES = [
+  "food",
+  "decor",
+  "photography",
+  "entertainment",
+  "venue",
+  "budget",
+] as const;
+export type PlanningPriority = (typeof PLANNING_PRIORITIES)[number];
 
 export interface EventProfile {
   id: string;
@@ -53,16 +58,18 @@ export interface EventProfile {
   notes: string;
 }
 
-export type BudgetCategory =
-  | "venue"
-  | "food_beverage"
-  | "decorations"
-  | "photography"
-  | "entertainment"
-  | "invitations"
-  | "transportation"
-  | "miscellaneous"
-  | "contingency_reserve";
+export const BUDGET_CATEGORIES = [
+  "venue",
+  "food_beverage",
+  "decorations",
+  "photography",
+  "entertainment",
+  "invitations",
+  "transportation",
+  "miscellaneous",
+  "contingency_reserve",
+] as const;
+export type BudgetCategory = (typeof BUDGET_CATEGORIES)[number];
 
 export interface BudgetItem {
   id: string;
@@ -99,14 +106,24 @@ export interface BudgetSummary {
   savingsTips: string[];
 }
 
-export type TaskPriority = "urgent" | "high" | "medium" | "low";
-export type TaskStatus = "todo" | "in_progress" | "completed" | "blocked";
+export const TASK_PRIORITIES = ["urgent", "high", "medium", "low"] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export const TASK_STATUSES = ["todo", "in_progress", "completed", "blocked"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const TASK_CATEGORIES = [
+  ...BUDGET_CATEGORIES,
+  "general",
+  "coordination",
+] as const;
+export type TaskCategory = (typeof TASK_CATEGORIES)[number];
 
 export interface Task {
   id: string;
   title: string;
   description: string;
-  category: BudgetCategory | "general" | "coordination";
+  category: TaskCategory;
   priority: TaskPriority;
   relativeDays: number; // Offset relative to event date: e.g. -21 (21 days prior)
   dueDate: string; // Computed ISO date YYYY-MM-DD
@@ -118,25 +135,34 @@ export interface Task {
   isBlocked: boolean;
 }
 
-export type VendorCategory =
-  | "venue"
-  | "caterer"
-  | "decorator"
-  | "photographer"
-  | "entertainment"
-  | "transportation"
-  | "invitations"
-  | "other";
+export const VENDOR_CATEGORIES = [
+  "venue",
+  "caterer",
+  "decorator",
+  "photographer",
+  "entertainment",
+  "transportation",
+  "invitations",
+  "other",
+] as const;
+export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
-export type VendorBookingStatus =
-  | "planned"
-  | "contacted"
-  | "quote_received"
-  | "shortlisted"
-  | "booked"
-  | "cancelled";
+export const VENDOR_BOOKING_STATUSES = [
+  "planned",
+  "contacted",
+  "quote_received",
+  "shortlisted",
+  "booked",
+  "cancelled",
+] as const;
+export type VendorBookingStatus = (typeof VENDOR_BOOKING_STATUSES)[number];
 
-export type VendorPaymentStatus = "unpaid" | "advance_paid" | "fully_paid";
+export const VENDOR_PAYMENT_STATUSES = [
+  "unpaid",
+  "advance_paid",
+  "fully_paid",
+] as const;
+export type VendorPaymentStatus = (typeof VENDOR_PAYMENT_STATUSES)[number];
 
 export interface VendorRecord {
   id: string;
@@ -155,15 +181,17 @@ export interface VendorRecord {
   relatedTaskIds: string[];
 }
 
-export type CreativeIdeaCategory =
-  | "theme"
-  | "decor"
-  | "menu"
-  | "activities"
-  | "invitation"
-  | "return_gifts"
-  | "schedule"
-  | "weather_contingency";
+export const CREATIVE_IDEA_CATEGORIES = [
+  "theme",
+  "decor",
+  "menu",
+  "activities",
+  "invitation",
+  "return_gifts",
+  "schedule",
+  "weather_contingency",
+] as const;
+export type CreativeIdeaCategory = (typeof CREATIVE_IDEA_CATEGORIES)[number];
 
 export interface CreativeIdea {
   id: string;

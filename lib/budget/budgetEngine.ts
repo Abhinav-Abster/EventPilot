@@ -1,4 +1,4 @@
-import { BudgetItem, BudgetCategory, BudgetSummary, EventProfile } from "../types/event";
+import { BudgetItem, BudgetCategory, BudgetSummary, EventProfile, PlanningPriority } from "../types/event";
 import {
   addMoney,
   subtractMoney,
@@ -251,11 +251,26 @@ export function optimizeBudget(
     "contingency_reserve",
   ];
 
+  const categoryToPriority: Partial<Record<BudgetCategory, PlanningPriority>> = {
+    venue: "venue",
+    food_beverage: "food",
+    decorations: "decor",
+    photography: "photography",
+    entertainment: "entertainment",
+  };
+
+  const getPriorityRank = (category: BudgetCategory, priorities: readonly string[]): number => {
+    const directIdx = priorities.indexOf(category);
+    if (directIdx !== -1) return directIdx;
+    const mapped = categoryToPriority[category];
+    return mapped ? priorities.indexOf(mapped) : -1;
+  };
+
   // Adjust order based on profile priorities
-  const userPriorities = profile.priorities || [];
+  const userPriorities: readonly string[] = profile.priorities || [];
   trimOrder.sort((a, b) => {
-    const aPriority = userPriorities.indexOf(a as any);
-    const bPriority = userPriorities.indexOf(b as any);
+    const aPriority = getPriorityRank(a, userPriorities);
+    const bPriority = getPriorityRank(b, userPriorities);
     if (aPriority !== -1 && bPriority === -1) return 1; // keep a protected longer
     if (aPriority === -1 && bPriority !== -1) return -1;
     if (aPriority !== -1 && bPriority !== -1) return bPriority - aPriority;

@@ -7,6 +7,8 @@ import {
   ReplanningProposal,
   PlanChangeDiff,
   BudgetCategory,
+  TaskCategory,
+  VendorCategory,
 } from "../types/event";
 import {
   calculateBudgetSummary,
@@ -516,12 +518,33 @@ export function generateReplanningProposals(
         return { ...v };
       });
 
+      const vendorCategoryToTaskCategory = (category: string): TaskCategory => {
+        switch (category) {
+          case "caterer":
+            return "food_beverage";
+          case "decorator":
+            return "decorations";
+          case "photographer":
+            return "photography";
+          case "venue":
+            return "venue";
+          case "entertainment":
+            return "entertainment";
+          case "transportation":
+            return "transportation";
+          case "invitations":
+            return "invitations";
+          default:
+            return "coordination";
+        }
+      };
+
       // Add emergency contingency task
       const replacementTask: Task = {
         id: `task-emergency-${cat}`,
         title: `CRITICAL: Source Replacement ${cat.toUpperCase()} Immediately`,
         description: `Prioritize contacting backup ${cat}s in Pune with availability for ${currentPlan.profile.date}.`,
-        category: cat as any,
+        category: vendorCategoryToTaskCategory(cat),
         priority: "urgent",
         relativeDays: -3,
         dueDate: addDaysToDate(currentPlan.profile.date, -3),

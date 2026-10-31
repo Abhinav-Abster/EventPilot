@@ -1,12 +1,38 @@
 import { DEFAULT_GEMINI_MODEL, getGeminiClient, GeminiConfigurationError } from "./geminiClient";
 import { EVENT_INTAKE_SYSTEM_PROMPT, PLAN_GENERATION_SYSTEM_PROMPT, REPLANNING_SYSTEM_PROMPT } from "./prompts";
-import { EventPlan, EventProfile, ReplanningProposal } from "../types/event";
+import {
+  EventPlan,
+  EventProfile,
+  ReplanningProposal,
+  EventType,
+  VenueType,
+  PlanningPriority,
+  BudgetCategory,
+  TaskPriority,
+  TaskStatus,
+  TaskCategory,
+  VendorCategory,
+  VendorBookingStatus,
+  VendorPaymentStatus,
+  CreativeIdeaCategory,
+  VENUE_TYPES,
+  PLANNING_PRIORITIES,
+  BUDGET_CATEGORIES,
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  TASK_CATEGORIES,
+  VENDOR_CATEGORIES,
+  VENDOR_BOOKING_STATUSES,
+  VENDOR_PAYMENT_STATUSES,
+  CREATIVE_IDEA_CATEGORIES,
+} from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
 import { addDaysToDate } from "../timeline/timelineEngine";
 import { buildCompactReplanningSummary } from "./replanningSummary";
 import { normalizeDiets } from "./normalizers";
 import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
+import { isOneOf } from "../utils/guards";
 
 export { buildCompactReplanningSummary, normalizeDiets };
 
@@ -142,12 +168,14 @@ export function normalizeProfile(
     sanitizedDiets.length > 0 ? sanitizedDiets : [...DEFAULT_DIETARY_PREFERENCES];
 
   // Priorities normalization
-  const validPriorities = ["food", "decor", "photography", "entertainment", "venue", "budget"] as const;
-  const priorities: (typeof validPriorities)[number][] = [];
+  const priorities: PlanningPriority[] = [];
   if (Array.isArray(p.priorities)) {
     for (const pr of p.priorities) {
-      if (typeof pr === "string" && validPriorities.includes(pr.toLowerCase().trim() as any)) {
-        priorities.push(pr.toLowerCase().trim() as any);
+      if (typeof pr === "string") {
+        const trimmed = pr.toLowerCase().trim();
+        if (isOneOf(PLANNING_PRIORITIES, trimmed)) {
+          priorities.push(trimmed);
+        }
       }
     }
   }
@@ -159,7 +187,7 @@ export function normalizeProfile(
   const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<string, unknown>;
   const city = typeof loc.city === "string" && loc.city.trim().length > 0 ? loc.city.trim() : DEFAULT_CITY;
   const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
-  const venueType = (["indoor", "outdoor", "hybrid", "unselected"].includes(rawVenue) ? rawVenue : "outdoor") as any;
+  const venueType: VenueType = isOneOf(VENUE_TYPES, rawVenue) ? rawVenue : "outdoor";
 
   // Guest count
   const rawGuestCount = typeof p.guestCount === "number" ? p.guestCount : Number(p.guestCount);
@@ -385,13 +413,16 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
   ]).map((value, index) => {
     const item = asRecord(value) ?? {};
     const rawCategory = text(item.category, "miscellaneous").toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    const category = validBudgetCategories.has(rawCategory)
+    const candidateCategory = validBudgetCategories.has(rawCategory)
       ? rawCategory
       : budgetCategoryMap[rawCategory] ?? "miscellaneous";
+    const category: BudgetCategory = isOneOf(BUDGET_CATEGORIES, candidateCategory)
+      ? candidateCategory
+      : "miscellaneous";
 
     return {
       id: text(item.id, `ai-budget-${index + 1}`),
-      category: category as any,
+      category,
       name: text(item.name, `Planned expense ${index + 1}`),
       estimatedCostMinor: integer(item.estimatedCostMinor ?? item.costMinor ?? item.cost, 10000),
       actualCostMinor: integer(item.actualCostMinor, 0),
@@ -429,24 +460,24 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
   ]).map((value, index) => {
     const task = asRecord(value) ?? {};
     const relativeDays = signedInteger(task.relativeDays ?? task.daysBeforeEvent, -7);
-    const validPriorities = ["urgent", "high", "medium", "low"] as const;
-    const priority = validPriorities.includes(text(task.priority).toLowerCase() as any)
-      ? (text(task.priority).toLowerCase() as (typeof validPriorities)[number])
-      : "medium";
+    const rawPriority = text(task.priority).toLowerCase();
+    const priority: TaskPriority = isOneOf(TASK_PRIORITIES, rawPriority) ? rawPriority : "medium";
 
-    const validStatus = ["todo", "in_progress", "completed", "blocked"] as const;
-    const status = validStatus.includes(text(task.status).toLowerCase() as any)
-      ? (text(task.status).toLowerCase() as (typeof validStatus)[number])
-      : "todo";
+    const rawStatus = text(task.status).toLowerCase();
+    const status: TaskStatus = isOneOf(TASK_STATUSES, rawStatus) ? rawStatus : "todo";
 
     const vendorId = typeof task.vendorId === "string" && task.vendorId.trim() ? task.vendorId.trim() : undefined;
     const estimatedCostMinor = task.estimatedCostMinor != null ? integer(task.estimatedCostMinor) : undefined;
+    const rawTaskCategory = text(task.category, "general");
+    const category: TaskCategory = isOneOf(TASK_CATEGORIES, rawTaskCategory)
+      ? rawTaskCategory
+      : "general";
 
     return {
       id: text(task.id, `ai-task-${index + 1}`),
       title: text(task.title, `Planning task ${index + 1}`),
       description: text(task.description, "Complete this event-planning task."),
-      category: text(task.category, "general"),
+      category,
       priority,
       relativeDays,
       dueDate: text(task.dueDate, addDaysToDate(planDate, relativeDays)),
@@ -465,9 +496,12 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
   const vendors = rawVendors.map((value, index) => {
     const vendor = asRecord(value) ?? {};
     const rawCategory = text(vendor.category, "other").toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    const category = validVendorCategories.has(rawCategory)
+    const candidateCategory = validVendorCategories.has(rawCategory)
       ? rawCategory
       : vendorCategoryMap[rawCategory] ?? "other";
+    const category: VendorCategory = isOneOf(VENDOR_CATEGORIES, candidateCategory)
+      ? candidateCategory
+      : "other";
 
     const rawContact = asRecord(vendor.contact) ?? {};
     const contact = {
@@ -482,20 +516,20 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
         : undefined,
     };
 
-    const validBookingStatus = ["planned", "contacted", "quote_received", "shortlisted", "booked", "cancelled"] as const;
-    const bookingStatus = validBookingStatus.includes(vendor.bookingStatus as any)
-      ? (vendor.bookingStatus as (typeof validBookingStatus)[number])
+    const rawBookingStatus = vendor.bookingStatus;
+    const bookingStatus: VendorBookingStatus = isOneOf(VENDOR_BOOKING_STATUSES, rawBookingStatus)
+      ? rawBookingStatus
       : "planned";
 
-    const validPaymentStatus = ["unpaid", "advance_paid", "fully_paid"] as const;
-    const paymentStatus = validPaymentStatus.includes(vendor.paymentStatus as any)
-      ? (vendor.paymentStatus as (typeof validPaymentStatus)[number])
+    const rawPaymentStatus = vendor.paymentStatus;
+    const paymentStatus: VendorPaymentStatus = isOneOf(VENDOR_PAYMENT_STATUSES, rawPaymentStatus)
+      ? rawPaymentStatus
       : "unpaid";
 
     return {
       id: text(vendor.id, `ai-vendor-${index + 1}`),
       name: text(vendor.name, `Potential vendor ${index + 1}`),
-      category: category as any,
+      category,
       contact,
       estimatedQuoteMinor: integer(vendor.estimatedQuoteMinor ?? vendor.quoteMinor ?? vendor.estimatedCostMinor, 0),
       actualQuoteMinor: integer(vendor.actualQuoteMinor, 0),
@@ -512,9 +546,12 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
   const ideas = rawIdeas.map((value, index) => {
     const idea = asRecord(value) ?? {};
     const rawCategory = text(idea.category, "activities").toLowerCase().replace(/[^a-z0-9_]/g, "_");
-    const category = validIdeaCategories.has(rawCategory)
+    const candidateCategory = validIdeaCategories.has(rawCategory)
       ? rawCategory
       : ideaCategoryMap[rawCategory] ?? "activities";
+    const category: CreativeIdeaCategory = isOneOf(CREATIVE_IDEA_CATEGORIES, candidateCategory)
+      ? candidateCategory
+      : "activities";
 
     const costRangeText = typeof idea.costRangeText === "string" && idea.costRangeText.trim()
       ? idea.costRangeText.trim()
@@ -522,7 +559,7 @@ export function normalizePlanOutput(output: unknown, profile: Partial<EventProfi
 
     return {
       id: text(idea.id, `ai-idea-${index + 1}`),
-      category: category as any,
+      category,
       title: text(idea.title, `Event idea ${index + 1}`),
       description: text(idea.description ?? idea.details, "A personalized suggestion for this event."),
       whyItFits: text(idea.whyItFits ?? idea.rationale, "It supports the event's stated priorities."),

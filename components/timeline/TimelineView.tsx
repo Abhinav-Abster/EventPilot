@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
-import { Task, TaskPriority, TaskStatus } from "../../lib/types/event";
+import { Task, TaskPriority, TaskStatus, TaskCategory } from "../../lib/types/event";
 import {
   detectCircularDependencies,
   addDaysToDate,
@@ -29,7 +29,7 @@ export function TimelineView() {
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
-  const [newTaskCategory, setNewTaskCategory] = useState("general");
+  const [newTaskCategory, setNewTaskCategory] = useState<TaskCategory>("general");
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("medium");
   const [newTaskRelativeDays, setNewTaskRelativeDays] = useState("-7");
   const [newTaskDependencies, setNewTaskDependencies] = useState<string[]>([]);
@@ -109,7 +109,7 @@ export function TimelineView() {
     addTask({
       title: newTaskTitle.trim(),
       description: newTaskDescription,
-      category: newTaskCategory as any,
+      category: newTaskCategory,
       priority: newTaskPriority,
       relativeDays: relDays,
       dueDate: computedDueDate,
