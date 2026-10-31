@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   Calendar,
   MapPin,
@@ -36,6 +36,13 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
   const [quickAssistantQuery, setQuickAssistantQuery] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const budgetSummary = useMemo(
     () =>
@@ -124,18 +131,25 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
     e.preventDefault();
     if (!quickAssistantQuery.trim() || isProcessing) return;
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsProcessing(true);
     setError(null);
     try {
-      const result = await requestReplanning(quickAssistantQuery, plan);
+      const result = await requestReplanning(quickAssistantQuery, plan, controller.signal);
       if (result.proposals.length > 0) {
         setActiveProposal(result.proposals[0]);
         setQuickAssistantQuery("");
       }
     } catch (err) {
+      if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : "Unable to analyze the requested change.");
     } finally {
-      setIsProcessing(false);
+      if (!controller.signal.aborted) {
+        setIsProcessing(false);
+      }
     }
   };
 

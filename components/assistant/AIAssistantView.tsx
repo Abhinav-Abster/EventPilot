@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Bot,
   Send,
@@ -29,6 +29,13 @@ export function AIAssistantView() {
   const [inputQuery, setInputQuery] = useState("");
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
       id: "init",
@@ -69,6 +76,10 @@ export function AIAssistantView() {
     const q = queryToSend || inputQuery;
     if (!q.trim() || isEvaluating) return;
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const userMsg: AssistantMessage = {
       id: "u-" + Date.now(),
       sender: "user",
@@ -82,7 +93,7 @@ export function AIAssistantView() {
     setError(null);
 
     try {
-      const result = await requestReplanning(q, plan);
+      const result = await requestReplanning(q, plan, controller.signal);
 
       if (result.proposals.length > 0) {
         const primaryProposal = result.proposals[0];
@@ -105,9 +116,12 @@ export function AIAssistantView() {
         setMessages((prev) => [...prev, assistantMsg]);
       }
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Unable to analyze the requested change.");
     } finally {
-      setIsEvaluating(false);
+      if (!controller.signal.aborted) {
+        setIsEvaluating(false);
+      }
     }
   };
 

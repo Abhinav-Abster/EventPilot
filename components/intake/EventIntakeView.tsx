@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Send,
   Sparkles,
@@ -38,6 +38,15 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
 
   const [inputMessage, setInputMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const intakeAbortRef = useRef<AbortController | null>(null);
+  const planAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      intakeAbortRef.current?.abort();
+      planAbortRef.current?.abort();
+    };
+  }, []);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [saveAsNewEvent, setSaveAsNewEvent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +93,10 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
     const text = textToSend || inputMessage;
     if (!text.trim() || isProcessing) return;
 
+    intakeAbortRef.current?.abort();
+    const controller = new AbortController();
+    intakeAbortRef.current = controller;
+
     const userMsg: ChatMessage = {
       id: "msg-" + Date.now(),
       sender: "user",
@@ -97,7 +110,7 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
     setError(null);
 
     try {
-      const result = await requestIntake(text, stagedProfile);
+      const result = await requestIntake(text, stagedProfile, controller.signal);
 
       const assistantMsg: ChatMessage = {
         id: "msg-" + (Date.now() + 1),
@@ -109,23 +122,33 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
       setMessages((prev) => [...prev, assistantMsg]);
       setStagedProfile((prev) => ({ ...prev, ...result.extractedProfile }));
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Unable to process the event details.");
     } finally {
-      setIsProcessing(false);
+      if (!controller.signal.aborted) {
+        setIsProcessing(false);
+      }
     }
   };
 
   const handleGeneratePlan = async () => {
+    planAbortRef.current?.abort();
+    const controller = new AbortController();
+    planAbortRef.current = controller;
+
     setIsGeneratingPlan(true);
     setError(null);
     try {
-      const result = await requestPlan(stagedProfile);
+      const result = await requestPlan(stagedProfile, controller.signal);
       setFullPlan(result.plan, saveAsNewEvent);
       onNavigate("dashboard");
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Unable to generate the event plan.");
     } finally {
-      setIsGeneratingPlan(false);
+      if (!controller.signal.aborted) {
+        setIsGeneratingPlan(false);
+      }
     }
   };
 
