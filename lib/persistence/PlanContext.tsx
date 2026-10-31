@@ -105,6 +105,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
             const validated = EventPlanSchema.safeParse(parsed);
             if (validated.success) {
               loadedPlans.push(validated.data as EventPlan);
+              try {
+                localStorage.removeItem(LEGACY_STORAGE_KEY);
+              } catch (_) {}
             }
           } catch (e) {
             console.warn("Failed to parse legacy stored plan:", e);
@@ -135,21 +138,64 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Sync to localStorage on state changes
-  useEffect(() => {
-    if (isHydrated && plans.length > 0) {
-      try {
-        localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(plans));
-        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activePlanId);
-        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(plan));
-      } catch (e) {
-        console.error("Failed to persist events to localStorage:", e);
-      }
-    }
-  }, [plans, activePlanId, plan, isHydrated]);
-
   const plansRef = useRef(plans);
   plansRef.current = plans;
+  const activePlanIdRef = useRef(activePlanId);
+  activePlanIdRef.current = activePlanId;
+  const lastSavedPlansRef = useRef<EventPlan[] | null>(null);
+  const lastSavedActiveIdRef = useRef<string | null>(null);
+
+  const flushSave = useCallback(() => {
+    if (!isHydrated || plansRef.current.length === 0) return;
+    if (
+      plansRef.current === lastSavedPlansRef.current &&
+      activePlanIdRef.current === lastSavedActiveIdRef.current
+    ) {
+      return;
+    }
+    try {
+      localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(plansRef.current));
+      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activePlanIdRef.current);
+      lastSavedPlansRef.current = plansRef.current;
+      lastSavedActiveIdRef.current = activePlanIdRef.current;
+    } catch (e) {
+      console.error("Failed to persist events to localStorage:", e);
+    }
+  }, [isHydrated]);
+
+  // Sync to localStorage on state changes (debounced by ~500ms)
+  useEffect(() => {
+    if (!isHydrated || plans.length === 0) return;
+    if (
+      plans === lastSavedPlansRef.current &&
+      activePlanId === lastSavedActiveIdRef.current
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      flushSave();
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [plans, activePlanId, isHydrated, flushSave]);
+
+  // Flush on pagehide / beforeunload so pending state is never lost
+  useEffect(() => {
+    const handleFlush = () => {
+      flushSave();
+    };
+
+    window.addEventListener("pagehide", handleFlush);
+    window.addEventListener("beforeunload", handleFlush);
+
+    return () => {
+      window.removeEventListener("pagehide", handleFlush);
+      window.removeEventListener("beforeunload", handleFlush);
+    };
+  }, [flushSave]);
 
   // Helper to mutate the currently active plan
   const updateActivePlan = useCallback((updater: (prev: EventPlan) => EventPlan) => {
