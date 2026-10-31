@@ -3,11 +3,11 @@ import {
   parseConstraintIntent,
   generateReplanningProposals,
 } from "../lib/replanning/replanningEngine";
-import { createCanonicalEventPlan } from "../lib/persistence/defaultEvent";
+import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 import { paiseToRupees } from "../lib/budget/moneyUtils";
 
 describe("Adaptive Replanning Engine", () => {
-  const initialPlan = createCanonicalEventPlan();
+  const initialPlan = createReferenceEventPlan();
 
   it("parses natural language budget reduction intent accurately", () => {
     const query = "My budget is now ₹30,000.";

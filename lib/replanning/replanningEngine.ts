@@ -48,7 +48,7 @@ export interface ParsedConstraintChange {
 
 /**
  * Natural Language / Query parser for constraint adjustments
- * Extracts structured intents even in offline/demo mode or without LLM
+ * Extracts structured intents for the constraint-solving pipeline.
  */
 export function parseConstraintIntent(
   query: string,

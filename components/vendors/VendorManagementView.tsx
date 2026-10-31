@@ -5,15 +5,11 @@ import {
   Users,
   Phone,
   Mail,
-  Building,
   Plus,
   Edit2,
   Trash2,
-  CheckCircle2,
   AlertCircle,
   X,
-  FileText,
-  CreditCard,
 } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import {
@@ -108,146 +104,163 @@ export function VendorManagementView() {
   };
 
   return (
-    <div className="space-y-8 pb-12 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold font-display text-forest-900">
-            Vendor Directory & Quote Tracker
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 mt-1">
-            Track quotes, contracts, and payment statuses across verified service providers in Pune.
+    <div className="space-y-12 pb-12">
+      {/* Editorial Bauhaus Header */}
+      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0px_0px_black] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest font-black">
+            <span className="w-3.5 h-3.5 bg-[#F0C020] border-2 border-black inline-block" />
+            <span>MODULE 04 / SERVICE ROSTER & PROCUREMENT</span>
+          </div>
+          <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tighter uppercase text-black">
+            VENDOR DIRECTORY
+          </h1>
+          <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
+            Curated index of verified suppliers, caterers, decorators, and venues. Track contractual quotations and execution commitments.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-forest-900 hover:bg-forest-850 text-white rounded-xl text-xs font-semibold shadow-sm transition"
+          className="btn-bauhaus px-6 py-4 bg-[#D02020] hover:bg-[#D02020]/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-[4px_4px_0px_0px_black] flex items-center gap-2 shrink-0"
         >
-          <Plus className="w-4 h-4 text-gold-400" />
-          <span>Add New Vendor</span>
+          <Plus size={16} strokeWidth={2.5} />
+          <span>ENROLL VENDOR</span>
         </button>
       </div>
 
       {/* Transparent Disclosure */}
-      <div className="bg-sand-50 border border-sand-300 rounded-2xl p-4 text-xs text-stone-600 flex items-start gap-2.5">
-        <AlertCircle className="w-4 h-4 text-stone-400 shrink-0 mt-0.5" />
-        <span>
-          <strong>Sample Data Disclosure:</strong> All initial vendor entries represent realistic Pune service benchmarks. EventPilot does not claim to make real-world financial transactions or reservations without verified integration credentials.
+      <div className="bg-[#FFF9C4] border-4 border-black p-5 shadow-[4px_4px_0px_0px_black] text-xs font-mono text-black flex items-start gap-3">
+        <AlertCircle size={18} strokeWidth={2.5} className="text-[#D02020] shrink-0 mt-0.5" />
+        <span className="leading-relaxed">
+          <strong className="uppercase font-black">BENCHMARK DISCLOSURE:</strong> Initial vendor profiles reflect market calibrations for Pune venues and services. EventPilot conducts verified deterministic constraint scoring for quotes and timelines.
         </span>
       </div>
 
       {/* Category Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition ${
-            selectedCategory === "all"
-              ? "bg-forest-900 text-white font-semibold"
-              : "bg-white text-stone-600 border border-sand-200 hover:bg-sand-100"
-          }`}
-        >
-          All Categories ({plan.vendors.length})
-        </button>
-        {Object.entries(VENDOR_CATEGORY_LABELS).map(([catKey, label]) => {
-          const count = plan.vendors.filter((v) => v.category === catKey).length;
-          if (count === 0) return null;
-          return (
-            <button
-              key={catKey}
-              onClick={() => setSelectedCategory(catKey)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition ${
-                selectedCategory === catKey
-                  ? "bg-forest-900 text-white font-semibold"
-                  : "bg-white text-stone-600 border border-sand-200 hover:bg-sand-100"
-              }`}
-            >
-              {label} ({count})
-            </button>
-          );
-        })}
+      <div className="space-y-3">
+        <span className="font-mono text-xs uppercase tracking-widest font-black text-black block">
+          DISCIPLINE FILTERS:
+        </span>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
+              selectedCategory === "all"
+                ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
+                : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
+            }`}
+          >
+            ALL CATEGORIES ({plan.vendors.length})
+          </button>
+          {Object.entries(VENDOR_CATEGORY_LABELS).map(([catKey, label]) => {
+            const count = plan.vendors.filter((v) => v.category === catKey).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={catKey}
+                onClick={() => setSelectedCategory(catKey)}
+                className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
+                  selectedCategory === catKey
+                    ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
+                    : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
+                }`}
+              >
+                {label.toUpperCase()} ({count})
+              </button>
+            );
+          })}
+        </div>
       </div>
 
+      {/* 4px Heavy Divider */}
+      <div className="w-full border-t-4 border-black" />
+
       {/* Vendor Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredVendors.map((vendor) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {filteredVendors.map((vendor, idx) => {
           const statusInfo =
             BOOKING_STATUS_CONFIG[vendor.bookingStatus] ||
             BOOKING_STATUS_CONFIG.planned;
 
+          // Alternate corner accents
+          const cornerShape =
+            idx % 3 === 0
+              ? "rounded-full bg-[#D02020]"
+              : idx % 3 === 1
+              ? "rounded-none bg-[#1040C0]"
+              : "shape-triangle bg-[#F0C020]";
+
           return (
             <div
               key={vendor.id}
-              className="bg-white rounded-2xl p-6 border border-sand-200 hover:border-sand-300 shadow-xs hover:shadow-sm transition space-y-4"
+              className="card-bauhaus bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col justify-between space-y-6 relative"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <span className="text-[10px] font-semibold uppercase text-stone-400 block mb-0.5">
+              <span className={`w-4 h-4 ${cornerShape} border-2 border-black absolute top-4 right-4`} />
+
+              <div className="space-y-4">
+                <div className="border-b-4 border-black pb-3">
+                  <span className="font-mono text-[10px] uppercase tracking-widest font-black text-black/60 block mb-1">
                     {VENDOR_CATEGORY_LABELS[vendor.category]}
                   </span>
-                  <h3 className="text-base font-bold text-forest-900">
+                  <h2 className="font-display font-black text-2xl uppercase tracking-tight text-black">
                     {vendor.name}
-                  </h3>
+                  </h2>
                 </div>
 
-                {/* Status Badge */}
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusInfo.badgeBg} ${statusInfo.color}`}
-                  >
-                    {statusInfo.label}
-                  </span>
-                </div>
-              </div>
-
-              {/* Quotes & Payment Status */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-sand-50 rounded-xl text-xs">
-                <div>
-                  <span className="text-stone-500 block text-[11px]">Quote Amount</span>
-                  <span className="font-mono font-bold text-stone-900 text-sm">
-                    {formatINR(vendor.estimatedQuoteMinor)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-stone-500 block text-[11px]">Payment Status</span>
-                  <span className="font-semibold text-stone-800 capitalize">
-                    {vendor.paymentStatus.replace("_", " ")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-1.5 text-xs text-stone-600 pt-1">
-                {vendor.contact.contactPerson && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-gold-600 shrink-0" />
-                    <span>{vendor.contact.contactPerson}</span>
+                {/* Quotes & Payment Status */}
+                <div className="grid grid-cols-2 gap-4 p-4 border-2 border-black bg-[#F0F0F0] shadow-[3px_3px_0px_0px_black] font-mono text-xs">
+                  <div>
+                    <span className="text-black/60 block text-[10px] uppercase font-bold tracking-wider">
+                      CONTRACT QUOTE
+                    </span>
+                    <span className="font-black text-black text-lg block pt-0.5">
+                      {formatINR(vendor.estimatedQuoteMinor)}
+                    </span>
                   </div>
-                )}
-                {vendor.contact.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-gold-600 shrink-0" />
-                    <span className="font-mono">{vendor.contact.phone}</span>
+                  <div>
+                    <span className="text-black/60 block text-[10px] uppercase font-bold tracking-wider">
+                      PAYMENT STATUS
+                    </span>
+                    <span className="font-black text-black uppercase block pt-1">
+                      {vendor.paymentStatus.replace("_", " ")}
+                    </span>
                   </div>
-                )}
-                {vendor.contact.email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-gold-600 shrink-0" />
-                    <span>{vendor.contact.email}</span>
-                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="space-y-2 text-xs font-mono text-black pt-1">
+                  {vendor.contact.contactPerson && (
+                    <div className="flex items-center gap-2">
+                      <Users size={15} strokeWidth={2.5} className="text-[#D02020] shrink-0" />
+                      <span className="font-bold">{vendor.contact.contactPerson}</span>
+                    </div>
+                  )}
+                  {vendor.contact.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone size={15} strokeWidth={2.5} className="text-[#1040C0] shrink-0" />
+                      <span className="font-bold">{vendor.contact.phone}</span>
+                    </div>
+                  )}
+                  {vendor.contact.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail size={15} strokeWidth={2.5} className="text-[#F0C020] shrink-0" />
+                      <span className="font-bold">{vendor.contact.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notes */}
+                {vendor.notes && (
+                  <p className="text-xs text-black/80 font-medium bg-[#FFF9C4] p-3 border-2 border-black shadow-[2px_2px_0px_0px_black]">
+                    {vendor.notes}
+                  </p>
                 )}
               </div>
-
-              {/* Notes */}
-              {vendor.notes && (
-                <p className="text-xs text-stone-500 bg-sand-50/50 p-2.5 rounded-lg border border-sand-100">
-                  {vendor.notes}
-                </p>
-              )}
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-2 border-t border-sand-100">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between pt-4 border-t-4 border-black">
+                <div>
                   <select
                     value={vendor.bookingStatus}
                     onChange={(e) =>
@@ -255,31 +268,31 @@ export function VendorManagementView() {
                         bookingStatus: e.target.value as VendorBookingStatus,
                       })
                     }
-                    className="text-xs bg-white border border-sand-300 rounded-lg px-2 py-1 text-stone-700"
+                    className="text-xs font-mono font-black uppercase bg-[#F0F0F0] border-2 border-black px-3 py-1.5 text-black shadow-[2px_2px_0px_0px_black] focus:outline-none"
                   >
-                    <option value="planned">Planned</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="quote_received">Quote Received</option>
-                    <option value="shortlisted">Shortlisted</option>
-                    <option value="booked">Booked</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="planned">PLANNED</option>
+                    <option value="contacted">CONTACTED</option>
+                    <option value="quote_received">QUOTE RECEIVED</option>
+                    <option value="shortlisted">SHORTLISTED</option>
+                    <option value="booked">BOOKED</option>
+                    <option value="cancelled">CANCELLED</option>
                   </select>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditingVendor(vendor)}
-                    className="p-1.5 text-stone-400 hover:text-forest-900 hover:bg-sand-100 rounded-lg transition"
+                    className="p-2 border-2 border-black bg-white hover:bg-[#F0C020] text-black shadow-[2px_2px_0px_0px_black] transition-all"
                     title="Edit Vendor"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 size={14} strokeWidth={2.5} />
                   </button>
                   <button
                     onClick={() => deleteVendor(vendor.id)}
-                    className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                    className="p-2 border-2 border-black bg-white hover:bg-[#D02020] hover:text-white text-black shadow-[2px_2px_0px_0px_black] transition-all"
                     title="Delete Vendor"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 size={14} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -291,27 +304,27 @@ export function VendorManagementView() {
       {/* Add Vendor Modal */}
       {showAddModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-sand-300 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-sand-200 mb-4">
-              <h3 className="text-sm font-bold text-forest-900 font-display">
-                Add New Vendor
-              </h3>
+          <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
+            <div className="flex items-center justify-between p-6 bg-[#D02020] text-white border-b-4 border-black">
+              <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
+                ENROLL SERVICE VENDOR
+              </h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-stone-400 hover:text-stone-600"
+                className="p-1 border-2 border-white bg-white text-black hover:bg-black hover:text-white transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X size={18} strokeWidth={2.5} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateVendor} className="space-y-3.5 text-xs">
+            <form onSubmit={handleCreateVendor} className="p-6 space-y-4 text-xs font-mono">
               <div>
-                <label className="block text-stone-600 font-medium mb-1">
-                  Vendor Name
+                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                  VENDOR / ESTABLISHMENT NAME
                 </label>
                 <input
                   type="text"
@@ -319,99 +332,107 @@ export function VendorManagementView() {
                   placeholder="e.g. Pune Anime Decor Studio"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">Category</label>
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    DISCIPLINE
+                  </label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as VendorCategory)}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs bg-white"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   >
                     {Object.entries(VENDOR_CATEGORY_LABELS).map(([k, l]) => (
                       <option key={k} value={k}>
-                        {l}
+                        {l.toUpperCase()}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">
-                    Quote (₹)
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    QUOTE (₹)
                   </label>
                   <input
                     type="number"
                     placeholder="5000"
                     value={newEstimatedQuote}
                     onChange={(e) => setNewEstimatedQuote(e.target.value)}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">
-                    Contact Person
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    CONTACT PERSON
                   </label>
                   <input
                     type="text"
                     placeholder="Mr. Rajesh"
                     value={newContactPerson}
                     onChange={(e) => setNewContactPerson(e.target.value)}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">Phone</label>
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    PHONE
+                  </label>
                   <input
                     type="text"
                     placeholder="+91 98220..."
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-stone-600 font-medium mb-1">Email</label>
+                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                  EMAIL
+                </label>
                 <input
                   type="email"
                   placeholder="vendor@pune.in"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                 />
               </div>
 
               <div>
-                <label className="block text-stone-600 font-medium mb-1">Notes</label>
+                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                  TERMS & NOTES
+                </label>
                 <textarea
                   rows={2}
-                  placeholder="Services covered, terms, or cancellation clauses"
+                  placeholder="Deliverables covered, deposit terms, cancellation policies..."
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-sand-200">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-stone-600 hover:bg-sand-100 rounded-lg"
+                  className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-forest-900 hover:bg-forest-850 text-white font-semibold rounded-lg"
+                  className="btn-bauhaus px-6 py-2 bg-[#D02020] text-white hover:bg-[#D02020]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
                 >
-                  Add Vendor
+                  ENROLL VENDOR
                 </button>
               </div>
             </form>
@@ -422,26 +443,28 @@ export function VendorManagementView() {
       {/* Edit Vendor Modal */}
       {editingVendor && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-sand-300 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-sand-200 mb-4">
-              <h3 className="text-sm font-bold text-forest-900 font-display">
-                Edit Vendor Details
-              </h3>
+          <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
+            <div className="flex items-center justify-between p-6 bg-[#1040C0] text-white border-b-4 border-black">
+              <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
+                EDIT VENDOR CONTRACT
+              </h2>
               <button
                 onClick={() => setEditingVendor(null)}
-                className="text-stone-400 hover:text-stone-600"
+                className="p-1 border-2 border-white bg-white text-black hover:bg-[#D02020] hover:text-white transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X size={18} strokeWidth={2.5} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="space-y-3.5 text-xs">
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs font-mono">
               <div>
-                <label className="block text-stone-600 font-medium mb-1">Name</label>
+                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                  NAME
+                </label>
                 <input
                   type="text"
                   required
@@ -449,14 +472,14 @@ export function VendorManagementView() {
                   onChange={(e) =>
                     setEditingVendor({ ...editingVendor, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">
-                    Quote (₹)
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    QUOTE (₹)
                   </label>
                   <input
                     type="number"
@@ -469,12 +492,12 @@ export function VendorManagementView() {
                         ),
                       })
                     }
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-medium mb-1">
-                    Booking Status
+                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                    BOOKING STATUS
                   </label>
                   <select
                     value={editingVendor.bookingStatus}
@@ -484,43 +507,45 @@ export function VendorManagementView() {
                         bookingStatus: e.target.value as VendorBookingStatus,
                       })
                     }
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs bg-white"
+                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                   >
-                    <option value="planned">Planned</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="quote_received">Quote Received</option>
-                    <option value="shortlisted">Shortlisted</option>
-                    <option value="booked">Booked</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="planned">PLANNED</option>
+                    <option value="contacted">CONTACTED</option>
+                    <option value="quote_received">QUOTE RECEIVED</option>
+                    <option value="shortlisted">SHORTLISTED</option>
+                    <option value="booked">BOOKED</option>
+                    <option value="cancelled">CANCELLED</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-stone-600 font-medium mb-1">Notes</label>
+                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+                  NOTES
+                </label>
                 <textarea
                   rows={2}
                   value={editingVendor.notes}
                   onChange={(e) =>
                     setEditingVendor({ ...editingVendor, notes: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-sand-300 rounded-lg text-xs"
+                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-sand-200">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
                 <button
                   type="button"
                   onClick={() => setEditingVendor(null)}
-                  className="px-3 py-1.5 text-stone-600 hover:bg-sand-100 rounded-lg"
+                  className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-forest-900 hover:bg-forest-850 text-white font-semibold rounded-lg"
+                  className="btn-bauhaus px-6 py-2 bg-[#1040C0] text-white hover:bg-[#1040C0]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
                 >
-                  Save Vendor
+                  SAVE SPECIFICATIONS
                 </button>
               </div>
             </form>

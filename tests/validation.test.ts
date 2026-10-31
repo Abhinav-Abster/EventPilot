@@ -5,10 +5,15 @@ import {
   TaskSchema,
   EventPlanSchema,
 } from "../lib/schemas/eventSchemas";
-import { processEventIntake, generateFullEventPlan } from "../lib/ai/aiService";
-import { createCanonicalEventPlan } from "../lib/persistence/defaultEvent";
+import {
+  processEventIntake,
+  generateFullEventPlan,
+  normalizeProfile,
+  normalizePlanOutput,
+} from "../lib/ai/aiService";
+import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 
-describe("Validation & AI Fallback Architecture", () => {
+describe("Validation & Gemini configuration", () => {
   it("rejects invalid event profile inputs with informative Zod errors", () => {
     const invalidProfile = {
       name: "X", // too short (< 2 chars)
@@ -28,28 +33,20 @@ describe("Validation & AI Fallback Architecture", () => {
     }
   });
 
-  it("validates canonical event plan against master EventPlanSchema", () => {
-    const canonical = createCanonicalEventPlan();
-    const result = EventPlanSchema.safeParse(canonical);
+  it("validates the reference event plan against master EventPlanSchema", () => {
+    const referencePlan = createReferenceEventPlan();
+    const result = EventPlanSchema.safeParse(referencePlan);
     expect(result.success).toBe(true);
   });
 
-  it("operates in deterministic demo mode when GEMINI_API_KEY is not provided", async () => {
+  it("reports a configuration error when GEMINI_API_KEY is not provided", async () => {
     const userQuery =
       "I'm planning my sister's birthday in Pune for 60 people. My budget is ₹40,000. She loves anime, and I'd like an outdoor evening party with vegetarian food.";
 
-    const intakeResult = await processEventIntake(userQuery);
-
-    expect(intakeResult.isDemo).toBe(true);
-    expect(intakeResult.extractedProfile.guestCount).toBe(60);
-    expect(intakeResult.extractedProfile.location?.city).toBe("Pune");
-    expect(intakeResult.extractedProfile.location?.venueType).toBe("outdoor");
-    expect(intakeResult.extractedProfile.theme).toContain("Anime");
-    expect(intakeResult.extractedProfile.dietaryPreferences).toContain("vegetarian");
-    expect(intakeResult.isComplete).toBe(true);
+    await expect(processEventIntake(userQuery)).rejects.toThrow("Gemini is not configured");
   });
 
-  it("generates a full validated event plan in demo mode without any external network call", async () => {
+  it("does not generate a plan when Gemini is not configured", async () => {
     const partialProfile = {
       name: "Sister's Anime Birthday",
       guestCount: 60,
@@ -59,15 +56,82 @@ describe("Validation & AI Fallback Architecture", () => {
       dietaryPreferences: ["vegetarian" as const],
     };
 
-    const genResult = await generateFullEventPlan(partialProfile);
+    await expect(generateFullEventPlan(partialProfile)).rejects.toThrow("Gemini is not configured");
+  });
 
-    expect(genResult.isDemo).toBe(true);
-    expect(genResult.plan.budgetItems.length).toBeGreaterThanOrEqual(6);
-    expect(genResult.plan.tasks.length).toBeGreaterThanOrEqual(7);
-    expect(genResult.plan.ideas.length).toBeGreaterThanOrEqual(5);
+  it("normalizes malformed profile and AI response data so it strictly passes EventPlanSchema validation", () => {
+    const messyProfile = {
+      name: "A", // too short
+      type: "birthday party",
+      date: "not-a-date",
+      guestCount: "75" as any,
+      totalBudgetMinor: 5000000,
+      dietaryPreferences: ["pure veg", "halal"],
+      location: { city: "" },
+    };
 
-    // Verify schema validation passes
-    const validation = EventPlanSchema.safeParse(genResult.plan);
-    expect(validation.success).toBe(true);
+    const normalizedProf = normalizeProfile(messyProfile);
+    expect(EventProfileSchema.safeParse(normalizedProf).success).toBe(true);
+    expect(normalizedProf.dietaryPreferences).toContain("vegetarian");
+    expect(normalizedProf.dietaryPreferences).toContain("halal");
+    expect(normalizedProf.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(normalizedProf.location.city.length).toBeGreaterThan(0);
+
+    const rawAiOutput = {
+      budgetItems: [
+        { name: "Custom Anime Cake", category: "cake", estimatedCostMinor: 300000 },
+        { name: "Live DJ & Sound", category: "music", estimatedCostMinor: 150000 },
+        { name: "Lawn Venue", category: "venue", estimatedCostMinor: 2000000 },
+        { name: "Catering", category: "catering", estimatedCostMinor: 3500000 }, // Total 59.5k > 50k budget!
+      ],
+      tasks: [
+        { title: "Book DJ", category: "entertainment", relativeDays: -10, vendorId: null, estimatedCostMinor: null },
+        { title: "Order Cake", category: "catering", relativeDays: -5 },
+      ],
+      vendors: [
+        {
+          name: "Sugar Bakery",
+          category: "bakery",
+          contact: { phone: 9876543210, contactPerson: "Anita" },
+          bookingStatus: "pending_review",
+        },
+      ],
+      ideas: [
+        { title: "Anime Trivia Quiz", category: "games", description: "Fun quiz", whyItFits: "Anime theme", estimatedCostMinor: 0, costRangeText: null },
+      ],
+    };
+
+    const normalizedPlan = normalizePlanOutput(rawAiOutput, normalizedProf);
+    const fullPlanCandidate = {
+      profile: normalizedPlan.normalizedProfile,
+      budgetItems: normalizedPlan.budgetItems,
+      tasks: normalizedPlan.tasks,
+      vendors: normalizedPlan.vendors,
+      ideas: normalizedPlan.ideas,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 1,
+    };
+
+    const planValidation = EventPlanSchema.safeParse(fullPlanCandidate);
+    expect(planValidation.success).toBe(true);
+
+    // Verify category mapping
+    expect(normalizedPlan.budgetItems.find((b: any) => b.name === "Custom Anime Cake")?.category).toBe("food_beverage");
+    expect(normalizedPlan.budgetItems.find((b: any) => b.name === "Live DJ & Sound")?.category).toBe("entertainment");
+
+    // Verify vendor phone became string and bookingStatus defaulted safely
+    const bakeryVendor = normalizedPlan.vendors.find((v: any) => v.name === "Sugar Bakery");
+    expect(typeof bakeryVendor?.contact.phone).toBe("string");
+    expect(bakeryVendor?.category).toBe("caterer");
+
+    // Verify task without nulls
+    const djTask = normalizedPlan.tasks.find((t: any) => t.title === "Book DJ");
+    expect(djTask?.vendorId).toBeUndefined();
+
+    // Verify total budget was auto-balanced to not exceed totalBudgetMinor
+    const totalEst = normalizedPlan.budgetItems.reduce((acc: number, item: any) => acc + item.estimatedCostMinor, 0);
+    expect(totalEst).toBeLessThanOrEqual(normalizedProf.totalBudgetMinor);
   });
 });
+

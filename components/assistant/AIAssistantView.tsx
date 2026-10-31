@@ -5,21 +5,15 @@ import {
   Bot,
   Send,
   Sparkles,
-  TrendingDown,
-  TrendingUp,
   ShieldCheck,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
+  Check,
   ArrowRight,
   RefreshCw,
-  HelpCircle,
   MessageSquare,
 } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
-import { executeReplanning } from "../../lib/ai/aiService";
+import { requestReplanning } from "../../lib/ai/client";
 import { ReplanningProposal } from "../../lib/types/event";
-import { formatINR } from "../../lib/budget/moneyUtils";
 
 interface AssistantMessage {
   id: string;
@@ -30,42 +24,43 @@ interface AssistantMessage {
 }
 
 export function AIAssistantView() {
-  const { plan, setActiveProposal, applyProposal, rejectProposal } = usePlan();
+  const { plan, setActiveProposal, applyProposal, lastAppliedProposalId } = usePlan();
 
   const [inputQuery, setInputQuery] = useState("");
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
       id: "init",
       sender: "assistant",
-      text: "I am ready to assist with real-time adaptive replanning. Try typing an adjustment such as 'My budget is now ₹30,000', 'We have 20 additional guests', or 'Move the party indoors'. I will calculate trade-offs and show an exact comparison.",
-      timestamp: "Ready",
+      text: "The adaptive replanning engine is active. State any real-world disruption or constraint delta (e.g., 'Budget reduced to ₹30,000', '20 more guests expected', or 'Shift party indoors'). Downstream impacts, non-negotiables, and side-by-side diffs will be computed deterministically.",
+      timestamp: "READY",
     },
   ]);
 
   const quickScenarios = [
     {
-      title: "Budget Reduction to ₹30,000",
+      title: "BUDGET CAP: ₹30,000",
       query: "My budget is now ₹30,000.",
     },
     {
-      title: "20 Additional Guests (+20 Pax)",
+      title: "GUEST CENSUS: +20 PAX",
       query: "We have 20 additional guests.",
     },
     {
-      title: "Relocate Indoors (Rain Protocol)",
+      title: "INDOOR RELOCATION",
       query: "Move the party indoors due to rain forecast.",
     },
     {
-      title: "Caterer Cancellation Contingency",
+      title: "CATERER CANCELLATION",
       query: "The caterer cancelled at the last minute.",
     },
     {
-      title: "Protect Decor, Cut Entertainment",
+      title: "PRESERVE DECOR MANDATE",
       query: "Keep the decorations but reduce other expenses.",
     },
     {
-      title: "Reschedule by 7 Days",
+      title: "POSTPONE BY 7 DAYS",
       query: "The event is now next Saturday.",
     },
   ];
@@ -84,16 +79,17 @@ export function AIAssistantView() {
     setMessages((prev) => [...prev, userMsg]);
     setInputQuery("");
     setIsEvaluating(true);
+    setError(null);
 
     try {
-      const result = await executeReplanning(q, plan);
+      const result = await requestReplanning(q, plan);
 
       if (result.proposals.length > 0) {
         const primaryProposal = result.proposals[0];
         const assistantMsg: AssistantMessage = {
           id: "a-" + Date.now(),
           sender: "assistant",
-          text: `I have analyzed your change request: "${result.explanation}". Here is the generated adaptive replanning proposal with deterministic impact calculations.`,
+          text: `Analysis complete: "${result.explanation}". Generated deterministic replanning proposal with verified constraint adjustments.`,
           proposal: primaryProposal,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
@@ -103,129 +99,157 @@ export function AIAssistantView() {
         const assistantMsg: AssistantMessage = {
           id: "a-" + Date.now(),
           sender: "assistant",
-          text: "I analyzed the request, but no material changes or conflicts were identified with current constraints.",
+          text: "The requested adjustment introduced no binding constraint conflicts with current allocations.",
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
         setMessages((prev) => [...prev, assistantMsg]);
       }
     } catch (e) {
-      console.error("Replanning failed:", e);
+      setError(e instanceof Error ? e.message : "Unable to analyze the requested change.");
     } finally {
       setIsEvaluating(false);
     }
   };
 
   return (
-    <div className="space-y-8 pb-12 animate-in fade-in duration-300">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold font-display text-forest-900">
-          Adaptive Replanning & AI Assistant
-        </h2>
-        <p className="text-xs sm:text-sm text-stone-600 mt-1">
-          EventPilot&apos;s core differentiator: change any real-world constraint and verify the downstream trade-offs before accepting.
+    <div className="space-y-12 pb-12">
+      {/* Bauhaus Constructivist Header */}
+      <div className="space-y-4 border-b-4 border-black pb-8">
+        <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-black">
+          <span className="w-3.5 h-3.5 rounded-full bg-[#D02020] border-2 border-black inline-block" />
+          <span className="w-3.5 h-3.5 bg-[#1040C0] border-2 border-black inline-block" />
+          <span className="w-3.5 h-3.5 bg-[#F0C020] border-2 border-black inline-block shape-triangle" />
+          <span className="font-bold">SYSTEM MODULE 06 // ADAPTIVE REPLANNING ENGINE</span>
+        </div>
+        <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tighter uppercase text-black leading-none">
+          REPLANNING TERMINAL
+        </h1>
+        <p className="font-sans font-medium text-base text-black max-w-3xl leading-relaxed">
+          Evaluate what-if scenarios in real-time. Trade-offs and resource adjustments are tested against non-negotiable architectural constraints before any plan modifications are committed.
         </p>
       </div>
 
-      {/* Quick Test Chips */}
-      <div className="space-y-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
-          Simulate Adaptive Scenarios:
-        </span>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      {error && (
+        <div role="alert" className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black] uppercase tracking-wider">
+          SYSTEM ERROR NOTICE: {error}
+        </div>
+      )}
+
+      {/* Quick Scenario Chips */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 bg-black inline-block" />
+          <span className="font-mono text-xs uppercase tracking-widest font-bold text-black">
+            DISRUPTION SCENARIO PRESETS:
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickScenarios.map((sc, idx) => (
             <button
               key={idx}
               onClick={() => handleSendQuery(sc.query)}
-              className="text-left p-2.5 bg-white border border-sand-200 hover:border-forest-800 rounded-xl transition text-xs shadow-2xs group"
+              className="text-left p-3.5 border-2 border-black bg-white shadow-[4px_4px_0px_0px_black] hover:bg-[#F0C020] hover:text-black btn-bauhaus font-mono text-xs group transition-colors duration-200"
             >
-              <span className="font-bold text-forest-900 block group-hover:text-forest-800 line-clamp-1">
-                {sc.title}
-              </span>
-              <span className="text-[10px] text-stone-500 block truncate mt-0.5">
-                {`"${sc.query}"`}
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold uppercase tracking-wider text-[11px] block truncate">
+                  {sc.title}
+                </span>
+                <span className={`w-2 h-2 border border-black ${idx % 3 === 0 ? 'bg-[#D02020] rounded-full' : idx % 3 === 1 ? 'bg-[#1040C0]' : 'bg-[#F0C020] shape-triangle'}`} />
+              </div>
+              <span className="font-sans text-[11px] text-gray-700 group-hover:text-black block truncate">
+                &ldquo;{sc.query}&rdquo;
               </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Main Conversation Stream */}
-      <div className="bg-white rounded-3xl border border-sand-200 shadow-sm flex flex-col min-h-[550px] overflow-hidden">
+      {/* Main Conversation Stream Window */}
+      <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] flex flex-col min-h-[640px] overflow-hidden">
+        {/* Stream Header Panel */}
+        <div className="px-6 py-4 bg-[#1040C0] border-b-4 border-black text-white flex items-center justify-between">
+          <div className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-widest">
+            <Bot size={18} strokeWidth={2.5} />
+            <span>DIRECTIVE ADAPTATION FEED</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#F0C020] border-2 border-black inline-block" />
+            <span className="font-mono text-[10px] uppercase font-bold tracking-widest">ENGINE OPERATIONAL</span>
+          </div>
+        </div>
+
         {/* Stream Messages */}
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+        <div className="flex-1 p-6 sm:p-8 space-y-6 overflow-y-auto bg-[#F0F0F0]">
           {messages.map((msg) => {
             const isUser = msg.sender === "user";
             return (
               <div
                 key={msg.id}
-                className={`flex items-start gap-3.5 ${
+                className={`flex items-start gap-4 ${
                   isUser ? "flex-row-reverse" : "flex-row"
                 }`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
-                    isUser
-                      ? "bg-sand-200 text-stone-800"
-                      : "bg-forest-900 text-gold-400"
+                  className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-[3px_3px_0px_0px_black] ${
+                    isUser ? "bg-[#D02020] text-white rounded-full" : "bg-[#121212] text-white"
                   }`}
                 >
-                  {isUser ? <MessageSquare className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  {isUser ? <MessageSquare size={16} strokeWidth={2} /> : <Bot size={16} strokeWidth={2} />}
                 </div>
 
-                <div className="space-y-3 max-w-2xl flex-1">
+                <div className="space-y-4 max-w-2xl flex-1">
                   <div
-                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                    className={`p-5 border-2 border-black shadow-[4px_4px_0px_0px_black] text-xs sm:text-sm leading-relaxed ${
                       isUser
-                        ? "bg-forest-900 text-white rounded-tr-xs ml-auto"
-                        : "bg-sand-50 border border-sand-200 text-stone-800 rounded-tl-xs"
+                        ? "bg-[#121212] text-white ml-auto"
+                        : "bg-white text-black font-sans"
                     }`}
                   >
-                    {msg.text}
+                    <p className="font-sans font-medium leading-relaxed">{msg.text}</p>
                     <div
-                      className={`text-[10px] mt-1 ${
-                        isUser ? "text-sand-300 text-right" : "text-stone-400"
+                      className={`text-[10px] font-mono mt-3 uppercase tracking-widest font-bold ${
+                        isUser ? "text-gray-300 text-right" : "text-gray-600"
                       }`}
                     >
-                      {msg.timestamp}
+                      TIMESTAMP // {msg.timestamp}
                     </div>
                   </div>
 
                   {/* Embedded Replanning Proposal Card */}
                   {msg.proposal && (
-                    <div className="bg-white border-2 border-forest-800 rounded-2xl p-5 shadow-md space-y-4">
-                      <div className="flex items-center justify-between pb-3 border-b border-sand-200">
+                    <div className="border-4 border-black bg-white p-6 space-y-5 shadow-[6px_6px_0px_0px_black]">
+                      <div className="flex items-center justify-between pb-3 border-b-2 border-black">
                         <div>
-                          <span className="text-[10px] font-semibold uppercase bg-gold-100 text-gold-900 px-2 py-0.5 rounded">
-                            Proposed Adaptation
+                          <span className="font-mono text-[10px] uppercase tracking-widest bg-[#F0C020] text-black border border-black px-2 py-0.5 font-bold">
+                            CALCULATED PROPOSAL
                           </span>
-                          <h4 className="text-sm font-bold text-forest-900 mt-1">
+                          <h2 className="font-display font-black text-xl text-black mt-2 uppercase tracking-tight">
                             {msg.proposal.title}
-                          </h4>
+                          </h2>
                         </div>
-                        <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                          {msg.proposal.impact.feasibilityScore}% Feasible
+                        <span className="font-mono text-xs uppercase tracking-widest bg-black text-white px-3 py-1 font-bold">
+                          {msg.proposal.impact.feasibilityScore}% FEASIBLE
                         </span>
                       </div>
 
-                      <p className="text-xs text-stone-600 leading-normal">
+                      <p className="font-sans font-medium text-xs sm:text-sm text-black leading-relaxed">
                         {msg.proposal.summary}
                       </p>
 
                       {/* Preserved Requirements */}
                       {msg.proposal.impact.preservedConstraints.length > 0 && (
-                        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                          <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1 mb-1.5">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                            Preserved Non-Negotiables:
+                        <div className="p-4 border-2 border-black bg-[#F0C020]/20 space-y-2 font-mono text-xs">
+                          <span className="text-[11px] font-bold text-black flex items-center gap-1.5 uppercase tracking-wider">
+                            <ShieldCheck size={16} strokeWidth={2.5} className="text-[#1040C0]" />
+                            PRESERVED NON-NEGOTIABLES:
                           </span>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-2">
                             {msg.proposal.impact.preservedConstraints.map((c, i) => (
                               <span
                                 key={i}
-                                className="text-[10px] font-medium bg-white text-emerald-800 px-2 py-0.5 rounded border border-emerald-300"
+                                className="text-[10px] border-2 border-black bg-white px-2.5 py-1 text-black uppercase font-bold shadow-[2px_2px_0px_0px_black]"
                               >
-                                ✓ {c}
+                                [✓] {c}
                               </span>
                             ))}
                           </div>
@@ -233,22 +257,22 @@ export function AIAssistantView() {
                       )}
 
                       {/* Diffs Preview */}
-                      <div className="space-y-1.5">
-                        <span className="text-[11px] font-bold text-stone-700 block uppercase">
-                          Material Modifications:
+                      <div className="space-y-2">
+                        <span className="font-mono text-[11px] uppercase tracking-wider font-bold text-black block">
+                          MATERIAL MODIFICATIONS:
                         </span>
-                        <div className="divide-y divide-sand-100 border border-sand-200 rounded-xl overflow-hidden text-xs">
+                        <div className="divide-y-2 divide-black border-2 border-black text-xs font-mono">
                           {msg.proposal.diffs.slice(0, 3).map((diff, i) => (
-                            <div key={i} className="p-2.5 bg-sand-50/50">
-                              <span className="font-semibold text-stone-800 block">
+                            <div key={i} className="p-3 bg-white">
+                              <span className="font-bold text-black uppercase block">
                                 {diff.label}
                               </span>
-                              <div className="flex items-center gap-2 font-mono text-[11px] mt-0.5">
-                                <span className="line-through text-rose-700">
+                              <div className="flex items-center gap-3 text-xs mt-1">
+                                <span className="line-through text-gray-500 font-bold">
                                   {diff.before}
                                 </span>
-                                <ArrowRight className="w-3 h-3 text-stone-400" />
-                                <span className="text-emerald-700 font-bold">
+                                <ArrowRight size={14} strokeWidth={2} />
+                                <span className="font-bold text-[#1040C0]">
                                   {diff.after}
                                 </span>
                               </div>
@@ -258,19 +282,29 @@ export function AIAssistantView() {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center justify-end gap-2 pt-2 border-t border-sand-200">
-                        <button
-                          onClick={() => setActiveProposal(msg.proposal!)}
-                          className="px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-sand-100 rounded-lg transition"
-                        >
-                          View Full Diff & Warnings
-                        </button>
-                        <button
-                          onClick={() => applyProposal(msg.proposal!)}
-                          className="px-4 py-2 text-xs font-bold bg-forest-900 hover:bg-forest-850 text-white rounded-lg shadow-sm transition"
-                        >
-                          Accept & Apply Proposal
-                        </button>
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black font-mono">
+                        {lastAppliedProposalId === msg.proposal.id ? (
+                          <span className="inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-widest font-black bg-[#121212] text-white border-2 border-black shadow-[4px_4px_0px_0px_black]">
+                            <Check size={16} strokeWidth={3} className="text-[#F0C020]" /> APPLIED TO ACTIVE PLAN
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setActiveProposal(msg.proposal!)}
+                              className="px-4 py-2.5 text-xs uppercase tracking-wider font-bold border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_black] btn-bauhaus hover:bg-gray-100"
+                            >
+                              VIEW COMPARISON
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => applyProposal(msg.proposal!)}
+                              className="px-6 py-2.5 text-xs uppercase tracking-widest font-black bg-[#D02020] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus hover:bg-[#D02020]/90"
+                            >
+                              ACCEPT & APPLY
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -280,36 +314,36 @@ export function AIAssistantView() {
           })}
 
           {isEvaluating && (
-            <div className="flex items-center gap-2 text-stone-400 text-xs italic pl-11">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Analyzing constraint shifts and generating proposals...</span>
+            <div className="flex items-center gap-3 text-black font-mono text-xs pl-12 uppercase tracking-widest font-bold">
+              <RefreshCw size={16} className="animate-spin text-[#1040C0]" />
+              <span>CALCULATING TRADE-OFFS & CONSTRAINTS...</span>
             </div>
           )}
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 bg-sand-50 border-t border-sand-200">
+        <div className="p-4 border-t-4 border-black bg-white">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendQuery();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-3"
           >
             <input
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Describe your constraint adjustment (e.g. 'My budget is now ₹30,000' or 'Move the party indoors')..."
-              className="flex-1 px-4 py-3 bg-white border border-sand-300 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:border-forest-900 text-stone-900 shadow-2xs"
+              placeholder="Hypothetical disruption (e.g. 'Budget is now ₹30,000' or 'Move party indoors')..."
+              className="flex-1 px-4 py-3 bg-white border-2 border-black text-xs sm:text-sm font-sans font-medium focus:outline-none focus:ring-2 focus:ring-[#1040C0]"
             />
             <button
               type="submit"
               disabled={!inputQuery.trim() || isEvaluating}
-              className="px-5 py-3 bg-forest-900 hover:bg-forest-850 disabled:bg-stone-300 text-white font-semibold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
+              className="px-6 py-3 bg-[#1040C0] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus font-mono text-xs uppercase tracking-widest font-bold disabled:opacity-40 flex items-center gap-2 shrink-0 hover:bg-[#1040C0]/90"
             >
-              <Sparkles className="w-4 h-4 text-gold-400" />
-              <span>Evaluate</span>
+              <Sparkles size={16} strokeWidth={2} />
+              <span>SOLVE</span>
             </button>
           </form>
         </div>

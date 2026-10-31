@@ -24,7 +24,7 @@ export const BOOKING_STATUS_CONFIG: Record<
 };
 
 /**
- * Returns realistic Pune sample vendors for initial demo
+ * Returns a baseline vendor list for a reference event.
  */
 export function generateDefaultVendors(): VendorRecord[] {
   return [

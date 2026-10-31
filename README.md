@@ -44,7 +44,7 @@ EventPilot bridges generative creativity and software engineering rigor: **GenAI
 - **Vendor Directory & Quote Tracker:** Track contact persons, estimated vs. actual quotes, booking statuses, and payment states with transparent disclosures.
 - **Personalized Creative Studio:** Tailored anime-fusion themes, 100% vegetarian menus, interactive party games, and return gifts with explicit trade-offs and cost ranges.
 - **Adaptive Replanning Engine (Core Differentiator):** Modify any constraint in natural language (e.g., *"My budget is now ₹30,000"*, *"Move party indoors"*, *"The caterer cancelled"*). Generates ranked proposals with side-by-side diff previews, preserved non-negotiables, and consequential Accept/Reject controls.
-- **Seamless Offline Demo Mode:** Fully functional out-of-the-box without requiring third-party API keys. Clearly labeled mode toggle between Deterministic Demo and Live Gemini API.
+- **Live Gemini Integration:** Intake, plan generation, and replanning analysis run through server-side Gemini API routes. Missing configuration and provider failures are shown in the interface.
 
 ---
 
@@ -64,15 +64,15 @@ EventPilot/
 │   ├── dashboard/               # DashboardView (KPIs, countdown, progress, quick replanning)
 │   ├── ideas/                   # CreativeIdeasView (Themes, decor, menus, weather contingency)
 │   ├── intake/                  # EventIntakeView (Chat intake & live profile builder)
-│   ├── layout/                  # Navbar (Tab switching, demo toggle, reset trigger)
+│   ├── layout/                  # Navbar and tab switching
 │   ├── replanning/              # ReplanningModal (Side-by-side Before/After change preview)
 │   ├── timeline/                # TimelineView (Topological task list & date recalculations)
 │   └── vendors/                 # VendorManagementView (Directory, quotes & booking status)
 ├── lib/
-│   ├── ai/                      # Gemini SDK integration (@google/genai) & deterministic intake
+│   ├── ai/                      # Gemini SDK integration and browser API client
 │   ├── budget/                  # Integer money utilities & budget optimization engine
 │   ├── ideas/                   # Personalized creative idea generation
-│   ├── persistence/             # LocalStorage state provider & canonical reference event
+│   ├── persistence/             # LocalStorage state provider and empty-plan initializer
 │   ├── replanning/              # Constraint intent parser & proposal generator
 │   ├── schemas/                 # Zod validation schemas for all domain entities
 │   ├── timeline/                # Cycle detection, topological sorting & schedule recalculation
@@ -85,7 +85,7 @@ EventPilot/
 
 | Responsibility | Responsible Module | Design Pattern / Mechanism |
 | :--- | :--- | :--- |
-| **Natural Language Interpretation** | `lib/ai/aiService.ts` | Gemini 2.0 Flash (`@google/genai`) or deterministic heuristic fallback |
+| **Natural Language Interpretation** | `lib/ai/aiService.ts` | Gemini (`@google/genai`) through server-side route handlers |
 | **Schema Validation** | `lib/schemas/eventSchemas.ts` | Zod runtime schema validation on all inputs & outputs |
 | **Monetary Calculations** | `lib/budget/moneyUtils.ts` | Integer Paise (Minor units); 0 floating-point arithmetic |
 | **Budget Optimization** | `lib/budget/budgetEngine.ts` | Deterministic priority-inversion reduction algorithm |
@@ -200,11 +200,11 @@ cp .env.example .env.local
 ### Environment Variables
 | Variable | Description | Required? | Default |
 | :--- | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Google Gemini API Key | Optional | Empty (runs in Demo Mode) |
+| `GEMINI_API_KEY` | Google Gemini API Key | Yes | None |
 | `GEMINI_MODEL` | Gemini Model identifier | Optional | `gemini-2.0-flash` |
 | `NEXT_PUBLIC_APP_NAME`| Application Name | Optional | `EventPilot` |
 
-> **Note:** If `GEMINI_API_KEY` is omitted, EventPilot automatically activates **Deterministic Demo Mode**. Every screen, calculation, and replanning flow remains 100% testable and demonstrable.
+> **Note:** Add `GEMINI_API_KEY` to `.env.local` and restart the application. If it is missing or Gemini returns an error, the interface displays the error and does not substitute generated sample data.
 
 ---
 
@@ -247,32 +247,17 @@ npm run test
 - **`tests/budget.test.ts`**: Verifies minor unit calculations, overspending detection, deficit calculation, protected requirement preservation during budget reduction, and infeasibility flagging.
 - **`tests/timeline.test.ts`**: Verifies topological ordering, circular dependency detection, blocked status propagation, overdue identification, and date shift recalculation.
 - **`tests/replanning.test.ts`**: Verifies natural language intent parsing, constraint preservation, diff generation, and proposal staging.
-- **`tests/validation.test.ts`**: Verifies Zod schema validation rules, rejection of malformed inputs, and deterministic demo mode generation.
+- **`tests/validation.test.ts`**: Verifies Zod schema validation rules, rejection of malformed inputs, and missing Gemini configuration errors.
 - **`tests/userJourney.test.ts`**: Simulates the complete 11-step end-to-end competition audit workflow.
 
 ---
 
-## 14. Demo Mode & User Walkthrough Instructions
+## 14. Starting a Plan
 
-### Exploring the Canonical Demo
-1. Launch the application with `npm run dev` and open `http://localhost:3000`.
-2. Notice the **Demo Mode (Deterministic)** badge in the navigation bar.
-3. The dashboard opens pre-loaded with **Aanya's 18th Anime Birthday Bash** in Pune (60 guests, ₹40,000 budget, outdoor lawn, 100% vegetarian catering).
-
-### Complete User Journey Walkthrough
-1. **Review Dashboard:** Inspect the budget health bar (₹40,000 / ₹40,000), upcoming action checklist, and vendor cards.
-2. **Complete a Task:** Click the checkmark next to *"Confirm & Book Venue Lawn / Hall"*. Notice downstream tasks (e.g. *Finalize Anime Decor*) are immediately unblocked.
-3. **Simulate Budget Cut:** In the dashboard quick-bar or AI Assistant, type:
-   > *"My budget is now ₹30,000."*
-4. **Review Change Diff:** EventPilot displays an **Adaptive Replanning Proposal** showing:
-   - Budget delta (-₹10,000 savings achieved).
-   - Preserved non-negotiables: *Anime-Themed Decor & Cake* and *100% Pure Vegetarian Food* remain strictly protected.
-   - Streamlined expenses: Photography adjusted, PA speaker substituted for DJ, and menu optimized to ₹220/guest.
-5. **Accept Proposal:** Click **"Accept & Apply Changes"**. All views (Dashboard, Budget Studio, Timeline) update reactively.
-6. **Simulate Venue Relocation:** Type:
-   > *"Move the party indoors due to rain forecast."*
-7. Verify that venue preference shifts to Indoor Hall and facility tasks adapt accordingly.
-8. **Reset Demo:** Click the **"Reset Demo"** button in the header at any time to restore the pristine reference state.
+1. Add `GEMINI_API_KEY` to `.env.local` and run `npm run dev`.
+2. Open Event Intake and describe the event you want to plan.
+3. Review the extracted profile, then select **Generate Master Plan**.
+4. Use the AI Assistant or dashboard quick bar to request a replan and review the generated change proposal.
 
 ---
 

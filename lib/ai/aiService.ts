@@ -1,484 +1,684 @@
-import { getGeminiClient, isGeminiConfigured, DEFAULT_GEMINI_MODEL } from "./geminiClient";
+import { DEFAULT_GEMINI_MODEL, getGeminiClient, GeminiConfigurationError } from "./geminiClient";
 import { EVENT_INTAKE_SYSTEM_PROMPT, PLAN_GENERATION_SYSTEM_PROMPT, REPLANNING_SYSTEM_PROMPT } from "./prompts";
-import {
-  EventProfile,
-  EventPlan,
-  ReplanningProposal,
-  BudgetItem,
-  Task,
-  VendorRecord,
-  CreativeIdea,
-} from "../types/event";
-import { EventProfileSchema, EventPlanSchema } from "../schemas/eventSchemas";
-import {
-  parseConstraintIntent,
-  generateReplanningProposals,
-} from "../replanning/replanningEngine";
-import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
-import { generateDefaultVendors } from "../vendor/vendorEngine";
-import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
-import { rupeesToPaise, formatINR } from "../budget/moneyUtils";
+import { EventPlan, EventProfile, ReplanningProposal } from "../types/event";
+import { EventPlanSchema } from "../schemas/eventSchemas";
+import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
+import { addDaysToDate } from "../timeline/timelineEngine";
 
 export interface IntakeResult {
   reply: string;
   extractedProfile: Partial<EventProfile>;
   isComplete: boolean;
   missingFields: string[];
-  isDemo: boolean;
 }
 
 export interface PlanGenerationResult {
   plan: EventPlan;
-  isDemo: boolean;
-  modelUsed?: string;
+  modelUsed: string;
 }
 
 export interface ReplanningResult {
   proposals: ReplanningProposal[];
-  isDemo: boolean;
   explanation: string;
 }
 
-/**
- * Conversational intake handler: extracts structured fields from user message
- */
+export class AIServiceError extends Error {
+  constructor(message: string, public readonly status = 502) {
+    super(message);
+    this.name = "AIServiceError";
+  }
+}
+
+function providerError(error: unknown): AIServiceError {
+  if (error instanceof GeminiConfigurationError) {
+    return new AIServiceError(error.message, 503);
+  }
+
+  const message = error instanceof Error ? error.message : "Unknown provider error";
+  return new AIServiceError(`Gemini request failed: ${message}`, 502);
+}
+
+async function generateJson(prompt: string): Promise<unknown> {
+  try {
+    const response = await getGeminiClient().models.generateContent({
+      model: DEFAULT_GEMINI_MODEL,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { responseMimeType: "application/json", temperature: 0.2 },
+    });
+
+    if (!response.text) {
+      throw new AIServiceError("Gemini returned an empty response.");
+    }
+
+    try {
+      return JSON.parse(response.text);
+    } catch {
+      throw new AIServiceError("Gemini returned invalid JSON. Please try again.");
+    }
+  } catch (error) {
+    if (error instanceof AIServiceError) throw error;
+    throw providerError(error);
+  }
+}
+
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as JsonRecord
+    : null;
+}
+
+function asArray(value: unknown, field: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new AIServiceError(`Gemini did not return a ${field} list. Please try again.`);
+  }
+  return value;
+}
+
+function text(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function integer(value: unknown, fallback = 0): number {
+  const numberValue = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numberValue) ? Math.max(0, Math.round(numberValue)) : fallback;
+}
+
+function signedInteger(value: unknown, fallback = 0): number {
+  const numberValue = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numberValue) ? Math.round(numberValue) : fallback;
+}
+
+export function normalizeProfile(
+  raw: Partial<EventProfile> | Record<string, unknown> | undefined
+): EventProfile {
+  const p = (raw || {}) as Record<string, unknown>;
+  const validTypes = ["birthday", "wedding", "community", "corporate", "anniversary", "other"] as const;
+  const rawType = typeof p.type === "string" ? p.type.toLowerCase().trim() : "";
+  let type: (typeof validTypes)[number] = "other";
+  for (const t of validTypes) {
+    if (rawType.includes(t)) {
+      type = t;
+      break;
+    }
+  }
+
+  // Date normalization: must be YYYY-MM-DD
+  let date = typeof p.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.date) ? p.date : "";
+  if (!date) {
+    date = addDaysToDate(new Date().toISOString().slice(0, 10), 30);
+  }
+
+  // Dietary preferences normalization
+  const validDiets = ["vegetarian", "non-vegetarian", "vegan", "jain", "halal", "gluten-free", "nut-allergy"] as const;
+  const dietaryPreferences: (typeof validDiets)[number][] = [];
+  if (Array.isArray(p.dietaryPreferences)) {
+    for (const d of p.dietaryPreferences) {
+      if (typeof d !== "string") continue;
+      const clean = d.toLowerCase().trim();
+      if ((clean.includes("veg") || clean.includes("vegetarian")) && !clean.includes("non")) {
+        if (!dietaryPreferences.includes("vegetarian")) dietaryPreferences.push("vegetarian");
+      } else if (clean.includes("non-veg") || clean.includes("non vegetarian") || clean.includes("meat")) {
+        if (!dietaryPreferences.includes("non-vegetarian")) dietaryPreferences.push("non-vegetarian");
+      } else if (clean.includes("vegan")) {
+        if (!dietaryPreferences.includes("vegan")) dietaryPreferences.push("vegan");
+      } else if (clean.includes("jain")) {
+        if (!dietaryPreferences.includes("jain")) dietaryPreferences.push("jain");
+      } else if (clean.includes("halal")) {
+        if (!dietaryPreferences.includes("halal")) dietaryPreferences.push("halal");
+      } else if (clean.includes("gluten")) {
+        if (!dietaryPreferences.includes("gluten-free")) dietaryPreferences.push("gluten-free");
+      } else if (clean.includes("nut")) {
+        if (!dietaryPreferences.includes("nut-allergy")) dietaryPreferences.push("nut-allergy");
+      }
+    }
+  }
+  if (dietaryPreferences.length === 0) {
+    dietaryPreferences.push("vegetarian");
+  }
+
+  // Priorities normalization
+  const validPriorities = ["food", "decor", "photography", "entertainment", "venue", "budget"] as const;
+  const priorities: (typeof validPriorities)[number][] = [];
+  if (Array.isArray(p.priorities)) {
+    for (const pr of p.priorities) {
+      if (typeof pr === "string" && validPriorities.includes(pr.toLowerCase().trim() as any)) {
+        priorities.push(pr.toLowerCase().trim() as any);
+      }
+    }
+  }
+  if (priorities.length === 0) {
+    priorities.push("food", "decor", "budget");
+  }
+
+  // Location normalization
+  const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<string, unknown>;
+  const city = typeof loc.city === "string" && loc.city.trim().length > 0 ? loc.city.trim() : "Pune";
+  const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
+  const venueType = (["indoor", "outdoor", "hybrid", "unselected"].includes(rawVenue) ? rawVenue : "outdoor") as any;
+
+  // Guest count
+  const rawGuestCount = typeof p.guestCount === "number" ? p.guestCount : Number(p.guestCount);
+  const guestCount = Number.isFinite(rawGuestCount)
+    ? Math.min(5000, Math.max(1, Math.round(rawGuestCount)))
+    : 50;
+
+  // Budget in minor units (paise)
+  let rawBudget = typeof p.totalBudgetMinor === "number" ? p.totalBudgetMinor : Number(p.totalBudgetMinor);
+  let totalBudgetMinor = Number.isFinite(rawBudget) ? Math.round(rawBudget) : 4000000;
+  if (totalBudgetMinor < 10000) {
+    if (totalBudgetMinor > 0 && totalBudgetMinor < 1000) {
+      totalBudgetMinor = totalBudgetMinor * 100;
+    }
+    if (totalBudgetMinor < 10000) {
+      totalBudgetMinor = 10000;
+    }
+  }
+
+  return {
+    id: typeof p.id === "string" && p.id ? p.id : "ep-" + Math.random().toString(36).substring(2, 9),
+    name: typeof p.name === "string" && p.name.trim().length >= 2 ? p.name.trim() : "Celebration Event",
+    type,
+    date,
+    time: typeof p.time === "string" && p.time.trim() ? p.time.trim() : "18:00",
+    location: {
+      city,
+      venueType,
+      venueName: typeof loc.venueName === "string" && loc.venueName.trim() ? loc.venueName.trim() : undefined,
+    },
+    guestCount,
+    totalBudgetMinor,
+    currency: "INR",
+    theme: typeof p.theme === "string" && p.theme.trim() ? p.theme.trim() : "General Celebration",
+    dietaryPreferences,
+    accessibilityRequirements: Array.isArray(p.accessibilityRequirements)
+      ? p.accessibilityRequirements.filter((s): s is string => typeof s === "string")
+      : [],
+    mustHaves: Array.isArray(p.mustHaves)
+      ? p.mustHaves.filter((s): s is string => typeof s === "string")
+      : [],
+    excludedFeatures: Array.isArray(p.excludedFeatures)
+      ? p.excludedFeatures.filter((s): s is string => typeof s === "string")
+      : [],
+    priorities,
+    notes: typeof p.notes === "string" ? p.notes : "",
+  };
+}
+
+export function normalizePlanOutput(output: unknown, profile: Partial<EventProfile>) {
+  const root = asRecord(output);
+  const generated = asRecord(root?.plan) ?? asRecord(root?.eventPlan) ?? asRecord(root?.data) ?? root;
+  if (!generated) {
+    throw new AIServiceError("Gemini returned an invalid plan format. Please try again.");
+  }
+
+  const normalizedProfile = normalizeProfile(profile);
+  const planDate = normalizedProfile.date;
+
+  const validBudgetCategories = new Set([
+    "venue",
+    "food_beverage",
+    "decorations",
+    "photography",
+    "entertainment",
+    "invitations",
+    "transportation",
+    "miscellaneous",
+    "contingency_reserve",
+  ]);
+
+  const budgetCategoryMap: Record<string, string> = {
+    food: "food_beverage",
+    catering: "food_beverage",
+    beverage: "food_beverage",
+    beverages: "food_beverage",
+    drinks: "food_beverage",
+    cake: "food_beverage",
+    bakery: "food_beverage",
+    dining: "food_beverage",
+    decor: "decorations",
+    decoration: "decorations",
+    decorations: "decorations",
+    flowers: "decorations",
+    lighting: "decorations",
+    stage: "decorations",
+    photo: "photography",
+    photos: "photography",
+    photography: "photography",
+    video: "photography",
+    videography: "photography",
+    media: "photography",
+    entertainment: "entertainment",
+    music: "entertainment",
+    sound: "entertainment",
+    audio: "entertainment",
+    dj: "entertainment",
+    artist: "entertainment",
+    performer: "entertainment",
+    venue: "venue",
+    hall: "venue",
+    lawn: "venue",
+    space: "venue",
+    rental: "venue",
+    location: "venue",
+    invitation: "invitations",
+    invitations: "invitations",
+    invites: "invitations",
+    print: "invitations",
+    stationery: "invitations",
+    transport: "transportation",
+    transportation: "transportation",
+    logistics: "transportation",
+    travel: "transportation",
+    contingency: "contingency_reserve",
+    contingency_reserve: "contingency_reserve",
+    reserve: "contingency_reserve",
+    buffer: "contingency_reserve",
+    emergency: "contingency_reserve",
+    misc: "miscellaneous",
+    miscellaneous: "miscellaneous",
+    other: "miscellaneous",
+  };
+
+  const validVendorCategories = new Set([
+    "venue",
+    "caterer",
+    "decorator",
+    "photographer",
+    "entertainment",
+    "transportation",
+    "invitations",
+    "other",
+  ]);
+
+  const vendorCategoryMap: Record<string, string> = {
+    food: "caterer",
+    catering: "caterer",
+    caterer: "caterer",
+    caterers: "caterer",
+    bakery: "caterer",
+    cake: "caterer",
+    baker: "caterer",
+    decor: "decorator",
+    decoration: "decorator",
+    decorator: "decorator",
+    decorators: "decorator",
+    florist: "decorator",
+    flowers: "decorator",
+    photo: "photographer",
+    photos: "photographer",
+    photography: "photographer",
+    photographer: "photographer",
+    photographers: "photographer",
+    videographer: "photographer",
+    entertainment: "entertainment",
+    music: "entertainment",
+    sound: "entertainment",
+    dj: "entertainment",
+    venue: "venue",
+    hall: "venue",
+    lawn: "venue",
+    transport: "transportation",
+    transportation: "transportation",
+    cab: "transportation",
+    cabs: "transportation",
+    invitation: "invitations",
+    invitations: "invitations",
+    printer: "invitations",
+    print: "invitations",
+    other: "other",
+  };
+
+  const validIdeaCategories = new Set([
+    "theme",
+    "decor",
+    "menu",
+    "activities",
+    "invitation",
+    "return_gifts",
+    "schedule",
+    "weather_contingency",
+  ]);
+
+  const ideaCategoryMap: Record<string, string> = {
+    theme: "theme",
+    concept: "theme",
+    decor: "decor",
+    decoration: "decor",
+    styling: "decor",
+    menu: "menu",
+    food: "menu",
+    catering: "menu",
+    drink: "menu",
+    drinks: "menu",
+    activities: "activities",
+    activity: "activities",
+    entertainment: "activities",
+    games: "activities",
+    fun: "activities",
+    invitation: "invitation",
+    invitations: "invitation",
+    invite: "invitation",
+    gift: "return_gifts",
+    gifts: "return_gifts",
+    favors: "return_gifts",
+    favor: "return_gifts",
+    return_gifts: "return_gifts",
+    schedule: "schedule",
+    timeline: "schedule",
+    flow: "schedule",
+    weather: "weather_contingency",
+    weather_contingency: "weather_contingency",
+    rain: "weather_contingency",
+  };
+
+  const rawBudgetItems = asArray(generated.budgetItems, "budget items");
+  const budgetItems = (rawBudgetItems.length > 0 ? rawBudgetItems : [
+    { name: "Venue Booking", category: "venue", estimatedCostMinor: Math.round(normalizedProfile.totalBudgetMinor * 0.25) },
+    { name: "Food & Catering", category: "food_beverage", estimatedCostMinor: Math.round(normalizedProfile.totalBudgetMinor * 0.45) },
+    { name: "Decorations & Theme", category: "decorations", estimatedCostMinor: Math.round(normalizedProfile.totalBudgetMinor * 0.15) },
+    { name: "Contingency Buffer", category: "contingency_reserve", estimatedCostMinor: Math.round(normalizedProfile.totalBudgetMinor * 0.15) },
+  ]).map((value, index) => {
+    const item = asRecord(value) ?? {};
+    const rawCategory = text(item.category, "miscellaneous").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const category = validBudgetCategories.has(rawCategory)
+      ? rawCategory
+      : budgetCategoryMap[rawCategory] ?? "miscellaneous";
+
+    return {
+      id: text(item.id, `ai-budget-${index + 1}`),
+      category: category as any,
+      name: text(item.name, `Planned expense ${index + 1}`),
+      estimatedCostMinor: integer(item.estimatedCostMinor ?? item.costMinor ?? item.cost, 10000),
+      actualCostMinor: integer(item.actualCostMinor, 0),
+      flexible: typeof item.flexible === "boolean" ? item.flexible : true,
+      isProtected: typeof item.isProtected === "boolean" ? item.isProtected : false,
+      notes: text(item.notes, "Generated from the event requirements."),
+    };
+  });
+
+  // Ensure total estimated doesn't exceed totalBudgetMinor
+  const totalEstimated = budgetItems.reduce((acc, item) => acc + item.estimatedCostMinor, 0);
+  if (totalEstimated > normalizedProfile.totalBudgetMinor && totalEstimated > 0) {
+    const excess = totalEstimated - normalizedProfile.totalBudgetMinor;
+    const flexibleItems = budgetItems.filter((i) => i.flexible && i.estimatedCostMinor > 0);
+    if (flexibleItems.length > 0) {
+      const flexibleTotal = flexibleItems.reduce((acc, i) => acc + i.estimatedCostMinor, 0);
+      for (const item of flexibleItems) {
+        const reduction = Math.round((item.estimatedCostMinor / flexibleTotal) * excess);
+        item.estimatedCostMinor = Math.max(0, item.estimatedCostMinor - reduction);
+      }
+    } else {
+      const ratio = normalizedProfile.totalBudgetMinor / totalEstimated;
+      for (const item of budgetItems) {
+        item.estimatedCostMinor = Math.max(0, Math.round(item.estimatedCostMinor * ratio));
+      }
+    }
+  }
+
+  const rawTasks = asArray(generated.tasks, "tasks");
+  const tasks = (rawTasks.length > 0 ? rawTasks : [
+    { title: "Confirm venue booking", category: "venue", relativeDays: -20 },
+    { title: "Finalize menu and caterer", category: "catering", relativeDays: -14 },
+    { title: "Send digital invitations", category: "invitations", relativeDays: -10 },
+    { title: "Final checklist review", category: "general", relativeDays: -2 },
+  ]).map((value, index) => {
+    const task = asRecord(value) ?? {};
+    const relativeDays = signedInteger(task.relativeDays ?? task.daysBeforeEvent, -7);
+    const validPriorities = ["urgent", "high", "medium", "low"] as const;
+    const priority = validPriorities.includes(text(task.priority).toLowerCase() as any)
+      ? (text(task.priority).toLowerCase() as (typeof validPriorities)[number])
+      : "medium";
+
+    const validStatus = ["todo", "in_progress", "completed", "blocked"] as const;
+    const status = validStatus.includes(text(task.status).toLowerCase() as any)
+      ? (text(task.status).toLowerCase() as (typeof validStatus)[number])
+      : "todo";
+
+    const vendorId = typeof task.vendorId === "string" && task.vendorId.trim() ? task.vendorId.trim() : undefined;
+    const estimatedCostMinor = task.estimatedCostMinor != null ? integer(task.estimatedCostMinor) : undefined;
+
+    return {
+      id: text(task.id, `ai-task-${index + 1}`),
+      title: text(task.title, `Planning task ${index + 1}`),
+      description: text(task.description, "Complete this event-planning task."),
+      category: text(task.category, "general"),
+      priority,
+      relativeDays,
+      dueDate: text(task.dueDate, addDaysToDate(planDate, relativeDays)),
+      status,
+      dependencies: Array.isArray(task.dependencies)
+        ? task.dependencies.filter((dependency): dependency is string => typeof dependency === "string")
+        : [],
+      estimatedCostMinor,
+      vendorId,
+      isOverdue: typeof task.isOverdue === "boolean" ? task.isOverdue : false,
+      isBlocked: typeof task.isBlocked === "boolean" ? task.isBlocked : false,
+    };
+  });
+
+  const rawVendors = asArray(generated.vendors, "vendors");
+  const vendors = rawVendors.map((value, index) => {
+    const vendor = asRecord(value) ?? {};
+    const rawCategory = text(vendor.category, "other").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const category = validVendorCategories.has(rawCategory)
+      ? rawCategory
+      : vendorCategoryMap[rawCategory] ?? "other";
+
+    const rawContact = asRecord(vendor.contact) ?? {};
+    const contact = {
+      contactPerson: typeof rawContact.contactPerson === "string" && rawContact.contactPerson.trim()
+        ? rawContact.contactPerson.trim()
+        : undefined,
+      phone: rawContact.phone != null && String(rawContact.phone).trim()
+        ? String(rawContact.phone).trim()
+        : undefined,
+      email: typeof rawContact.email === "string" && rawContact.email.trim()
+        ? rawContact.email.trim()
+        : undefined,
+    };
+
+    const validBookingStatus = ["planned", "contacted", "quote_received", "shortlisted", "booked", "cancelled"] as const;
+    const bookingStatus = validBookingStatus.includes(vendor.bookingStatus as any)
+      ? (vendor.bookingStatus as (typeof validBookingStatus)[number])
+      : "planned";
+
+    const validPaymentStatus = ["unpaid", "advance_paid", "fully_paid"] as const;
+    const paymentStatus = validPaymentStatus.includes(vendor.paymentStatus as any)
+      ? (vendor.paymentStatus as (typeof validPaymentStatus)[number])
+      : "unpaid";
+
+    return {
+      id: text(vendor.id, `ai-vendor-${index + 1}`),
+      name: text(vendor.name, `Potential vendor ${index + 1}`),
+      category: category as any,
+      contact,
+      estimatedQuoteMinor: integer(vendor.estimatedQuoteMinor ?? vendor.quoteMinor ?? vendor.estimatedCostMinor, 0),
+      actualQuoteMinor: integer(vendor.actualQuoteMinor, 0),
+      bookingStatus,
+      paymentStatus,
+      notes: text(vendor.notes, "Research and obtain a quote before booking."),
+      relatedTaskIds: Array.isArray(vendor.relatedTaskIds)
+        ? vendor.relatedTaskIds.filter((taskId): taskId is string => typeof taskId === "string")
+        : [],
+    };
+  });
+
+  const rawIdeas = asArray(generated.ideas, "ideas");
+  const ideas = rawIdeas.map((value, index) => {
+    const idea = asRecord(value) ?? {};
+    const rawCategory = text(idea.category, "activities").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const category = validIdeaCategories.has(rawCategory)
+      ? rawCategory
+      : ideaCategoryMap[rawCategory] ?? "activities";
+
+    const costRangeText = typeof idea.costRangeText === "string" && idea.costRangeText.trim()
+      ? idea.costRangeText.trim()
+      : undefined;
+
+    return {
+      id: text(idea.id, `ai-idea-${index + 1}`),
+      category: category as any,
+      title: text(idea.title, `Event idea ${index + 1}`),
+      description: text(idea.description ?? idea.details, "A personalized suggestion for this event."),
+      whyItFits: text(idea.whyItFits ?? idea.rationale, "It supports the event's stated priorities."),
+      estimatedCostMinor: integer(idea.estimatedCostMinor ?? idea.costMinor ?? idea.cost, 0),
+      costRangeText,
+      implementationSteps: Array.isArray(idea.implementationSteps)
+        ? idea.implementationSteps.filter((step): step is string => typeof step === "string")
+        : [],
+      constraints: Array.isArray(idea.constraints)
+        ? idea.constraints.filter((constraint): constraint is string => typeof constraint === "string")
+        : [],
+      tradeOffs: Array.isArray(idea.tradeOffs)
+        ? idea.tradeOffs.filter((tradeOff): tradeOff is string => typeof tradeOff === "string")
+        : [],
+      isSaved: typeof idea.isSaved === "boolean" ? idea.isSaved : false,
+    };
+  });
+
+  return {
+    normalizedProfile,
+    budgetItems,
+    tasks,
+    vendors,
+    ideas,
+  };
+}
+
 export async function processEventIntake(
   userMessage: string,
   currentProfile: Partial<EventProfile> = {}
 ): Promise<IntakeResult> {
-  const client = getGeminiClient();
+  const parsed = await generateJson(`${EVENT_INTAKE_SYSTEM_PROMPT}
 
-  if (client && isGeminiConfigured()) {
-    try {
-      const prompt = `
 Current profile state: ${JSON.stringify(currentProfile)}
-User message: "${userMessage}"
+User message: ${JSON.stringify(userMessage)}
 
-Analyze the user's message and extract any event details.
-Return a valid JSON object with:
+Return only this JSON object:
 {
-  "reply": "Concise, enthusiastic message responding to user, acknowledging details provided, and asking 1-2 targeted follow-ups if missing critical information",
-  "extractedProfile": {
-    "name": "string (optional)",
-    "type": "birthday" | "wedding" | "community" | "corporate" | "other",
-    "date": "YYYY-MM-DD (optional)",
-    "location": { "city": "string", "venueType": "indoor" | "outdoor" | "hybrid" },
-    "guestCount": number (optional),
-    "totalBudgetMinor": number in Paise (₹40,000 = 4000000) (optional),
-    "theme": "string",
-    "dietaryPreferences": ["vegetarian" | "non-vegetarian" | "vegan" | "jain"],
-    "mustHaves": ["string"],
-    "notes": "string"
-  },
-  "isComplete": boolean,
+  "reply": "string",
+  "extractedProfile": { "name": "string", "type": "birthday|wedding|community|corporate|anniversary|other", "date": "YYYY-MM-DD", "location": { "city": "string", "venueType": "indoor|outdoor|hybrid" }, "guestCount": 0, "totalBudgetMinor": 0, "theme": "string", "dietaryPreferences": ["vegetarian"], "mustHaves": ["string"], "notes": "string" },
+  "isComplete": false,
   "missingFields": ["string"]
 }
-`;
+Only include fields that were stated or can be inferred safely in extractedProfile.`);
 
-      const response = await client.models.generateContent({
-        model: DEFAULT_GEMINI_MODEL,
-        contents: [
-          { role: "user", parts: [{ text: `${EVENT_INTAKE_SYSTEM_PROMPT}\n\n${prompt}` }] },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
+  if (!parsed || typeof parsed !== "object") {
+    throw new AIServiceError("Gemini returned an invalid intake result. Please try again.");
+  }
 
-      if (response && response.text) {
-        const parsed = JSON.parse(response.text);
-        return {
-          reply: parsed.reply || "Got it! Here is what I gathered from your event request.",
-          extractedProfile: { ...currentProfile, ...parsed.extractedProfile },
-          isComplete: Boolean(parsed.isComplete),
-          missingFields: parsed.missingFields || [],
-          isDemo: false,
-        };
+  const result = parsed as Partial<IntakeResult>;
+  if (typeof result.reply !== "string" || !result.extractedProfile || typeof result.extractedProfile !== "object") {
+    throw new AIServiceError("Gemini returned an incomplete intake result. Please try again.");
+  }
+
+  // Clean extracted profile fields
+  const extracted = result.extractedProfile as Partial<EventProfile>;
+  const merged = { ...currentProfile, ...extracted };
+  if (merged.dietaryPreferences && Array.isArray(merged.dietaryPreferences)) {
+    const validDiets = ["vegetarian", "non-vegetarian", "vegan", "jain", "halal", "gluten-free", "nut-allergy"] as const;
+    const sanitizedDiets: (typeof validDiets)[number][] = [];
+    for (const d of merged.dietaryPreferences) {
+      if (typeof d !== "string") continue;
+      const clean = d.toLowerCase().trim();
+      if ((clean.includes("veg") || clean.includes("vegetarian")) && !clean.includes("non")) {
+        if (!sanitizedDiets.includes("vegetarian")) sanitizedDiets.push("vegetarian");
+      } else if (clean.includes("non-veg") || clean.includes("meat")) {
+        if (!sanitizedDiets.includes("non-vegetarian")) sanitizedDiets.push("non-vegetarian");
+      } else if (clean.includes("vegan")) {
+        if (!sanitizedDiets.includes("vegan")) sanitizedDiets.push("vegan");
+      } else if (clean.includes("jain")) {
+        if (!sanitizedDiets.includes("jain")) sanitizedDiets.push("jain");
+      } else if (clean.includes("halal")) {
+        if (!sanitizedDiets.includes("halal")) sanitizedDiets.push("halal");
+      } else if (clean.includes("gluten")) {
+        if (!sanitizedDiets.includes("gluten-free")) sanitizedDiets.push("gluten-free");
+      } else if (clean.includes("nut")) {
+        if (!sanitizedDiets.includes("nut-allergy")) sanitizedDiets.push("nut-allergy");
       }
-    } catch (e) {
-      console.warn("Live Gemini intake failed, gracefully falling back to deterministic intake:", e);
     }
-  }
-
-  // Deterministic Offline / Demo Intake Parser
-  return deterministicIntakeParser(userMessage, currentProfile);
-}
-
-/**
- * Deterministic intake heuristic for offline & demo modes
- */
-function deterministicIntakeParser(
-  userMessage: string,
-  current: Partial<EventProfile>
-): IntakeResult {
-  const msg = userMessage.toLowerCase();
-  const extracted: Partial<EventProfile> = { ...current };
-
-  // 1. Detect Event Type
-  if (msg.includes("birthday") || msg.includes("sister") || msg.includes("bday")) {
-    extracted.type = "birthday";
-    if (!extracted.name) extracted.name = "Sister's Milestone Birthday";
-  } else if (msg.includes("wedding") || msg.includes("shaadi") || msg.includes("marriage")) {
-    extracted.type = "wedding";
-    if (!extracted.name) extracted.name = "Dream Wedding Celebration";
-  } else if (msg.includes("community") || msg.includes("diwali") || msg.includes("festival")) {
-    extracted.type = "community";
-    if (!extracted.name) extracted.name = "Community Cultural Gathering";
-  }
-
-  // 2. City
-  if (msg.includes("pune")) {
-    extracted.location = {
-      ...(extracted.location || { venueType: "outdoor" }),
-      city: "Pune",
-    };
-  } else if (msg.includes("mumbai")) {
-    extracted.location = {
-      ...(extracted.location || { venueType: "outdoor" }),
-      city: "Mumbai",
-    };
-  } else if (msg.includes("delhi") || msg.includes("bengaluru") || msg.includes("bangalore")) {
-    const city = msg.includes("delhi") ? "Delhi" : "Bengaluru";
-    extracted.location = {
-      ...(extracted.location || { venueType: "outdoor" }),
-      city,
-    };
-  }
-
-  // 3. Venue Type
-  if (msg.includes("outdoor") || msg.includes("lawn") || msg.includes("garden")) {
-    extracted.location = {
-      ...(extracted.location || { city: "Pune" }),
-      venueType: "outdoor",
-    };
-  } else if (msg.includes("indoor") || msg.includes("hall") || msg.includes("banquet")) {
-    extracted.location = {
-      ...(extracted.location || { city: "Pune" }),
-      venueType: "indoor",
-    };
-  }
-
-  // 4. Guest Count
-  const guestMatch = msg.match(/(\d+)\s*(?:people|guests?|pax|heads?)/);
-  if (guestMatch) {
-    extracted.guestCount = parseInt(guestMatch[1], 10);
-  }
-
-  // 5. Budget
-  const budgetMatch =
-    msg.match(/(?:budget|spend|cost)\s*(?:is|of|around|approx|equals|=|to)?\s*₹?\s*(\d[\d,]*(?:\.\d+)?)\s*(k|lakh|thousand)?/i) ||
-    msg.match(/₹\s*(\d[\d,]*(?:\.\d+)?)\s*(k|lakh|thousand)?/i);
-
-  if (budgetMatch) {
-    let num = parseFloat(budgetMatch[1].replace(/,/g, ""));
-    const unit = (budgetMatch[2] || "").toLowerCase();
-    if (unit === "k" || unit === "thousand") num *= 1000;
-    if (unit === "lakh") num *= 100000;
-    if (num >= 100 && num <= 10000000) {
-      extracted.totalBudgetMinor = rupeesToPaise(num);
+    if (sanitizedDiets.length > 0) {
+      merged.dietaryPreferences = sanitizedDiets;
     }
-  }
-
-  // 6. Theme
-  if (msg.includes("anime") || msg.includes("manga") || msg.includes("ghibli")) {
-    extracted.theme = "Anime & Manga Aesthetics (Studio Ghibli & Shonen)";
-    extracted.mustHaves = Array.from(
-      new Set([...(extracted.mustHaves || []), "Anime-Themed Decor & Cake"])
-    );
-  }
-
-  // 7. Dietary
-  if (msg.includes("vegetarian") || msg.includes("veg") || msg.includes("pure veg")) {
-    extracted.dietaryPreferences = ["vegetarian"];
-    extracted.mustHaves = Array.from(
-      new Set([...(extracted.mustHaves || []), "100% Pure Vegetarian Food"])
-    );
-  }
-
-  // Check completeness
-  const missing: string[] = [];
-  if (!extracted.guestCount) missing.push("Guest count");
-  if (!extracted.totalBudgetMinor) missing.push("Total budget");
-  if (!extracted.location?.city) missing.push("City / Location");
-  if (!extracted.date) {
-    // Default to 25 days out if unspecified
-    extracted.date = addDaysToDate(formatISODate(new Date()), 25);
-  }
-
-  let reply = "";
-  if (missing.length === 0) {
-    reply = `Brilliant! I have captured your event parameters: ${
-      extracted.name || "Event"
-    } in ${extracted.location?.city} for ${extracted.guestCount} guests, with a budget of ${formatINR(
-      extracted.totalBudgetMinor || 4000000
-    )}, featuring a ${extracted.theme || "custom"} theme and ${
-      extracted.dietaryPreferences?.join(", ") || "vegetarian"
-    } catering. You can review the details below and generate the comprehensive plan.`;
-  } else {
-    reply = `Great start! I've noted down your preferences. To make the plan complete, could you please confirm the ${missing.join(
-      " and "
-    )}?`;
   }
 
   return {
-    reply,
-    extractedProfile: extracted,
-    isComplete: missing.length === 0,
-    missingFields: missing,
-    isDemo: true,
+    reply: result.reply,
+    extractedProfile: merged,
+    isComplete: Boolean(result.isComplete),
+    missingFields: Array.isArray(result.missingFields)
+      ? result.missingFields.filter((field): field is string => typeof field === "string")
+      : [],
   };
 }
 
-/**
- * Generates an end-to-end event plan from profile
- */
 export async function generateFullEventPlan(
-  profileInput: Partial<EventProfile>
+  profile: Partial<EventProfile>
 ): Promise<PlanGenerationResult> {
-  const targetDate = profileInput.date || addDaysToDate(formatISODate(new Date()), 25);
+  const normalizedProfile = normalizeProfile(profile);
+  const now = new Date().toISOString();
 
-  const fullProfile: EventProfile = {
-    id: profileInput.id || "ep-" + Math.random().toString(36).substring(2, 9),
-    name: profileInput.name || "Aanya's 18th Anime Birthday Bash",
-    type: profileInput.type || "birthday",
-    date: targetDate,
-    time: profileInput.time || "17:30",
-    location: {
-      city: profileInput.location?.city || "Pune",
-      venueType: profileInput.location?.venueType || "outdoor",
-      venueName: profileInput.location?.venueName || "Green Meadows Open Lawn, Pune",
-    },
-    guestCount: profileInput.guestCount || 60,
-    totalBudgetMinor: profileInput.totalBudgetMinor || 4000000, // ₹40,000
-    currency: "INR",
-    theme: profileInput.theme || "Anime & Manga Aesthetics",
-    dietaryPreferences: profileInput.dietaryPreferences || ["vegetarian"],
-    accessibilityRequirements: profileInput.accessibilityRequirements || ["Wheelchair ramp"],
-    mustHaves: profileInput.mustHaves?.length
-      ? profileInput.mustHaves
-      : ["Anime-Themed Decor & Cake", "100% Pure Vegetarian Food"],
-    excludedFeatures: profileInput.excludedFeatures || ["Alcohol"],
-    priorities: profileInput.priorities || ["food", "decor", "budget"],
-    notes: profileInput.notes || "Curated celebration planned with EventPilot.",
-  };
+  const prompt = `${PLAN_GENERATION_SYSTEM_PROMPT}
 
-  const client = getGeminiClient();
+Create a complete EventPilot plan for this profile:
+${JSON.stringify(normalizedProfile, null, 2)}
 
-  if (client && isGeminiConfigured()) {
-    try {
-      const prompt = `
-Generate a comprehensive event plan for this profile:
-${JSON.stringify(fullProfile, null, 2)}
+Strict Formatting and Constraints:
+1. Return strictly JSON with budgetItems, tasks, vendors, and ideas arrays.
+2. Amounts must be in paise (₹1 = 100 paise). The sum of all budget items' estimatedCostMinor MUST NOT exceed totalBudgetMinor (${normalizedProfile.totalBudgetMinor}).
+3. Allowed Budget Categories: "venue", "food_beverage", "decorations", "photography", "entertainment", "invitations", "transportation", "miscellaneous", "contingency_reserve".
+4. Allowed Vendor Categories: "venue", "caterer", "decorator", "photographer", "entertainment", "transportation", "invitations", "other".
+5. Allowed Idea Categories: "theme", "decor", "menu", "activities", "invitation", "return_gifts", "schedule", "weather_contingency".
+6. Every task must include id, title, description, category, priority ("urgent"|"high"|"medium"|"low"), relativeDays (negative integer indicating days relative to event date), dueDate (YYYY-MM-DD), status ("todo"), dependencies (array of strings).
+7. Every budget item must include id, category, name, estimatedCostMinor, actualCostMinor (0), flexible (boolean), isProtected (boolean), notes.
+8. Every vendor must include id, name, category, contact, estimatedQuoteMinor, actualQuoteMinor (0), bookingStatus ("planned"), paymentStatus ("unpaid"), notes, relatedTaskIds.
+9. Every idea must include id, category, title, description, whyItFits, estimatedCostMinor, implementationSteps, constraints, tradeOffs.`;
 
-Provide:
-1. "budgetItems": Realistic array of budget items (venue, food_beverage, decorations, photography, entertainment, invitations, contingency_reserve) whose estimatedCostMinor sum exactly matches or is slightly under ${fullProfile.totalBudgetMinor}. All numbers in paise (₹1 = 100 paise).
-2. "tasks": Array of dependency-aware tasks with relativeDays (e.g. -21, -14, -7, 0) and dependencies.
-3. "ideas": Array of personalized creative suggestions (theme, menu, decor, activities, return_gifts, weather_contingency).
-`;
+  const parsed = await generateJson(prompt);
+  const generated = normalizePlanOutput(parsed, normalizedProfile);
 
-      const response = await client.models.generateContent({
-        model: DEFAULT_GEMINI_MODEL,
-        contents: [
-          { role: "user", parts: [{ text: `${PLAN_GENERATION_SYSTEM_PROMPT}\n\n${prompt}` }] },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.3,
-        },
-      });
+  const validation = EventPlanSchema.safeParse({
+    profile: generated.normalizedProfile,
+    budgetItems: generated.budgetItems,
+    tasks: generated.tasks,
+    vendors: generated.vendors,
+    ideas: generated.ideas,
+    createdAt: now,
+    updatedAt: now,
+    version: 1,
+  });
 
-      if (response && response.text) {
-        const parsed = JSON.parse(response.text);
-        if (parsed.budgetItems && parsed.tasks) {
-          const generatedPlan: EventPlan = {
-            profile: fullProfile,
-            budgetItems: parsed.budgetItems,
-            tasks: parsed.tasks,
-            vendors: generateDefaultVendors(),
-            ideas: parsed.ideas || generatePersonalizedIdeas(fullProfile),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            version: 1,
-          };
-
-          return {
-            plan: generatedPlan,
-            isDemo: false,
-            modelUsed: DEFAULT_GEMINI_MODEL,
-          };
-        }
-      }
-    } catch (e) {
-      console.warn("Live Gemini plan generation failed, using deterministic generation:", e);
-    }
+  if (!validation.success) {
+    console.error("Plan validation failed with issues:", JSON.stringify(validation.error.issues, null, 2));
+    throw new AIServiceError(
+      `Gemini returned a plan that did not pass validation: ${validation.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ")}`
+    );
   }
 
-  // Deterministic plan generation
-  const tasks = generateDefaultTasks(
-    targetDate,
-    fullProfile.location.venueType === "outdoor"
-  );
-  const vendors = generateDefaultVendors();
-  const ideas = generatePersonalizedIdeas(fullProfile);
-
-  // Allocate items scaled to totalBudgetMinor
-  const budgetRatio = fullProfile.totalBudgetMinor / 4000000;
-
-  const budgetItems: BudgetItem[] = [
-    {
-      id: "bi-venue",
-      category: "venue",
-      name: `${fullProfile.location.venueType === "outdoor" ? "Outdoor Lawn" : "Banquet Hall"} Rental`,
-      estimatedCostMinor: Math.round(800000 * budgetRatio),
-      actualCostMinor: Math.round(800000 * budgetRatio),
-      flexible: false,
-      isProtected: false,
-      notes: "4-hour evening booking with furniture and basic lighting.",
-    },
-    {
-      id: "bi-catering",
-      category: "food_beverage",
-      name: `${fullProfile.dietaryPreferences.join("/")} Buffet (${fullProfile.guestCount} guests)`,
-      estimatedCostMinor: Math.round(1800000 * budgetRatio),
-      actualCostMinor: Math.round(1750000 * budgetRatio),
-      flexible: false,
-      isProtected: true,
-      notes: "Welcome mocktails, 2 starters, 3 mains, live counter, and dessert.",
-    },
-    {
-      id: "bi-cake",
-      category: "food_beverage",
-      name: `Custom 2kg Themed Birthday Cake`,
-      estimatedCostMinor: Math.round(250000 * budgetRatio),
-      actualCostMinor: Math.round(250000 * budgetRatio),
-      flexible: true,
-      isProtected: true,
-      notes: "Handcrafted theme cake from artisanal bakery.",
-    },
-    {
-      id: "bi-decor",
-      category: "decorations",
-      name: "Thematic Stage Backdrop & Entrance Arch",
-      estimatedCostMinor: Math.round(500000 * budgetRatio),
-      actualCostMinor: Math.round(500000 * budgetRatio),
-      flexible: true,
-      isProtected: true,
-      notes: "Custom character standees and fairy lights.",
-    },
-    {
-      id: "bi-photo",
-      category: "photography",
-      name: "Freelance Photographer (3 Hours Coverage)",
-      estimatedCostMinor: Math.round(350000 * budgetRatio),
-      actualCostMinor: Math.round(350000 * budgetRatio),
-      flexible: true,
-      isProtected: false,
-      notes: "Candid portraits, group photos, and digital gallery.",
-    },
-    {
-      id: "bi-sound",
-      category: "entertainment",
-      name: "Sound System Rental & Mics",
-      estimatedCostMinor: Math.round(100000 * budgetRatio),
-      actualCostMinor: Math.round(100000 * budgetRatio),
-      flexible: true,
-      isProtected: false,
-      notes: "PA system for background music and games.",
-    },
-    {
-      id: "bi-invites",
-      category: "invitations",
-      name: "Digital Animated Video Invites",
-      estimatedCostMinor: Math.round(50000 * budgetRatio),
-      actualCostMinor: Math.round(50000 * budgetRatio),
-      flexible: true,
-      isProtected: false,
-      notes: "Motion graphic invite sent via WhatsApp.",
-    },
-    {
-      id: "bi-contingency",
-      category: "contingency_reserve",
-      name: "Contingency & Incidentals Reserve",
-      estimatedCostMinor: Math.round(150000 * budgetRatio),
-      actualCostMinor: 0,
-      flexible: true,
-      isProtected: false,
-      notes: "Buffer for unexpected requirements.",
-    },
-  ];
-
-  return {
-    plan: {
-      profile: fullProfile,
-      budgetItems,
-      tasks,
-      vendors,
-      ideas,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: 1,
-    },
-    isDemo: true,
-  };
+  const plan = validation.data as EventPlan;
+  return { plan, modelUsed: DEFAULT_GEMINI_MODEL };
 }
 
-/**
- * Adaptive replanning solver: parses natural language constraint change,
- * generates ranked proposals with transparent trade-offs and diffs.
- */
 export async function executeReplanning(
   userQuery: string,
   currentPlan: EventPlan
 ): Promise<ReplanningResult> {
-  const client = getGeminiClient();
+  const parsed = await generateJson(`${REPLANNING_SYSTEM_PROMPT}
 
-  if (client && isGeminiConfigured()) {
-    try {
-      const prompt = `
-Current Event Plan:
-- Budget: ${formatINR(currentPlan.profile.totalBudgetMinor)}
-- Guests: ${currentPlan.profile.guestCount}
-- Venue: ${currentPlan.profile.location.venueType} in ${currentPlan.profile.location.city}
-- Must-Haves: ${currentPlan.profile.mustHaves.join(", ")}
-- Current Total Estimated: ${formatINR(
-        currentPlan.budgetItems.reduce((s, i) => s + i.estimatedCostMinor, 0)
-      )}
+Current event plan: ${JSON.stringify(currentPlan)}
+Requested change: ${JSON.stringify(userQuery)}
 
-User requested change: "${userQuery}"
+Identify the requested change and return only { "explanation": "a concise explanation of the request and its relevant planning trade-offs" }.`);
 
-Analyze the change:
-1. What fields changed?
-2. How does it impact the budget, deadlines, and vendors?
-3. Propose a balanced optimization that preserves protected constraints.
-`;
-
-      const response = await client.models.generateContent({
-        model: DEFAULT_GEMINI_MODEL,
-        contents: [
-          { role: "user", parts: [{ text: `${REPLANNING_SYSTEM_PROMPT}\n\n${prompt}` }] },
-        ],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
-
-      if (response && response.text) {
-        // Fallback or augment with deterministic validation
-      }
-    } catch (e) {
-      console.warn("Live Gemini replanning failed, using deterministic replanning:", e);
-    }
+  if (!parsed || typeof parsed !== "object" || typeof (parsed as { explanation?: unknown }).explanation !== "string") {
+    throw new AIServiceError("Gemini returned an invalid replanning analysis. Please try again.");
   }
 
-  // Deterministic Replanning Engine
   const intent = parseConstraintIntent(userQuery, currentPlan);
-  const proposals = generateReplanningProposals(currentPlan, intent);
-
   return {
-    proposals,
-    isDemo: true,
-    explanation: intent.explanation,
+    proposals: generateReplanningProposals(currentPlan, intent),
+    explanation: (parsed as { explanation: string }).explanation,
   };
 }

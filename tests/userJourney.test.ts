@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createCanonicalEventPlan } from "../lib/persistence/defaultEvent";
+import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 import { calculateBudgetSummary } from "../lib/budget/budgetEngine";
 import {
   parseConstraintIntent,
@@ -12,7 +12,7 @@ import { EventPlan } from "../lib/types/event";
 describe("Phase 6 End-to-End User Journey Audit", () => {
   it("executes the complete 11-step user journey with 100% integrity", () => {
     // 1. Initial State: Birthday event for 60 guests with ₹40,000 budget
-    let currentPlan: EventPlan = createCanonicalEventPlan();
+    let currentPlan: EventPlan = createReferenceEventPlan();
     expect(currentPlan.profile.guestCount).toBe(60);
     expect(paiseToRupees(currentPlan.profile.totalBudgetMinor)).toBe(40000);
     expect(currentPlan.profile.location.city).toBe("Pune");
@@ -103,8 +103,8 @@ describe("Phase 6 End-to-End User Journey Audit", () => {
     expect(restored.profile.location.venueType).toBe("indoor");
     expect(paiseToRupees(restored.profile.totalBudgetMinor)).toBe(30000);
 
-    // 11. Reset to demo: verify original sample event returns cleanly
-    currentPlan = createCanonicalEventPlan();
+    // 11. Restore the reference fixture.
+    currentPlan = createReferenceEventPlan();
     expect(currentPlan.profile.name).toBe("Aanya's 18th Anime Birthday Bash");
     expect(currentPlan.profile.location.venueType).toBe("outdoor");
     expect(paiseToRupees(currentPlan.profile.totalBudgetMinor)).toBe(40000);

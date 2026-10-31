@@ -3,7 +3,39 @@ import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/
 import { generateDefaultVendors } from "../vendor/vendorEngine";
 import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
 
-export function createCanonicalEventPlan(): EventPlan {
+export function createEmptyEventPlan(): EventPlan {
+  const targetDate = addDaysToDate(formatISODate(new Date()), 25);
+
+  return {
+    profile: {
+      id: "ep-new-event",
+      name: "New Event",
+      type: "other",
+      date: targetDate,
+      time: "18:00",
+      location: { city: "To be decided", venueType: "unselected" },
+      guestCount: 1,
+      totalBudgetMinor: 10000,
+      currency: "INR",
+      theme: "To be decided",
+      dietaryPreferences: [],
+      accessibilityRequirements: [],
+      mustHaves: [],
+      excludedFeatures: [],
+      priorities: ["budget"],
+      notes: "Start by describing your event in Event Intake.",
+    },
+    budgetItems: [],
+    tasks: [],
+    vendors: [],
+    ideas: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    version: 1,
+  };
+}
+
+export function createReferenceEventPlan(): EventPlan {
   // Event date set ~25 days into future from today
   const targetDate = addDaysToDate(formatISODate(new Date()), 25);
 
@@ -133,3 +165,95 @@ export function createCanonicalEventPlan(): EventPlan {
     version: 1,
   };
 }
+
+export function createCustomEventPlan(
+  name = "New Celebration",
+  type: "birthday" | "wedding" | "community" | "corporate" | "anniversary" | "other" = "other",
+  overrides: Partial<EventPlan["profile"]> = {}
+): EventPlan {
+  const targetDate = addDaysToDate(formatISODate(new Date()), 30);
+  const eventId = "ep-" + Math.random().toString(36).substring(2, 9);
+  const budgetMinor = overrides.totalBudgetMinor || 5000000;
+
+  const profile = {
+    id: eventId,
+    name,
+    type,
+    date: overrides.date || targetDate,
+    time: overrides.time || "18:00",
+    location: {
+      city: overrides.location?.city || "Pune",
+      venueType: overrides.location?.venueType || "outdoor",
+      venueName: overrides.location?.venueName || "",
+    },
+    guestCount: overrides.guestCount || 50,
+    totalBudgetMinor: budgetMinor,
+    currency: "INR" as const,
+    theme: overrides.theme || `${name} Celebration`,
+    dietaryPreferences: overrides.dietaryPreferences || ["vegetarian" as const],
+    accessibilityRequirements: overrides.accessibilityRequirements || [],
+    mustHaves: overrides.mustHaves || [],
+    excludedFeatures: overrides.excludedFeatures || [],
+    priorities: overrides.priorities || ["food" as const, "decor" as const, "budget" as const],
+    notes: overrides.notes || `Planning for ${name}.`,
+  };
+
+  const tasks = generateDefaultTasks(profile.date, true);
+  const vendors = generateDefaultVendors();
+  const ideas = generatePersonalizedIdeas(profile);
+
+  const budgetItems = [
+    {
+      id: "bi-venue-" + eventId.slice(-4),
+      category: "venue" as const,
+      name: "Venue Space Rental & Setup",
+      estimatedCostMinor: Math.round(budgetMinor * 0.25),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Space reservation, lighting, seating, and basic amenities.",
+    },
+    {
+      id: "bi-food-" + eventId.slice(-4),
+      category: "food_beverage" as const,
+      name: "Catering & Refreshments",
+      estimatedCostMinor: Math.round(budgetMinor * 0.45),
+      actualCostMinor: 0,
+      flexible: false,
+      isProtected: true,
+      notes: "Food service tailored to dietary needs.",
+    },
+    {
+      id: "bi-decor-" + eventId.slice(-4),
+      category: "decorations" as const,
+      name: "Theme Decor & Lighting",
+      estimatedCostMinor: Math.round(budgetMinor * 0.15),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Atmosphere, balloon/flower styling, or backdrop installation.",
+    },
+    {
+      id: "bi-contingency-" + eventId.slice(-4),
+      category: "contingency_reserve" as const,
+      name: "Emergency Contingency Reserve",
+      estimatedCostMinor: Math.round(budgetMinor * 0.15),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Buffer for unplanned needs and errands.",
+    },
+  ];
+
+  return {
+    profile,
+    budgetItems,
+    tasks,
+    vendors,
+    ideas,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    version: 1,
+  };
+}
+

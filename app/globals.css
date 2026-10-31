@@ -3,53 +3,106 @@
 @tailwind utilities;
 
 :root {
-  --background: #faf8f5;
-  --foreground: #1c2826;
-  --primary: #143d30;
-  --primary-hover: #0e2d23;
-  --accent-gold: #d97706;
-  --card-bg: #ffffff;
-  --border-color: #e7e2d7;
+  --background: #F0F0F0;
+  --foreground: #121212;
+  --primary-red: #D02020;
+  --primary-blue: #1040C0;
+  --primary-yellow: #F0C020;
+  --border: #121212;
+  --muted: #E0E0E0;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-outfit), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom accessible focus states */
+/* Bauhaus High-Impact Primary Selection */
+::selection {
+  background-color: #D02020;
+  color: #FFFFFF;
+}
+
+/* Accessible High-Contrast Focus Outlines */
 a:focus-visible,
 button:focus-visible,
+[role="button"]:focus-visible,
 input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid #143d30;
-  outline-offset: 2px;
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #121212 !important;
+  outline-offset: 3px !important;
 }
 
-/* Smooth transitions */
-.transition-card {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Custom scrollbars */
+/* Geometric Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1ede4;
+  background: #F0F0F0;
+  border-left: 2px solid #121212;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccbfae;
-  border-radius: 9999px;
+  background: #121212;
+  border: 1px solid #F0F0F0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9d8e7c;
+  background: #D02020;
+}
+
+/* Bauhaus Geometric Shape Utilities */
+.shape-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.shape-triangle-right {
+  clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+}
+
+.shape-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Bauhaus Dot Grid Background Patterns */
+.bg-pattern-dots {
+  background-image: radial-gradient(#121212 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+
+.bg-pattern-dots-white {
+  background-image: radial-gradient(#ffffff 2px, transparent 2px);
+  background-size: 20px 20px;
+}
+
+.bg-pattern-grid {
+  background-image:
+    linear-gradient(#12121215 1px, transparent 1px),
+    linear-gradient(90deg, #12121215 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Physical Mechanical Button Press Simulation */
+.btn-bauhaus {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.btn-bauhaus:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+/* Hover Lift for Cards */
+.card-bauhaus {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.card-bauhaus:hover {
+  transform: translateY(-2px);
 }

@@ -236,7 +236,7 @@ export function recalculateSchedule(
 }
 
 /**
- * Generates default canonical tasks tailored to event profile and venue
+ * Generates default tasks tailored to an event profile and venue.
  */
 export function generateDefaultTasks(eventDateStr: string, isOutdoor: boolean): Task[] {
   const baseTasks: Array<Omit<Task, "dueDate" | "isOverdue" | "isBlocked">> = [
