@@ -4,6 +4,9 @@ import { EventPlan, EventProfile, ReplanningProposal } from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
 import { addDaysToDate } from "../timeline/timelineEngine";
+import { buildCompactReplanningSummary } from "./replanningSummary";
+
+export { buildCompactReplanningSummary };
 
 export interface IntakeResult {
   reply: string;
@@ -623,7 +626,7 @@ export async function generateFullEventPlan(
   const prompt = `${PLAN_GENERATION_SYSTEM_PROMPT}
 
 Create a complete EventPilot plan for this profile:
-${JSON.stringify(normalizedProfile, null, 2)}
+${JSON.stringify(normalizedProfile)}
 
 Strict Formatting and Constraints:
 1. Return strictly JSON with budgetItems, tasks, vendors, and ideas arrays.
@@ -665,9 +668,10 @@ export async function executeReplanning(
   userQuery: string,
   currentPlan: EventPlan
 ): Promise<ReplanningResult> {
+  const summary = buildCompactReplanningSummary(currentPlan, userQuery);
   const parsed = await generateJson(`${REPLANNING_SYSTEM_PROMPT}
 
-Current event plan: ${JSON.stringify(currentPlan)}
+Current event summary: ${JSON.stringify(summary)}
 Requested change: ${JSON.stringify(userQuery)}
 
 Identify the requested change and return only { "explanation": "a concise explanation of the request and its relevant planning trade-offs" }.`);
