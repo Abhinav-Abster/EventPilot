@@ -1,60 +1,37 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react";
 import {
   EventPlan,
   BudgetItem,
   Task,
-  TaskStatus,
   VendorRecord,
-  CreativeIdea,
   EventProfile,
   ReplanningProposal,
   EventType,
 } from "../types/event";
 import { createReferenceEventPlan, createCustomEventPlan } from "./defaultEvent";
 import { EventPlanSchema } from "../schemas/eventSchemas";
-import { recalculateSchedule } from "../timeline/timelineEngine";
-import { loadStoredPlans, saveStoredPlans } from "./storage";
 import { createId } from "../utils/id";
+import {
+  applyProfileUpdates,
+  addBudgetItemToPlan,
+  updateBudgetItemInPlan,
+  deleteBudgetItemFromPlan,
+  addTaskToPlan,
+  updateTaskInPlan,
+  deleteTaskFromPlan,
+  toggleTaskStatusInPlan,
+  addVendorToPlan,
+  updateVendorInPlan,
+  deleteVendorFromPlan,
+  toggleSaveIdeaInPlan,
+  duplicatePlan,
+} from "./planMutators";
+import { usePlanStorage } from "./usePlanStorage";
+import { PlanContextType } from "./planContextTypes";
 
-export interface PlanContextType {
-  plan: EventPlan;
-  plans: EventPlan[];
-  activePlanId: string;
-  isHydrated: boolean;
-  activeProposal: ReplanningProposal | null;
-  lastAppliedProposalId: string | null;
-
-  // Multi-event operations
-  switchEvent: (id: string) => void;
-  createEvent: (
-    name?: string,
-    type?: EventType,
-    overrides?: Partial<EventProfile>
-  ) => string;
-  duplicateEvent: (id: string) => string;
-  deleteEvent: (id: string) => void;
-  updateEventName: (id: string, name: string) => void;
-
-  // Active plan mutators
-  updateProfile: (profile: Partial<EventProfile>) => void;
-  addBudgetItem: (item: Omit<BudgetItem, "id">) => void;
-  updateBudgetItem: (id: string, updates: Partial<BudgetItem>) => void;
-  deleteBudgetItem: (id: string) => void;
-  addTask: (task: Omit<Task, "id">) => void;
-  updateTask: (id: string, updates: Partial<Task>) => void;
-  deleteTask: (id: string) => void;
-  toggleTaskStatus: (id: string) => void;
-  addVendor: (vendor: Omit<VendorRecord, "id">) => void;
-  updateVendor: (id: string, updates: Partial<VendorRecord>) => void;
-  deleteVendor: (id: string) => void;
-  toggleSaveIdea: (id: string) => void;
-  setActiveProposal: (prop: ReplanningProposal | null) => void;
-  applyProposal: (prop: ReplanningProposal) => void;
-  rejectProposal: () => void;
-  setFullPlan: (newPlan: EventPlan, createAsNew?: boolean) => void;
-}
+export type { PlanContextType };
 
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
@@ -65,75 +42,20 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const [activeProposal, setActiveProposal] = useState<ReplanningProposal | null>(null);
   const [lastAppliedProposalId, setLastAppliedProposalId] = useState<string | null>(null);
 
-  // Derive current active plan
   const plan = useMemo(() => {
     const found = plans.find((p) => p.profile.id === activePlanId);
     return found || plans[0] || createReferenceEventPlan();
   }, [plans, activePlanId]);
 
-  // Hydrate from localStorage on client mount
-  useEffect(() => {
-    const { loadedPlans, activeId } = loadStoredPlans();
-    setPlans(loadedPlans);
-    setActivePlanId(activeId);
-    setIsHydrated(true);
-  }, []);
+  const { plansRef } = usePlanStorage(
+    plans,
+    activePlanId,
+    setPlans,
+    setActivePlanId,
+    setIsHydrated,
+    isHydrated
+  );
 
-  const plansRef = useRef(plans);
-  plansRef.current = plans;
-  const activePlanIdRef = useRef(activePlanId);
-  activePlanIdRef.current = activePlanId;
-  const lastSavedPlansRef = useRef<EventPlan[] | null>(null);
-  const lastSavedActiveIdRef = useRef<string | null>(null);
-
-  const flushSave = useCallback(() => {
-    if (!isHydrated || plansRef.current.length === 0) return;
-    if (
-      plansRef.current === lastSavedPlansRef.current &&
-      activePlanIdRef.current === lastSavedActiveIdRef.current
-    ) {
-      return;
-    }
-    saveStoredPlans(plansRef.current, activePlanIdRef.current);
-    lastSavedPlansRef.current = plansRef.current;
-    lastSavedActiveIdRef.current = activePlanIdRef.current;
-  }, [isHydrated]);
-
-  // Sync to localStorage on state changes (debounced by ~500ms)
-  useEffect(() => {
-    if (!isHydrated || plans.length === 0) return;
-    if (
-      plans === lastSavedPlansRef.current &&
-      activePlanId === lastSavedActiveIdRef.current
-    ) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      flushSave();
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [plans, activePlanId, isHydrated, flushSave]);
-
-  // Flush on pagehide / beforeunload so pending state is never lost
-  useEffect(() => {
-    const handleFlush = () => {
-      flushSave();
-    };
-
-    window.addEventListener("pagehide", handleFlush);
-    window.addEventListener("beforeunload", handleFlush);
-
-    return () => {
-      window.removeEventListener("pagehide", handleFlush);
-      window.removeEventListener("beforeunload", handleFlush);
-    };
-  }, [flushSave]);
-
-  // Helper to mutate the currently active plan
   const updateActivePlan = useCallback((updater: (prev: EventPlan) => EventPlan) => {
     setPlans((prevPlans) => {
       const targetIndex = prevPlans.findIndex((p) => p.profile.id === activePlanId);
@@ -146,15 +68,13 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     });
   }, [activePlanId]);
 
-  // Multi-event handlers
   const switchEvent = useCallback((id: string) => {
-    const exists = plansRef.current.some((p) => p.profile.id === id);
-    if (exists) {
+    if (plansRef.current.some((p) => p.profile.id === id)) {
       setActivePlanId(id);
       setActiveProposal(null);
       setLastAppliedProposalId(null);
     }
-  }, []);
+  }, [plansRef]);
 
   const createEvent = useCallback((
     name = "New Celebration",
@@ -172,24 +92,13 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const duplicateEvent = useCallback((id: string): string => {
     const currentPlans = plansRef.current;
     const source = currentPlans.find((p) => p.profile.id === id) || currentPlans[0] || createReferenceEventPlan();
-    const newId = createId("ep");
-    const clone: EventPlan = {
-      ...structuredClone(source),
-      profile: {
-        ...source.profile,
-        id: newId,
-        name: `${source.profile.name} (Copy)`,
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: 1,
-    };
+    const clone = duplicatePlan(source);
     setPlans((prev) => [...prev, clone]);
-    setActivePlanId(newId);
+    setActivePlanId(clone.profile.id);
     setActiveProposal(null);
     setLastAppliedProposalId(null);
-    return newId;
-  }, []);
+    return clone.profile.id;
+  }, [plansRef]);
 
   const deleteEvent = useCallback((id: string) => {
     const currentPlans = plansRef.current;
@@ -206,7 +115,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     }
     setActiveProposal(null);
     setLastAppliedProposalId(null);
-  }, [activePlanId]);
+  }, [activePlanId, plansRef]);
 
   const updateEventName = useCallback((id: string, name: string) => {
     const trimmed = name.trim();
@@ -214,173 +123,58 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setPlans((prev) =>
       prev.map((p) =>
         p.profile.id === id
-          ? {
-              ...p,
-              profile: { ...p.profile, name: trimmed },
-              updatedAt: new Date().toISOString(),
-            }
+          ? { ...p, profile: { ...p.profile, name: trimmed }, updatedAt: new Date().toISOString() }
           : p
       )
     );
   }, []);
 
-  // Active plan mutators
   const updateProfile = useCallback((profileUpdates: Partial<EventProfile>) => {
-    updateActivePlan((prev) => {
-      const newProfile: EventProfile = { ...prev.profile, ...profileUpdates };
-      let updatedTasks = prev.tasks;
-
-      if (profileUpdates.date && profileUpdates.date !== prev.profile.date) {
-        const res = recalculateSchedule(prev.tasks, profileUpdates.date);
-        updatedTasks = res.updatedTasks;
-      }
-
-      return {
-        ...prev,
-        profile: newProfile,
-        tasks: updatedTasks,
-        updatedAt: new Date().toISOString(),
-        version: prev.version + 1,
-      };
-    });
+    updateActivePlan((prev) => applyProfileUpdates(prev, profileUpdates));
   }, [updateActivePlan]);
 
   const addBudgetItem = useCallback((item: Omit<BudgetItem, "id">) => {
-    const newItem: BudgetItem = {
-      ...item,
-      id: createId("bi"),
-    };
-    updateActivePlan((prev) => ({
-      ...prev,
-      budgetItems: [...prev.budgetItems, newItem],
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => addBudgetItemToPlan(prev, item));
   }, [updateActivePlan]);
 
   const updateBudgetItem = useCallback((id: string, updates: Partial<BudgetItem>) => {
-    updateActivePlan((prev) => ({
-      ...prev,
-      budgetItems: prev.budgetItems.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
-      ),
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => updateBudgetItemInPlan(prev, id, updates));
   }, [updateActivePlan]);
 
   const deleteBudgetItem = useCallback((id: string) => {
-    updateActivePlan((prev) => ({
-      ...prev,
-      budgetItems: prev.budgetItems.filter((item) => item.id !== id),
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => deleteBudgetItemFromPlan(prev, id));
   }, [updateActivePlan]);
 
   const addTask = useCallback((task: Omit<Task, "id">) => {
-    const newTask: Task = {
-      ...task,
-      id: createId("t"),
-    };
-    updateActivePlan((prev) => {
-      const newTasks = [...prev.tasks, newTask];
-      const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
-      return {
-        ...prev,
-        tasks: updatedTasks,
-        updatedAt: new Date().toISOString(),
-        version: prev.version + 1,
-      };
-    });
+    updateActivePlan((prev) => addTaskToPlan(prev, task));
   }, [updateActivePlan]);
 
   const updateTask = useCallback((id: string, updates: Partial<Task>) => {
-    updateActivePlan((prev) => {
-      const newTasks = prev.tasks.map((task) =>
-        task.id === id ? { ...task, ...updates } : task
-      );
-      const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
-      return {
-        ...prev,
-        tasks: updatedTasks,
-        updatedAt: new Date().toISOString(),
-        version: prev.version + 1,
-      };
-    });
+    updateActivePlan((prev) => updateTaskInPlan(prev, id, updates));
   }, [updateActivePlan]);
 
   const deleteTask = useCallback((id: string) => {
-    updateActivePlan((prev) => {
-      const filtered = prev.tasks.filter((t) => t.id !== id);
-      const { updatedTasks } = recalculateSchedule(filtered, prev.profile.date);
-      return {
-        ...prev,
-        tasks: updatedTasks,
-        updatedAt: new Date().toISOString(),
-        version: prev.version + 1,
-      };
-    });
+    updateActivePlan((prev) => deleteTaskFromPlan(prev, id));
   }, [updateActivePlan]);
 
   const toggleTaskStatus = useCallback((id: string) => {
-    updateActivePlan((prev) => {
-      const target = prev.tasks.find((t) => t.id === id);
-      if (!target) return prev;
-
-      const newStatus: TaskStatus = target.status === "completed" ? "todo" : "completed";
-      const newTasks = prev.tasks.map((t) =>
-        t.id === id ? { ...t, status: newStatus } : t
-      );
-      const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
-
-      return {
-        ...prev,
-        tasks: updatedTasks,
-        updatedAt: new Date().toISOString(),
-        version: prev.version + 1,
-      };
-    });
+    updateActivePlan((prev) => toggleTaskStatusInPlan(prev, id));
   }, [updateActivePlan]);
 
   const addVendor = useCallback((vendor: Omit<VendorRecord, "id">) => {
-    const newVendor: VendorRecord = {
-      ...vendor,
-      id: createId("v"),
-    };
-    updateActivePlan((prev) => ({
-      ...prev,
-      vendors: [...prev.vendors, newVendor],
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => addVendorToPlan(prev, vendor));
   }, [updateActivePlan]);
 
   const updateVendor = useCallback((id: string, updates: Partial<VendorRecord>) => {
-    updateActivePlan((prev) => ({
-      ...prev,
-      vendors: prev.vendors.map((v) => (v.id === id ? { ...v, ...updates } : v)),
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => updateVendorInPlan(prev, id, updates));
   }, [updateActivePlan]);
 
   const deleteVendor = useCallback((id: string) => {
-    updateActivePlan((prev) => ({
-      ...prev,
-      vendors: prev.vendors.filter((v) => v.id !== id),
-      updatedAt: new Date().toISOString(),
-      version: prev.version + 1,
-    }));
+    updateActivePlan((prev) => deleteVendorFromPlan(prev, id));
   }, [updateActivePlan]);
 
   const toggleSaveIdea = useCallback((id: string) => {
-    updateActivePlan((prev) => ({
-      ...prev,
-      ideas: prev.ideas.map((idea) =>
-        idea.id === id ? { ...idea, isSaved: !idea.isSaved } : idea
-      ),
-    }));
+    updateActivePlan((prev) => toggleSaveIdeaInPlan(prev, id));
   }, [updateActivePlan]);
 
   const applyProposal = useCallback((proposal: ReplanningProposal) => {
@@ -407,10 +201,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       const freshId = createId("ep");
       const freshPlan: EventPlan = {
         ...newPlan,
-        profile: {
-          ...newPlan.profile,
-          id: freshId,
-        },
+        profile: { ...newPlan.profile, id: freshId },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
