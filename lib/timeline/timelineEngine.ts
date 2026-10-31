@@ -1,4 +1,5 @@
 import { Task, TaskPriority, TaskStatus } from "../types/event";
+import { PriorityQueue } from "../utils/priorityQueue";
 
 /**
  * Parses YYYY-MM-DD to a local Date object without UTC timezone drift
@@ -47,18 +48,19 @@ export function detectCircularDependencies(tasks: Task[]): {
   const taskMap = new Map<string, Task>(tasks.map((t) => [t.id, t]));
   const visited = new Set<string>();
   const recursionStack = new Set<string>();
+  const currentPath: string[] = [];
   let detectedCycle: string[] = [];
 
-  function dfs(taskId: string, path: string[]): boolean {
+  function dfs(taskId: string): boolean {
     visited.add(taskId);
     recursionStack.add(taskId);
-    const currentPath = [...path, taskId];
+    currentPath.push(taskId);
 
     const task = taskMap.get(taskId);
     if (task && task.dependencies) {
       for (const depId of task.dependencies) {
         if (!visited.has(depId)) {
-          if (dfs(depId, currentPath)) return true;
+          if (dfs(depId)) return true;
         } else if (recursionStack.has(depId)) {
           detectedCycle = [...currentPath, depId];
           return true;
@@ -66,13 +68,14 @@ export function detectCircularDependencies(tasks: Task[]): {
       }
     }
 
+    currentPath.pop();
     recursionStack.delete(taskId);
     return false;
   }
 
   for (const task of tasks) {
     if (!visited.has(task.id)) {
-      if (dfs(task.id, [])) {
+      if (dfs(task.id)) {
         return { hasCycle: true, cycleTaskIds: detectedCycle };
       }
     }
@@ -109,16 +112,21 @@ export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
     }
   }
 
-  // Queue tasks with 0 dependencies
-  const queue: Task[] = tasks
-    .filter((t) => (inDegree.get(t.id) || 0) === 0)
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  // Queue tasks with 0 dependencies into a Min-Priority Queue by dueDate
+  const queue = new PriorityQueue<Task>((a, b) => a.dueDate.localeCompare(b.dueDate));
+  for (const t of tasks) {
+    if ((inDegree.get(t.id) || 0) === 0) {
+      queue.push(t);
+    }
+  }
 
   const sorted: Task[] = [];
+  const sortedIds = new Set<string>();
 
-  while (queue.length > 0) {
-    const current = queue.shift()!;
+  while (!queue.isEmpty()) {
+    const current = queue.pop()!;
     sorted.push(current);
+    sortedIds.add(current.id);
 
     const children = dependents.get(current.id) || [];
     for (const childId of children) {
@@ -128,13 +136,13 @@ export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
         if (childTask) queue.push(childTask);
       }
     }
-    queue.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }
 
-  // If any unvisited remaining (e.g. broken node) append them
+  // If any unvisited remaining (e.g. broken node) append them using Set lookup
   for (const t of tasks) {
-    if (!sorted.some((s) => s.id === t.id)) {
+    if (!sortedIds.has(t.id)) {
       sorted.push(t);
+      sortedIds.add(t.id);
     }
   }
 
