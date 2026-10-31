@@ -1,19 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Bot,
-  Send,
-  Sparkles,
-  ShieldCheck,
-  Check,
-  ArrowRight,
-  RefreshCw,
-  MessageSquare,
-} from "lucide-react";
+import { Bot, RefreshCw, MessageSquare } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { requestReplanning } from "../../lib/ai/client";
 import { ReplanningProposal } from "../../lib/types/event";
+import { AssistantScenarioPresets } from "./parts/AssistantScenarioPresets";
+import { AssistantProposalCard } from "./parts/AssistantProposalCard";
+import { AssistantInputBar } from "./parts/AssistantInputBar";
 
 interface AssistantMessage {
   id: string;
@@ -36,6 +30,7 @@ export function AIAssistantView() {
       abortControllerRef.current?.abort();
     };
   }, []);
+
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
       id: "init",
@@ -44,33 +39,6 @@ export function AIAssistantView() {
       timestamp: "READY",
     },
   ]);
-
-  const quickScenarios = [
-    {
-      title: "BUDGET CAP: ₹30,000",
-      query: "My budget is now ₹30,000.",
-    },
-    {
-      title: "GUEST CENSUS: +20 PAX",
-      query: "We have 20 additional guests.",
-    },
-    {
-      title: "INDOOR RELOCATION",
-      query: "Move the party indoors due to rain forecast.",
-    },
-    {
-      title: "CATERER CANCELLATION",
-      query: "The caterer cancelled at the last minute.",
-    },
-    {
-      title: "PRESERVE DECOR MANDATE",
-      query: "Keep the decorations but reduce other expenses.",
-    },
-    {
-      title: "POSTPONE BY 7 DAYS",
-      query: "The event is now next Saturday.",
-    },
-  ];
 
   const handleSendQuery = async (queryToSend?: string) => {
     const q = queryToSend || inputQuery;
@@ -149,34 +117,7 @@ export function AIAssistantView() {
         </div>
       )}
 
-      {/* Quick Scenario Chips */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 bg-black inline-block" />
-          <span className="font-mono text-xs uppercase tracking-widest font-bold text-black">
-            DISRUPTION SCENARIO PRESETS:
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {quickScenarios.map((sc, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSendQuery(sc.query)}
-              className="text-left p-3.5 border-2 border-black bg-white shadow-[4px_4px_0px_0px_black] hover:bg-[#F0C020] hover:text-black btn-bauhaus font-mono text-xs group transition-colors duration-200"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-bold uppercase tracking-wider text-[11px] block truncate">
-                  {sc.title}
-                </span>
-                <span className={`w-2 h-2 border border-black ${idx % 3 === 0 ? 'bg-[#D02020] rounded-full' : idx % 3 === 1 ? 'bg-[#1040C0]' : 'bg-[#F0C020] shape-triangle'}`} />
-              </div>
-              <span className="font-sans text-[11px] text-gray-700 group-hover:text-black block truncate">
-                &ldquo;{sc.query}&rdquo;
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <AssistantScenarioPresets onSelectScenario={handleSendQuery} />
 
       {/* Main Conversation Stream Window */}
       <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] flex flex-col min-h-[640px] overflow-hidden">
@@ -199,9 +140,7 @@ export function AIAssistantView() {
             return (
               <div
                 key={msg.id}
-                className={`flex items-start gap-4 ${
-                  isUser ? "flex-row-reverse" : "flex-row"
-                }`}
+                className={`flex items-start gap-4 ${isUser ? "flex-row-reverse" : "flex-row"}`}
               >
                 <div
                   className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-[3px_3px_0px_0px_black] ${
@@ -214,9 +153,7 @@ export function AIAssistantView() {
                 <div className="space-y-4 max-w-2xl flex-1">
                   <div
                     className={`p-5 border-2 border-black shadow-[4px_4px_0px_0px_black] text-xs sm:text-sm leading-relaxed ${
-                      isUser
-                        ? "bg-[#121212] text-white ml-auto"
-                        : "bg-white text-black font-sans"
+                      isUser ? "bg-[#121212] text-white ml-auto" : "bg-white text-black font-sans"
                     }`}
                   >
                     <p className="font-sans font-medium leading-relaxed">{msg.text}</p>
@@ -229,98 +166,13 @@ export function AIAssistantView() {
                     </div>
                   </div>
 
-                  {/* Embedded Replanning Proposal Card */}
                   {msg.proposal && (
-                    <div className="border-4 border-black bg-white p-6 space-y-5 shadow-[6px_6px_0px_0px_black]">
-                      <div className="flex items-center justify-between pb-3 border-b-2 border-black">
-                        <div>
-                          <span className="font-mono text-[10px] uppercase tracking-widest bg-[#F0C020] text-black border border-black px-2 py-0.5 font-bold">
-                            CALCULATED PROPOSAL
-                          </span>
-                          <h2 className="font-display font-black text-xl text-black mt-2 uppercase tracking-tight">
-                            {msg.proposal.title}
-                          </h2>
-                        </div>
-                        <span className="font-mono text-xs uppercase tracking-widest bg-black text-white px-3 py-1 font-bold">
-                          {msg.proposal.impact.feasibilityScore}% FEASIBLE
-                        </span>
-                      </div>
-
-                      <p className="font-sans font-medium text-xs sm:text-sm text-black leading-relaxed">
-                        {msg.proposal.summary}
-                      </p>
-
-                      {/* Preserved Requirements */}
-                      {msg.proposal.impact.preservedConstraints.length > 0 && (
-                        <div className="p-4 border-2 border-black bg-[#F0C020]/20 space-y-2 font-mono text-xs">
-                          <span className="text-[11px] font-bold text-black flex items-center gap-1.5 uppercase tracking-wider">
-                            <ShieldCheck size={16} strokeWidth={2.5} className="text-[#1040C0]" />
-                            PRESERVED NON-NEGOTIABLES:
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {msg.proposal.impact.preservedConstraints.map((c, i) => (
-                              <span
-                                key={i}
-                                className="text-[10px] border-2 border-black bg-white px-2.5 py-1 text-black uppercase font-bold shadow-[2px_2px_0px_0px_black]"
-                              >
-                                [✓] {c}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Diffs Preview */}
-                      <div className="space-y-2">
-                        <span className="font-mono text-[11px] uppercase tracking-wider font-bold text-black block">
-                          MATERIAL MODIFICATIONS:
-                        </span>
-                        <div className="divide-y-2 divide-black border-2 border-black text-xs font-mono">
-                          {msg.proposal.diffs.slice(0, 3).map((diff, i) => (
-                            <div key={i} className="p-3 bg-white">
-                              <span className="font-bold text-black uppercase block">
-                                {diff.label}
-                              </span>
-                              <div className="flex items-center gap-3 text-xs mt-1">
-                                <span className="line-through text-gray-500 font-bold">
-                                  {diff.before}
-                                </span>
-                                <ArrowRight size={14} strokeWidth={2} />
-                                <span className="font-bold text-[#1040C0]">
-                                  {diff.after}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black font-mono">
-                        {lastAppliedProposalId === msg.proposal.id ? (
-                          <span className="inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-widest font-black bg-[#121212] text-white border-2 border-black shadow-[4px_4px_0px_0px_black]">
-                            <Check size={16} strokeWidth={3} className="text-[#F0C020]" /> APPLIED TO ACTIVE PLAN
-                          </span>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setActiveProposal(msg.proposal!)}
-                              className="px-4 py-2.5 text-xs uppercase tracking-wider font-bold border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_black] btn-bauhaus hover:bg-gray-100"
-                            >
-                              VIEW COMPARISON
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => applyProposal(msg.proposal!)}
-                              className="px-6 py-2.5 text-xs uppercase tracking-widest font-black bg-[#D02020] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus hover:bg-[#D02020]/90"
-                            >
-                              ACCEPT & APPLY
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    <AssistantProposalCard
+                      proposal={msg.proposal}
+                      isApplied={lastAppliedProposalId === msg.proposal.id}
+                      onViewComparison={() => setActiveProposal(msg.proposal!)}
+                      onApply={() => applyProposal(msg.proposal!)}
+                    />
                   )}
                 </div>
               </div>
@@ -335,32 +187,15 @@ export function AIAssistantView() {
           )}
         </div>
 
-        {/* Input Bar */}
-        <div className="p-4 border-t-4 border-black bg-white">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendQuery();
-            }}
-            className="flex items-center gap-3"
-          >
-            <input
-              type="text"
-              value={inputQuery}
-              onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Hypothetical disruption (e.g. 'Budget is now ₹30,000' or 'Move party indoors')..."
-              className="flex-1 px-4 py-3 bg-white border-2 border-black text-xs sm:text-sm font-sans font-medium focus:outline-none focus:ring-2 focus:ring-[#1040C0]"
-            />
-            <button
-              type="submit"
-              disabled={!inputQuery.trim() || isEvaluating}
-              className="px-6 py-3 bg-[#1040C0] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus font-mono text-xs uppercase tracking-widest font-bold disabled:opacity-40 flex items-center gap-2 shrink-0 hover:bg-[#1040C0]/90"
-            >
-              <Sparkles size={16} strokeWidth={2} />
-              <span>SOLVE</span>
-            </button>
-          </form>
-        </div>
+        <AssistantInputBar
+          inputQuery={inputQuery}
+          onInputChange={setInputQuery}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendQuery();
+          }}
+          isEvaluating={isEvaluating}
+        />
       </div>
     </div>
   );
