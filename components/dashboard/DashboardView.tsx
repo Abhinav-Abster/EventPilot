@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Calendar,
   MapPin,
@@ -23,6 +23,8 @@ import { formatINR } from "../../lib/budget/moneyUtils";
 import { daysBetween, formatISODate } from "../../lib/timeline/timelineEngine";
 import { NavTab } from "../layout/Navbar";
 import { requestReplanning } from "../../lib/ai/client";
+import { Task } from "../../lib/types/event";
+import { DashboardTaskItem } from "./DashboardTaskItem";
 
 interface DashboardViewProps {
   onNavigate: (tab: NavTab) => void;
@@ -35,19 +37,78 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const budgetSummary = calculateBudgetSummary(
-    plan.profile.totalBudgetMinor,
-    plan.budgetItems,
-    plan.profile.guestCount
+  const budgetSummary = useMemo(
+    () =>
+      calculateBudgetSummary(
+        plan.profile.totalBudgetMinor,
+        plan.budgetItems,
+        plan.profile.guestCount
+      ),
+    [plan.profile.totalBudgetMinor, plan.budgetItems, plan.profile.guestCount]
   );
 
   const todayStr = formatISODate(new Date());
   const daysRemaining = daysBetween(todayStr, plan.profile.date);
 
-  const completedTasks = plan.tasks.filter((t) => t.status === "completed");
-  const overdueTasks = plan.tasks.filter((t) => t.isOverdue && t.status !== "completed");
-  const blockedTasks = plan.tasks.filter((t) => t.isBlocked && t.status !== "completed");
-  const upcomingTasks = plan.tasks.filter((t) => t.status !== "completed").slice(0, 4);
+  const {
+    completedTasksCount,
+    overdueTasksCount,
+    blockedTasksCount,
+    upcomingTasks,
+    bookedVendorsCount,
+    totalVendorQuotesMinor,
+    vendorSectorCount,
+  } = useMemo(() => {
+    let completedCount = 0;
+    let overdueCount = 0;
+    let blockedCount = 0;
+    const upcoming: Task[] = [];
+
+    for (const task of plan.tasks) {
+      if (task.status === "completed") {
+        completedCount++;
+      } else {
+        if (upcoming.length < 4) {
+          upcoming.push(task);
+        }
+        if (task.isOverdue) {
+          overdueCount++;
+        }
+        if (task.isBlocked) {
+          blockedCount++;
+        }
+      }
+    }
+
+    let bookedCount = 0;
+    let totalQuotes = 0;
+    const sectors = new Set<string>();
+
+    for (const vendor of plan.vendors) {
+      if (vendor.bookingStatus === "booked") {
+        bookedCount++;
+      }
+      totalQuotes += vendor.estimatedQuoteMinor;
+      sectors.add(vendor.category);
+    }
+
+    return {
+      completedTasksCount: completedCount,
+      overdueTasksCount: overdueCount,
+      blockedTasksCount: blockedCount,
+      upcomingTasks: upcoming,
+      bookedVendorsCount: bookedCount,
+      totalVendorQuotesMinor: totalQuotes,
+      vendorSectorCount: sectors.size,
+    };
+  }, [plan.tasks, plan.vendors]);
+
+  const handleToggleTask = useCallback(
+    (id: string) => {
+      toggleTaskStatus(id);
+    },
+    [toggleTaskStatus]
+  );
 
   const percentSpent =
     plan.profile.totalBudgetMinor > 0
@@ -376,10 +437,10 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
 
             <div>
               <div className="font-display font-black text-4xl text-black">
-                {completedTasks.length} / {plan.tasks.length}
+                {completedTasksCount} / {plan.tasks.length}
               </div>
               <div className="font-mono text-xs font-bold text-black/60 pt-1">
-                {Math.round((completedTasks.length / (plan.tasks.length || 1)) * 100)}% COMPLETE
+                {Math.round((completedTasksCount / (plan.tasks.length || 1)) * 100)}% COMPLETE
               </div>
             </div>
 
@@ -389,7 +450,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 className="h-full bg-[#1040C0] transition-all duration-300"
                 style={{
                   width: `${Math.round(
-                    (completedTasks.length / (plan.tasks.length || 1)) * 100
+                    (completedTasksCount / (plan.tasks.length || 1)) * 100
                   )}%`,
                 }}
               />
@@ -402,7 +463,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 OVERDUE
               </span>
               <span className="font-black text-[#D02020] text-sm">
-                {overdueTasks.length} DIRECTIVES
+                {overdueTasksCount} DIRECTIVES
               </span>
             </div>
             <div>
@@ -410,7 +471,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 BLOCKED
               </span>
               <span className="font-black text-black text-sm">
-                {blockedTasks.length} DIRECTIVES
+                {blockedTasksCount} DIRECTIVES
               </span>
             </div>
           </div>
@@ -440,7 +501,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 {plan.vendors.length} CONTRACTS
               </div>
               <div className="font-mono text-xs font-bold text-black/60 pt-1">
-                {plan.vendors.filter((v) => v.bookingStatus === "booked").length} CONFIRMED BOOKINGS
+                {bookedVendorsCount} CONFIRMED BOOKINGS
               </div>
             </div>
 
@@ -455,9 +516,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 TOTAL QUOTES
               </span>
               <span className="font-black text-black text-sm">
-                {formatINR(
-                  plan.vendors.reduce((s, v) => s + v.estimatedQuoteMinor, 0)
-                )}
+                {formatINR(totalVendorQuotesMinor)}
               </span>
             </div>
             <div>
@@ -465,7 +524,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
                 COVERAGE
               </span>
               <span className="font-black text-black text-sm">
-                {new Set(plan.vendors.map((v) => v.category)).size} SECTORS
+                {vendorSectorCount} SECTORS
               </span>
             </div>
           </div>
@@ -555,60 +614,13 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
         </div>
 
         <div className="divide-y-2 divide-black">
-          {upcomingTasks.map((task) => {
-            const isDone = task.status === "completed";
-            return (
-              <div
-                key={task.id}
-                className="py-4 flex items-start sm:items-center justify-between gap-4 group hover:bg-[#FFF9C4]/40 transition-colors p-2"
-              >
-                <div className="flex items-start gap-4">
-                  {/* Square Checkbox Button */}
-                  <button
-                    onClick={() => toggleTaskStatus(task.id)}
-                    className={`mt-0.5 w-6 h-6 border-2 border-black flex items-center justify-center transition-all shrink-0 ${
-                      isDone
-                        ? "bg-[#D02020] text-white shadow-[2px_2px_0px_0px_black]"
-                        : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
-                    }`}
-                    aria-label={`Mark directive '${task.title}' as complete`}
-                  >
-                    {isDone && <Check size={16} strokeWidth={3} />}
-                  </button>
-
-                  <div className="space-y-1">
-                    <h3
-                      className={`text-sm sm:text-base font-black uppercase tracking-tight ${
-                        isDone ? "line-through text-black/40" : "text-black"
-                      }`}
-                    >
-                      {task.title}
-                    </h3>
-                    <p className="text-xs text-black/70 font-medium line-clamp-1">
-                      {task.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0 font-mono text-[11px]">
-                  <span
-                    className={`px-2.5 py-1 uppercase tracking-wider font-black border-2 border-black shadow-[2px_2px_0px_0px_black] ${
-                      task.priority === "urgent"
-                        ? "bg-[#D02020] text-white"
-                        : task.priority === "high"
-                        ? "bg-[#F0C020] text-black"
-                        : "bg-white text-black"
-                    }`}
-                  >
-                    {task.priority}
-                  </span>
-                  <span className="font-bold text-black uppercase">
-                    DUE {task.dueDate}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {upcomingTasks.map((task) => (
+            <DashboardTaskItem
+              key={task.id}
+              task={task}
+              onToggle={handleToggleTask}
+            />
+          ))}
         </div>
       </section>
     </div>

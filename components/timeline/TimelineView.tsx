@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   CheckSquare,
   Plus,
   Edit2,
   Trash2,
   Calendar,
-  Link as LinkIcon,
   AlertTriangle,
   X,
-  Check,
 } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { Task, TaskPriority, TaskStatus } from "../../lib/types/event";
@@ -18,6 +16,7 @@ import {
   detectCircularDependencies,
   addDaysToDate,
 } from "../../lib/timeline/timelineEngine";
+import { TimelineTaskCard } from "./TimelineTaskCard";
 
 export function TimelineView() {
   const { plan, addTask, updateTask, deleteTask, toggleTaskStatus, updateProfile } =
@@ -36,16 +35,69 @@ export function TimelineView() {
   const [newTaskDependencies, setNewTaskDependencies] = useState<string[]>([]);
 
   // Circular dependency health check
-  const cycleCheck = detectCircularDependencies(plan.tasks);
+  const cycleCheck = useMemo(
+    () => detectCircularDependencies(plan.tasks),
+    [plan.tasks]
+  );
 
-  const filteredTasks = plan.tasks.filter((task) => {
-    if (filterStatus === "all") return true;
-    if (filterStatus === "todo") return task.status === "todo";
-    if (filterStatus === "completed") return task.status === "completed";
-    if (filterStatus === "overdue") return task.isOverdue && task.status !== "completed";
-    if (filterStatus === "blocked") return task.isBlocked && task.status !== "completed";
-    return true;
-  });
+  const statusCounts = useMemo(() => {
+    let todo = 0;
+    let overdue = 0;
+    let blocked = 0;
+    let completed = 0;
+
+    for (const t of plan.tasks) {
+      if (t.status === "completed") {
+        completed++;
+      } else {
+        if (t.status === "todo") todo++;
+        if (t.isOverdue) overdue++;
+        if (t.isBlocked) blocked++;
+      }
+    }
+
+    return {
+      all: plan.tasks.length,
+      todo,
+      overdue,
+      blocked,
+      completed,
+    };
+  }, [plan.tasks]);
+
+  const filteredTasks = useMemo(() => {
+    return plan.tasks.filter((task) => {
+      if (filterStatus === "all") return true;
+      if (filterStatus === "todo") return task.status === "todo";
+      if (filterStatus === "completed") return task.status === "completed";
+      if (filterStatus === "overdue") return task.isOverdue && task.status !== "completed";
+      if (filterStatus === "blocked") return task.isBlocked && task.status !== "completed";
+      return true;
+    });
+  }, [plan.tasks, filterStatus]);
+
+  const taskById = useMemo(
+    () => new Map(plan.tasks.map((t) => [t.id, t])),
+    [plan.tasks]
+  );
+
+  const handleToggleTask = useCallback(
+    (id: string) => {
+      toggleTaskStatus(id);
+    },
+    [toggleTaskStatus]
+  );
+
+  const handleEditTask = useCallback((task: Task) => {
+    setEditingTask(task);
+  }, []);
+
+  const handleDeleteTask = useCallback(
+    (id: string) => {
+      deleteTask(id);
+    },
+    [deleteTask]
+  );
 
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,28 +232,22 @@ export function TimelineView() {
         </span>
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {[
-            { id: "all", label: `ALL (${plan.tasks.length})` },
+            { id: "all", label: `ALL (${statusCounts.all})` },
             {
               id: "todo",
-              label: `PENDING (${plan.tasks.filter((t) => t.status === "todo").length})`,
+              label: `PENDING (${statusCounts.todo})`,
             },
             {
               id: "overdue",
-              label: `OVERDUE (${
-                plan.tasks.filter((t) => t.isOverdue && t.status !== "completed").length
-              })`,
+              label: `OVERDUE (${statusCounts.overdue})`,
             },
             {
               id: "blocked",
-              label: `BLOCKED (${
-                plan.tasks.filter((t) => t.isBlocked && t.status !== "completed").length
-              })`,
+              label: `BLOCKED (${statusCounts.blocked})`,
             },
             {
               id: "completed",
-              label: `COMPLETED (${
-                plan.tasks.filter((t) => t.status === "completed").length
-              })`,
+              label: `COMPLETED (${statusCounts.completed})`,
             },
           ].map((f) => (
             <button
@@ -230,142 +276,19 @@ export function TimelineView() {
           </div>
         ) : (
           filteredTasks.map((task) => {
-            const isDone = task.status === "completed";
-            const depTasks = plan.tasks.filter((t) => (task.dependencies || []).includes(t.id));
+            const depTasks = (task.dependencies || [])
+              .map((id) => taskById.get(id))
+              .filter((t): t is Task => Boolean(t));
 
             return (
-              <div
+              <TimelineTaskCard
                 key={task.id}
-                className={`card-bauhaus border-4 border-black p-6 shadow-[6px_6px_0px_0px_black] transition-all ${
-                  isDone
-                    ? "bg-[#F0F0F0] opacity-80"
-                    : task.isOverdue
-                    ? "bg-[#FFF9C4]"
-                    : "bg-white"
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                  {/* Square Checkbox & Info */}
-                  <div className="flex items-start gap-4 flex-1">
-                    <button
-                      onClick={() => toggleTaskStatus(task.id)}
-                      className={`mt-1 w-6 h-6 border-2 border-black flex items-center justify-center transition-all shrink-0 ${
-                        isDone
-                          ? "bg-[#D02020] text-white shadow-[2px_2px_0px_0px_black]"
-                          : task.isBlocked
-                          ? "bg-[#E0E0E0] text-black cursor-not-allowed border-dashed"
-                          : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
-                      }`}
-                      title={
-                        task.isBlocked
-                          ? "Prerequisite directive must be resolved first"
-                          : isDone
-                          ? "Mark as Pending"
-                          : "Mark as Complete"
-                      }
-                    >
-                      {isDone && <Check size={16} strokeWidth={3} />}
-                    </button>
-
-                    <div className="space-y-1.5 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2
-                          className={`font-display font-black text-base uppercase tracking-tight ${
-                            isDone ? "line-through text-black/40" : "text-black"
-                          }`}
-                        >
-                          {task.title}
-                        </h2>
-
-                        {/* Priority Badge */}
-                        <span
-                          className={`text-[10px] font-mono uppercase px-2 py-0.5 border-2 border-black font-black shadow-[2px_2px_0px_0px_black] ${
-                            task.priority === "urgent"
-                              ? "bg-[#D02020] text-white"
-                              : task.priority === "high"
-                              ? "bg-[#F0C020] text-black"
-                              : "bg-white text-black"
-                          }`}
-                        >
-                          {task.priority}
-                        </span>
-
-                        {/* Overdue Badge */}
-                        {task.isOverdue && !isDone && (
-                          <span className="text-[10px] font-mono uppercase bg-[#D02020] text-white px-2 py-0.5 font-black border-2 border-black shadow-[2px_2px_0px_0px_black]">
-                            OVERDUE
-                          </span>
-                        )}
-
-                        {/* Blocked Badge */}
-                        {task.isBlocked && !isDone && (
-                          <span className="text-[10px] font-mono uppercase bg-[#1040C0] text-white px-2 py-0.5 font-black border-2 border-black shadow-[2px_2px_0px_0px_black]">
-                            BLOCKED BY PREREQUISITE
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="font-medium text-xs text-black/80 leading-relaxed">
-                        {task.description}
-                      </p>
-
-                      {/* Dependencies listing */}
-                      {depTasks.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 pt-2 text-[11px] font-mono">
-                          <span className="text-black/70 flex items-center gap-1 uppercase tracking-wider text-[10px] font-black">
-                            <LinkIcon size={12} strokeWidth={2} /> REQUIRES:
-                          </span>
-                          {depTasks.map((dep) => (
-                            <span
-                              key={dep.id}
-                              className={`px-2 py-0.5 text-[10px] uppercase tracking-wider border-2 border-black font-bold shadow-[2px_2px_0px_0px_black] ${
-                                dep.status === "completed"
-                                  ? "bg-[#E0E0E0] text-black/50 line-through"
-                                  : "bg-[#F0C020] text-black font-black"
-                              }`}
-                            >
-                              {dep.title}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right metadata & actions */}
-                  <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-3 shrink-0 self-stretch sm:self-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-black font-mono">
-                    <div className="text-right">
-                      <span className="text-xs font-black text-black block">
-                        DUE {task.dueDate}
-                      </span>
-                      <span className="text-[10px] font-bold text-black/70 uppercase tracking-wider block">
-                        {task.relativeDays === 0
-                          ? "EVENT DAY"
-                          : `${Math.abs(task.relativeDays)}D ${
-                              task.relativeDays < 0 ? "PRIOR" : "POST"
-                            }`}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 pt-1">
-                      <button
-                        onClick={() => setEditingTask(task)}
-                        className="p-1.5 border-2 border-black bg-white hover:bg-[#F0C020] text-black shadow-[2px_2px_0px_0px_black] transition-all"
-                        title="Edit Directive"
-                      >
-                        <Edit2 size={13} strokeWidth={2.5} />
-                      </button>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        className="p-1.5 border-2 border-black bg-white hover:bg-[#D02020] hover:text-white text-black shadow-[2px_2px_0px_0px_black] transition-all"
-                        title="Delete Directive"
-                      >
-                        <Trash2 size={13} strokeWidth={2.5} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                task={task}
+                depTasks={depTasks}
+                onToggle={handleToggleTask}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+              />
             );
           })
         )}
