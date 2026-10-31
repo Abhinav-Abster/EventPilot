@@ -10,6 +10,7 @@ import {
   CreativeIdea,
   EventProfile,
   ReplanningProposal,
+  EventType,
 } from "../types/event";
 import { createEmptyEventPlan, createReferenceEventPlan, createCustomEventPlan } from "./defaultEvent";
 import { EventPlanSchema } from "../schemas/eventSchemas";
@@ -27,7 +28,7 @@ export interface PlanContextType {
   switchEvent: (id: string) => void;
   createEvent: (
     name?: string,
-    type?: "birthday" | "wedding" | "community" | "corporate" | "anniversary" | "other",
+    type?: EventType,
     overrides?: Partial<EventProfile>
   ) => string;
   duplicateEvent: (id: string) => string;
@@ -222,7 +223,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const createEvent = useCallback((
     name = "New Celebration",
-    type: "birthday" | "wedding" | "community" | "corporate" | "anniversary" | "other" = "other",
+    type: EventType = "other",
     overrides: Partial<EventProfile> = {}
   ): string => {
     const newPlan = createCustomEventPlan(name, type, overrides);

@@ -1,34 +1,23 @@
 import { z } from "zod";
+import {
+  EVENT_TYPES,
+  VENUE_TYPES,
+  PLANNING_PRIORITIES,
+  BUDGET_CATEGORIES,
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  VENDOR_CATEGORIES,
+  VENDOR_BOOKING_STATUSES,
+  VENDOR_PAYMENT_STATUSES,
+  CREATIVE_IDEA_CATEGORIES,
+} from "../types/event";
+import { VALID_DIETS } from "../ai/normalizers";
+import { DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
-export const EventTypeSchema = z.enum([
-  "birthday",
-  "wedding",
-  "community",
-  "corporate",
-  "anniversary",
-  "other",
-]);
-
-export const VenueTypeSchema = z.enum(["indoor", "outdoor", "hybrid", "unselected"]);
-
-export const DietaryPreferenceSchema = z.enum([
-  "vegetarian",
-  "non-vegetarian",
-  "vegan",
-  "jain",
-  "halal",
-  "gluten-free",
-  "nut-allergy",
-]);
-
-export const PlanningPrioritySchema = z.enum([
-  "food",
-  "decor",
-  "photography",
-  "entertainment",
-  "venue",
-  "budget",
-]);
+export const EventTypeSchema = z.enum(EVENT_TYPES);
+export const VenueTypeSchema = z.enum(VENUE_TYPES);
+export const DietaryPreferenceSchema = z.enum(VALID_DIETS);
+export const PlanningPrioritySchema = z.enum(PLANNING_PRIORITIES);
 
 export const EventProfileSchema = z.object({
   id: z.string().default(() => "ep-" + Math.random().toString(36).substring(2, 9)),
@@ -45,7 +34,7 @@ export const EventProfileSchema = z.object({
   totalBudgetMinor: z.number().int().min(10000, "Budget must be at least ₹100"), // 10,000 paise = ₹100
   currency: z.literal("INR").default("INR"),
   theme: z.string().default("General Celebration"),
-  dietaryPreferences: z.array(DietaryPreferenceSchema).default(["vegetarian"]),
+  dietaryPreferences: z.array(DietaryPreferenceSchema).default([...DEFAULT_DIETARY_PREFERENCES]),
   accessibilityRequirements: z.array(z.string()).default([]),
   mustHaves: z.array(z.string()).default([]),
   excludedFeatures: z.array(z.string()).default([]),
@@ -53,17 +42,7 @@ export const EventProfileSchema = z.object({
   notes: z.string().default(""),
 });
 
-export const BudgetCategorySchema = z.enum([
-  "venue",
-  "food_beverage",
-  "decorations",
-  "photography",
-  "entertainment",
-  "invitations",
-  "transportation",
-  "miscellaneous",
-  "contingency_reserve",
-]);
+export const BudgetCategorySchema = z.enum(BUDGET_CATEGORIES);
 
 export const BudgetItemSchema = z.object({
   id: z.string().default(() => "bi-" + Math.random().toString(36).substring(2, 9)),
@@ -76,8 +55,8 @@ export const BudgetItemSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const TaskPrioritySchema = z.enum(["urgent", "high", "medium", "low"]);
-export const TaskStatusSchema = z.enum(["todo", "in_progress", "completed", "blocked"]);
+export const TaskPrioritySchema = z.enum(TASK_PRIORITIES);
+export const TaskStatusSchema = z.enum(TASK_STATUSES);
 
 export const TaskSchema = z.object({
   id: z.string().default(() => "t-" + Math.random().toString(36).substring(2, 9)),
@@ -95,16 +74,10 @@ export const TaskSchema = z.object({
   isBlocked: z.boolean().default(false),
 });
 
-export const VendorCategorySchema = z.enum([
-  "venue",
-  "caterer",
-  "decorator",
-  "photographer",
-  "entertainment",
-  "transportation",
-  "invitations",
-  "other",
-]);
+export const VendorCategorySchema = z.enum(VENDOR_CATEGORIES);
+
+export const VendorBookingStatusSchema = z.enum(VENDOR_BOOKING_STATUSES);
+export const VendorPaymentStatusSchema = z.enum(VENDOR_PAYMENT_STATUSES);
 
 export const VendorRecordSchema = z.object({
   id: z.string().default(() => "v-" + Math.random().toString(36).substring(2, 9)),
@@ -117,29 +90,13 @@ export const VendorRecordSchema = z.object({
   }).default({}),
   estimatedQuoteMinor: z.number().int().min(0),
   actualQuoteMinor: z.number().int().min(0).default(0),
-  bookingStatus: z.enum([
-    "planned",
-    "contacted",
-    "quote_received",
-    "shortlisted",
-    "booked",
-    "cancelled",
-  ]).default("planned"),
-  paymentStatus: z.enum(["unpaid", "advance_paid", "fully_paid"]).default("unpaid"),
+  bookingStatus: VendorBookingStatusSchema.default("planned"),
+  paymentStatus: VendorPaymentStatusSchema.default("unpaid"),
   notes: z.string().default(""),
   relatedTaskIds: z.array(z.string()).default([]),
 });
 
-export const CreativeIdeaCategorySchema = z.enum([
-  "theme",
-  "decor",
-  "menu",
-  "activities",
-  "invitation",
-  "return_gifts",
-  "schedule",
-  "weather_contingency",
-]);
+export const CreativeIdeaCategorySchema = z.enum(CREATIVE_IDEA_CATEGORIES);
 
 export const CreativeIdeaSchema = z.object({
   id: z.string().default(() => "ci-" + Math.random().toString(36).substring(2, 9)),

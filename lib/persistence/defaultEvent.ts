@@ -1,7 +1,8 @@
-import { EventPlan } from "../types/event";
+import { EventPlan, EventType } from "../types/event";
 import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
 import { generateDefaultVendors } from "../vendor/vendorEngine";
 import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
+import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
 export function createEmptyEventPlan(): EventPlan {
   const targetDate = addDaysToDate(formatISODate(new Date()), 25);
@@ -168,7 +169,7 @@ export function createReferenceEventPlan(): EventPlan {
 
 export function createCustomEventPlan(
   name = "New Celebration",
-  type: "birthday" | "wedding" | "community" | "corporate" | "anniversary" | "other" = "other",
+  type: EventType = "other",
   overrides: Partial<EventPlan["profile"]> = {}
 ): EventPlan {
   const targetDate = addDaysToDate(formatISODate(new Date()), 30);
@@ -182,7 +183,7 @@ export function createCustomEventPlan(
     date: overrides.date || targetDate,
     time: overrides.time || "18:00",
     location: {
-      city: overrides.location?.city || "Pune",
+      city: overrides.location?.city || DEFAULT_CITY,
       venueType: overrides.location?.venueType || "outdoor",
       venueName: overrides.location?.venueName || "",
     },
@@ -190,7 +191,7 @@ export function createCustomEventPlan(
     totalBudgetMinor: budgetMinor,
     currency: "INR" as const,
     theme: overrides.theme || `${name} Celebration`,
-    dietaryPreferences: overrides.dietaryPreferences || ["vegetarian" as const],
+    dietaryPreferences: overrides.dietaryPreferences || [...DEFAULT_DIETARY_PREFERENCES],
     accessibilityRequirements: overrides.accessibilityRequirements || [],
     mustHaves: overrides.mustHaves || [],
     excludedFeatures: overrides.excludedFeatures || [],

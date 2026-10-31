@@ -19,6 +19,7 @@ import { usePlan } from "../../lib/persistence/PlanContext";
 import { requestIntake, requestPlan } from "../../lib/ai/client";
 import { EventProfile, DietaryPreference, VenueType } from "../../lib/types/event";
 import { paiseToRupees, rupeesToPaise } from "../../lib/budget/moneyUtils";
+import { DEFAULT_CITY } from "../../lib/config/constants";
 import { NavTab } from "../layout/Navbar";
 
 interface EventIntakeViewProps {
@@ -410,7 +411,7 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
                 </label>
                 <input
                   type="text"
-                  value={stagedProfile.location?.city || "Pune"}
+                  value={stagedProfile.location?.city || DEFAULT_CITY}
                   onChange={(e) =>
                     setStagedProfile({
                       ...stagedProfile,
@@ -436,7 +437,7 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
                     setStagedProfile({
                       ...stagedProfile,
                       location: {
-                        ...(stagedProfile.location || { city: "Pune" }),
+                        ...(stagedProfile.location || { city: DEFAULT_CITY }),
                         venueType: e.target.value as VenueType,
                       },
                     })

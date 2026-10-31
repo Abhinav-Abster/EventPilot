@@ -18,6 +18,7 @@ import {
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { formatINR, rupeesToPaise } from "../../lib/budget/moneyUtils";
 import { EventType } from "../../lib/types/event";
+import { DEFAULT_CITY } from "../../lib/config/constants";
 
 interface EventManagerModalProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function EventManagerModal({
   // New Event Form State
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<EventType>("birthday");
-  const [newCity, setNewCity] = useState("Pune");
+  const [newCity, setNewCity] = useState(DEFAULT_CITY);
   const [newGuestCount, setNewGuestCount] = useState(50);
   const [newBudgetRupees, setNewBudgetRupees] = useState(50000);
 
@@ -72,7 +73,7 @@ export function EventManagerModal({
     if (!newName.trim()) return;
 
     createEvent(newName.trim(), newType, {
-      location: { city: newCity.trim() || "Pune", venueType: "outdoor" },
+      location: { city: newCity.trim() || DEFAULT_CITY, venueType: "outdoor" },
       guestCount: Math.max(1, newGuestCount),
       totalBudgetMinor: rupeesToPaise(Math.max(100, newBudgetRupees)),
       theme: `${newName.trim()} Theme`,
