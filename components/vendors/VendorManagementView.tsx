@@ -1,27 +1,26 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import {
-  Users,
-  Phone,
-  Mail,
-  Plus,
-  AlertCircle,
-  X,
-} from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
-import {
-  VendorRecord,
-  VendorCategory,
-  VendorBookingStatus,
-  VendorPaymentStatus,
-} from "../../lib/types/event";
-import {
-  VENDOR_CATEGORY_LABELS,
-  BOOKING_STATUS_CONFIG,
-} from "../../lib/vendor/vendorEngine";
-import { formatINR, paiseToRupees, rupeesToPaise } from "../../lib/budget/moneyUtils";
+import { VendorRecord, VendorBookingStatus } from "../../lib/types/event";
+import { rupeesToPaise } from "../../lib/budget/moneyUtils";
 import { VendorCard } from "./VendorCard";
+import { VendorCategoryFilter } from "./parts/VendorCategoryFilter";
+import { VendorAddModal, NewVendorFormData } from "./parts/VendorAddModal";
+import { VendorEditModal } from "./parts/VendorEditModal";
+
+const INITIAL_VENDOR_FORM: NewVendorFormData = {
+  name: "",
+  category: "caterer",
+  contactPerson: "",
+  phone: "",
+  email: "",
+  estimatedQuote: "",
+  bookingStatus: "planned",
+  paymentStatus: "unpaid",
+  notes: "",
+};
 
 export function VendorManagementView() {
   const { plan, addVendor, updateVendor, deleteVendor } = usePlan();
@@ -29,25 +28,10 @@ export function VendorManagementView() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingVendor, setEditingVendor] = useState<VendorRecord | null>(null);
-
-  // New Vendor Form State
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<VendorCategory>("caterer");
-  const [newContactPerson, setNewContactPerson] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newEstimatedQuote, setNewEstimatedQuote] = useState("");
-  const [newBookingStatus, setNewBookingStatus] =
-    useState<VendorBookingStatus>("planned");
-  const [newPaymentStatus, setNewPaymentStatus] =
-    useState<VendorPaymentStatus>("unpaid");
-  const [newNotes, setNewNotes] = useState("");
+  const [vendorForm, setVendorForm] = useState<NewVendorFormData>(INITIAL_VENDOR_FORM);
 
   const filteredVendors = useMemo(
-    () =>
-      selectedCategory === "all"
-        ? plan.vendors
-        : plan.vendors.filter((v) => v.category === selectedCategory),
+    () => (selectedCategory === "all" ? plan.vendors : plan.vendors.filter((v) => v.category === selectedCategory)),
     [plan.vendors, selectedCategory]
   );
 
@@ -71,26 +55,26 @@ export function VendorManagementView() {
 
   const handleCreateVendor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!vendorForm.name.trim()) return;
 
     addVendor({
-      name: newName.trim(),
-      category: newCategory,
+      name: vendorForm.name.trim(),
+      category: vendorForm.category,
       contact: {
-        contactPerson: newContactPerson,
-        phone: newPhone,
-        email: newEmail,
+        contactPerson: vendorForm.contactPerson,
+        phone: vendorForm.phone,
+        email: vendorForm.email,
       },
-      estimatedQuoteMinor: rupeesToPaise(parseFloat(newEstimatedQuote) || 0),
-      actualQuoteMinor: rupeesToPaise(parseFloat(newEstimatedQuote) || 0),
-      bookingStatus: newBookingStatus,
-      paymentStatus: newPaymentStatus,
-      notes: newNotes,
+      estimatedQuoteMinor: rupeesToPaise(parseFloat(vendorForm.estimatedQuote) || 0),
+      actualQuoteMinor: rupeesToPaise(parseFloat(vendorForm.estimatedQuote) || 0),
+      bookingStatus: vendorForm.bookingStatus,
+      paymentStatus: vendorForm.paymentStatus,
+      notes: vendorForm.notes,
       relatedTaskIds: [],
     });
 
     setShowAddModal(false);
-    resetForm();
+    setVendorForm(INITIAL_VENDOR_FORM);
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
@@ -109,18 +93,6 @@ export function VendorManagementView() {
     });
 
     setEditingVendor(null);
-  };
-
-  const resetForm = () => {
-    setNewName("");
-    setNewCategory("caterer");
-    setNewContactPerson("");
-    setNewPhone("");
-    setNewEmail("");
-    setNewEstimatedQuote("");
-    setNewBookingStatus("planned");
-    setNewPaymentStatus("unpaid");
-    setNewNotes("");
   };
 
   return (
@@ -157,43 +129,12 @@ export function VendorManagementView() {
         </span>
       </div>
 
-      {/* Category Filter Tabs */}
-      <div className="space-y-3">
-        <span className="font-mono text-xs uppercase tracking-widest font-black text-black block">
-          DISCIPLINE FILTERS:
-        </span>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          <button
-            onClick={() => setSelectedCategory("all")}
-            className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
-              selectedCategory === "all"
-                ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
-                : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
-            }`}
-          >
-            ALL CATEGORIES ({plan.vendors.length})
-          </button>
-          {Object.entries(VENDOR_CATEGORY_LABELS).map(([catKey, label]) => {
-            const count = plan.vendors.filter((v) => v.category === catKey).length;
-            if (count === 0) return null;
-            return (
-              <button
-                key={catKey}
-                onClick={() => setSelectedCategory(catKey)}
-                className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
-                  selectedCategory === catKey
-                    ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
-                    : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
-                }`}
-              >
-                {label.toUpperCase()} ({count})
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <VendorCategoryFilter
+        vendors={plan.vendors}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
-      {/* 4px Heavy Divider */}
       <div className="w-full border-t-4 border-black" />
 
       {/* Vendor Cards Grid */}
@@ -210,257 +151,20 @@ export function VendorManagementView() {
         ))}
       </div>
 
-      {/* Add Vendor Modal */}
-      {showAddModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
-            <div className="flex items-center justify-between p-6 bg-[#D02020] text-white border-b-4 border-black">
-              <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
-                ENROLL SERVICE VENDOR
-              </h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 border-2 border-white bg-white text-black hover:bg-black hover:text-white transition-colors"
-              >
-                <X size={18} strokeWidth={2.5} />
-              </button>
-            </div>
+      <VendorAddModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        form={vendorForm}
+        onChange={setVendorForm}
+        onSubmit={handleCreateVendor}
+      />
 
-            <form onSubmit={handleCreateVendor} className="p-6 space-y-4 text-xs font-mono">
-              <div>
-                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                  VENDOR / ESTABLISHMENT NAME
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Pune Anime Decor Studio"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    DISCIPLINE
-                  </label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value as VendorCategory)}
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  >
-                    {Object.entries(VENDOR_CATEGORY_LABELS).map(([k, l]) => (
-                      <option key={k} value={k}>
-                        {l.toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    QUOTE (₹)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="5000"
-                    value={newEstimatedQuote}
-                    onChange={(e) => setNewEstimatedQuote(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    CONTACT PERSON
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Mr. Rajesh"
-                    value={newContactPerson}
-                    onChange={(e) => setNewContactPerson(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    PHONE
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="+91 98220..."
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                  EMAIL
-                </label>
-                <input
-                  type="email"
-                  placeholder="vendor@pune.in"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                  TERMS & NOTES
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Deliverables covered, deposit terms, cancellation policies..."
-                  value={newNotes}
-                  onChange={(e) => setNewNotes(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
-                >
-                  CANCEL
-                </button>
-                <button
-                  type="submit"
-                  className="btn-bauhaus px-6 py-2 bg-[#D02020] text-white hover:bg-[#D02020]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
-                >
-                  ENROLL VENDOR
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Vendor Modal */}
-      {editingVendor && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
-            <div className="flex items-center justify-between p-6 bg-[#1040C0] text-white border-b-4 border-black">
-              <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
-                EDIT VENDOR CONTRACT
-              </h2>
-              <button
-                onClick={() => setEditingVendor(null)}
-                className="p-1 border-2 border-white bg-white text-black hover:bg-[#D02020] hover:text-white transition-colors"
-              >
-                <X size={18} strokeWidth={2.5} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs font-mono">
-              <div>
-                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                  NAME
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editingVendor.name}
-                  onChange={(e) =>
-                    setEditingVendor({ ...editingVendor, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    QUOTE (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={paiseToRupees(editingVendor.estimatedQuoteMinor)}
-                    onChange={(e) =>
-                      setEditingVendor({
-                        ...editingVendor,
-                        estimatedQuoteMinor: rupeesToPaise(
-                          parseFloat(e.target.value) || 0
-                        ),
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                    BOOKING STATUS
-                  </label>
-                  <select
-                    value={editingVendor.bookingStatus}
-                    onChange={(e) =>
-                      setEditingVendor({
-                        ...editingVendor,
-                        bookingStatus: e.target.value as VendorBookingStatus,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                  >
-                    <option value="planned">PLANNED</option>
-                    <option value="contacted">CONTACTED</option>
-                    <option value="quote_received">QUOTE RECEIVED</option>
-                    <option value="shortlisted">SHORTLISTED</option>
-                    <option value="booked">BOOKED</option>
-                    <option value="cancelled">CANCELLED</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
-                  NOTES
-                </label>
-                <textarea
-                  rows={2}
-                  value={editingVendor.notes}
-                  onChange={(e) =>
-                    setEditingVendor({ ...editingVendor, notes: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
-                <button
-                  type="button"
-                  onClick={() => setEditingVendor(null)}
-                  className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
-                >
-                  CANCEL
-                </button>
-                <button
-                  type="submit"
-                  className="btn-bauhaus px-6 py-2 bg-[#1040C0] text-white hover:bg-[#1040C0]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
-                >
-                  SAVE SPECIFICATIONS
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <VendorEditModal
+        editingVendor={editingVendor}
+        onClose={() => setEditingVendor(null)}
+        onSubmit={handleSaveEdit}
+        onChange={setEditingVendor}
+      />
     </div>
   );
 }
