@@ -1,24 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AIServiceError, executeReplanning } from "../../../../lib/ai/aiService";
+import { z } from "zod";
+import { executeReplanning } from "../../../../lib/ai/aiService";
+import { handleAIRoute } from "../../../../lib/api/handleAIRoute";
+import { EventPlan } from "../../../../lib/types/event";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    if (
-      typeof body.query !== "string" ||
-      !body.query.trim() ||
-      !body.plan ||
-      typeof body.plan !== "object" ||
-      Array.isArray(body.plan)
-    ) {
-      return NextResponse.json({ error: "Provide a replanning request and a valid event plan." }, { status: 400 });
-    }
-    return NextResponse.json(await executeReplanning(body.query, body.plan));
-  } catch (error) {
-    const status = error instanceof AIServiceError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "Unable to analyze the requested change.";
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+const replanningSchema = z.object({
+  query: z
+    .string({ required_error: "Provide a replanning request and a valid event plan." })
+    .trim()
+    .min(1, { message: "Provide a replanning request and a valid event plan." }),
+  plan: z.custom<EventPlan>(
+    (val) => typeof val === "object" && val !== null && !Array.isArray(val),
+    { message: "Provide a replanning request and a valid event plan." }
+  ),
+});
+
+export const POST = handleAIRoute(replanningSchema, ({ query, plan }) =>
+  executeReplanning(query, plan)
+);

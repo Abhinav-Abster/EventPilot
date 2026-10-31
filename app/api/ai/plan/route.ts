@@ -1,18 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AIServiceError, generateFullEventPlan } from "../../../../lib/ai/aiService";
+import { z } from "zod";
+import { generateFullEventPlan } from "../../../../lib/ai/aiService";
+import { handleAIRoute } from "../../../../lib/api/handleAIRoute";
+import { EventProfile } from "../../../../lib/types/event";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    if (!body.profile || typeof body.profile !== "object" || Array.isArray(body.profile)) {
-      return NextResponse.json({ error: "Provide a valid event profile." }, { status: 400 });
-    }
-    return NextResponse.json(await generateFullEventPlan(body.profile));
-  } catch (error) {
-    const status = error instanceof AIServiceError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "Unable to generate the event plan.";
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+const planSchema = z.object({
+  profile: z.custom<Partial<EventProfile>>(
+    (val) => typeof val === "object" && val !== null && !Array.isArray(val),
+    { message: "Provide a valid event profile." }
+  ),
+});
+
+export const POST = handleAIRoute(planSchema, ({ profile }) =>
+  generateFullEventPlan(profile)
+);

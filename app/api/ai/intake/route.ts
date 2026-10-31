@@ -1,23 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AIServiceError, processEventIntake } from "../../../../lib/ai/aiService";
+import { z } from "zod";
+import { processEventIntake } from "../../../../lib/ai/aiService";
+import { handleAIRoute } from "../../../../lib/api/handleAIRoute";
+import { EventProfile } from "../../../../lib/types/event";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    if (
-      typeof body.message !== "string" ||
-      !body.message.trim() ||
-      (body.currentProfile !== undefined &&
-        (typeof body.currentProfile !== "object" || Array.isArray(body.currentProfile)))
-    ) {
-      return NextResponse.json({ error: "Provide an event message and a valid current profile." }, { status: 400 });
-    }
-    return NextResponse.json(await processEventIntake(body.message, body.currentProfile ?? {}));
-  } catch (error) {
-    const status = error instanceof AIServiceError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "Unable to process the event details.";
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+const intakeSchema = z.object({
+  message: z
+    .string({ required_error: "Provide an event message and a valid current profile." })
+    .trim()
+    .min(1, { message: "Provide an event message and a valid current profile." }),
+  currentProfile: z
+    .custom<Partial<EventProfile>>(
+      (val) => val === undefined || (typeof val === "object" && val !== null && !Array.isArray(val)),
+      { message: "Provide an event message and a valid current profile." }
+    )
+    .optional(),
+});
+
+export const POST = handleAIRoute(intakeSchema, ({ message, currentProfile }) =>
+  processEventIntake(message, currentProfile ?? {})
+);
