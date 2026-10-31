@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
 import {
   EventPlan,
   BudgetItem,
@@ -148,8 +148,11 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     }
   }, [plans, activePlanId, plan, isHydrated]);
 
+  const plansRef = useRef(plans);
+  plansRef.current = plans;
+
   // Helper to mutate the currently active plan
-  const updateActivePlan = (updater: (prev: EventPlan) => EventPlan) => {
+  const updateActivePlan = useCallback((updater: (prev: EventPlan) => EventPlan) => {
     setPlans((prevPlans) => {
       const targetIndex = prevPlans.findIndex((p) => p.profile.id === activePlanId);
       if (targetIndex >= 0) {
@@ -159,19 +162,19 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       }
       return prevPlans;
     });
-  };
+  }, [activePlanId]);
 
   // Multi-event handlers
-  const switchEvent = (id: string) => {
-    const exists = plans.some((p) => p.profile.id === id);
+  const switchEvent = useCallback((id: string) => {
+    const exists = plansRef.current.some((p) => p.profile.id === id);
     if (exists) {
       setActivePlanId(id);
       setActiveProposal(null);
       setLastAppliedProposalId(null);
     }
-  };
+  }, []);
 
-  const createEvent = (
+  const createEvent = useCallback((
     name = "New Celebration",
     type: "birthday" | "wedding" | "community" | "corporate" | "anniversary" | "other" = "other",
     overrides: Partial<EventProfile> = {}
@@ -182,10 +185,11 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setActiveProposal(null);
     setLastAppliedProposalId(null);
     return newPlan.profile.id;
-  };
+  }, []);
 
-  const duplicateEvent = (id: string): string => {
-    const source = plans.find((p) => p.profile.id === id) || plan;
+  const duplicateEvent = useCallback((id: string): string => {
+    const currentPlans = plansRef.current;
+    const source = currentPlans.find((p) => p.profile.id === id) || currentPlans[0] || createReferenceEventPlan();
     const newId = "ep-" + Math.random().toString(36).substring(2, 9);
     const clone: EventPlan = {
       ...JSON.parse(JSON.stringify(source)),
@@ -203,26 +207,26 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setActiveProposal(null);
     setLastAppliedProposalId(null);
     return newId;
-  };
+  }, []);
 
-  const deleteEvent = (id: string) => {
-    setPlans((prev) => {
-      const remaining = prev.filter((p) => p.profile.id !== id);
-      if (remaining.length === 0) {
-        const fresh = createCustomEventPlan("My New Event", "other");
-        setActivePlanId(fresh.profile.id);
-        return [fresh];
-      }
+  const deleteEvent = useCallback((id: string) => {
+    const currentPlans = plansRef.current;
+    const remaining = currentPlans.filter((p) => p.profile.id !== id);
+    if (remaining.length === 0) {
+      const fresh = createCustomEventPlan("My New Event", "other");
+      setPlans([fresh]);
+      setActivePlanId(fresh.profile.id);
+    } else {
+      setPlans(remaining);
       if (activePlanId === id) {
         setActivePlanId(remaining[0].profile.id);
       }
-      return remaining;
-    });
+    }
     setActiveProposal(null);
     setLastAppliedProposalId(null);
-  };
+  }, [activePlanId]);
 
-  const updateEventName = (id: string, name: string) => {
+  const updateEventName = useCallback((id: string, name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
     setPlans((prev) =>
@@ -236,10 +240,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
           : p
       )
     );
-  };
+  }, []);
 
   // Active plan mutators
-  const updateProfile = (profileUpdates: Partial<EventProfile>) => {
+  const updateProfile = useCallback((profileUpdates: Partial<EventProfile>) => {
     updateActivePlan((prev) => {
       const newProfile: EventProfile = { ...prev.profile, ...profileUpdates };
       let updatedTasks = prev.tasks;
@@ -257,9 +261,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         version: prev.version + 1,
       };
     });
-  };
+  }, [updateActivePlan]);
 
-  const addBudgetItem = (item: Omit<BudgetItem, "id">) => {
+  const addBudgetItem = useCallback((item: Omit<BudgetItem, "id">) => {
     const newItem: BudgetItem = {
       ...item,
       id: "bi-" + Math.random().toString(36).substring(2, 9),
@@ -270,9 +274,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const updateBudgetItem = (id: string, updates: Partial<BudgetItem>) => {
+  const updateBudgetItem = useCallback((id: string, updates: Partial<BudgetItem>) => {
     updateActivePlan((prev) => ({
       ...prev,
       budgetItems: prev.budgetItems.map((item) =>
@@ -281,18 +285,18 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const deleteBudgetItem = (id: string) => {
+  const deleteBudgetItem = useCallback((id: string) => {
     updateActivePlan((prev) => ({
       ...prev,
       budgetItems: prev.budgetItems.filter((item) => item.id !== id),
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const addTask = (task: Omit<Task, "id">) => {
+  const addTask = useCallback((task: Omit<Task, "id">) => {
     const newTask: Task = {
       ...task,
       id: "t-" + Math.random().toString(36).substring(2, 9),
@@ -307,9 +311,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         version: prev.version + 1,
       };
     });
-  };
+  }, [updateActivePlan]);
 
-  const updateTask = (id: string, updates: Partial<Task>) => {
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
     updateActivePlan((prev) => {
       const newTasks = prev.tasks.map((task) =>
         task.id === id ? { ...task, ...updates } : task
@@ -322,9 +326,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         version: prev.version + 1,
       };
     });
-  };
+  }, [updateActivePlan]);
 
-  const deleteTask = (id: string) => {
+  const deleteTask = useCallback((id: string) => {
     updateActivePlan((prev) => {
       const filtered = prev.tasks.filter((t) => t.id !== id);
       const { updatedTasks } = recalculateSchedule(filtered, prev.profile.date);
@@ -335,9 +339,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         version: prev.version + 1,
       };
     });
-  };
+  }, [updateActivePlan]);
 
-  const toggleTaskStatus = (id: string) => {
+  const toggleTaskStatus = useCallback((id: string) => {
     updateActivePlan((prev) => {
       const target = prev.tasks.find((t) => t.id === id);
       if (!target) return prev;
@@ -355,9 +359,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         version: prev.version + 1,
       };
     });
-  };
+  }, [updateActivePlan]);
 
-  const addVendor = (vendor: Omit<VendorRecord, "id">) => {
+  const addVendor = useCallback((vendor: Omit<VendorRecord, "id">) => {
     const newVendor: VendorRecord = {
       ...vendor,
       id: "v-" + Math.random().toString(36).substring(2, 9),
@@ -368,36 +372,36 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const updateVendor = (id: string, updates: Partial<VendorRecord>) => {
+  const updateVendor = useCallback((id: string, updates: Partial<VendorRecord>) => {
     updateActivePlan((prev) => ({
       ...prev,
       vendors: prev.vendors.map((v) => (v.id === id ? { ...v, ...updates } : v)),
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const deleteVendor = (id: string) => {
+  const deleteVendor = useCallback((id: string) => {
     updateActivePlan((prev) => ({
       ...prev,
       vendors: prev.vendors.filter((v) => v.id !== id),
       updatedAt: new Date().toISOString(),
       version: prev.version + 1,
     }));
-  };
+  }, [updateActivePlan]);
 
-  const toggleSaveIdea = (id: string) => {
+  const toggleSaveIdea = useCallback((id: string) => {
     updateActivePlan((prev) => ({
       ...prev,
       ideas: prev.ideas.map((idea) =>
         idea.id === id ? { ...idea, isSaved: !idea.isSaved } : idea
       ),
     }));
-  };
+  }, [updateActivePlan]);
 
-  const applyProposal = (proposal: ReplanningProposal) => {
+  const applyProposal = useCallback((proposal: ReplanningProposal) => {
     const validated = EventPlanSchema.safeParse(proposal.revisedPlan);
     if (!validated.success) {
       throw new Error("This proposal could not be applied because its revised plan is invalid.");
@@ -410,13 +414,13 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     }));
     setLastAppliedProposalId(proposal.id);
     setActiveProposal(null);
-  };
+  }, [updateActivePlan]);
 
-  const rejectProposal = () => {
+  const rejectProposal = useCallback(() => {
     setActiveProposal(null);
-  };
+  }, []);
 
-  const setFullPlan = (newPlan: EventPlan, createAsNew = false) => {
+  const setFullPlan = useCallback((newPlan: EventPlan, createAsNew = false) => {
     if (createAsNew) {
       const freshId = "ep-" + Math.random().toString(36).substring(2, 9);
       const freshPlan: EventPlan = {
@@ -442,40 +446,70 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     }
     setLastAppliedProposalId(null);
     setActiveProposal(null);
-  };
+  }, [activePlanId]);
+
+  const contextValue = useMemo<PlanContextType>(
+    () => ({
+      plan,
+      plans,
+      activePlanId,
+      isHydrated,
+      activeProposal,
+      lastAppliedProposalId,
+      switchEvent,
+      createEvent,
+      duplicateEvent,
+      deleteEvent,
+      updateEventName,
+      updateProfile,
+      addBudgetItem,
+      updateBudgetItem,
+      deleteBudgetItem,
+      addTask,
+      updateTask,
+      deleteTask,
+      toggleTaskStatus,
+      addVendor,
+      updateVendor,
+      deleteVendor,
+      toggleSaveIdea,
+      setActiveProposal,
+      applyProposal,
+      rejectProposal,
+      setFullPlan,
+    }),
+    [
+      plan,
+      plans,
+      activePlanId,
+      isHydrated,
+      activeProposal,
+      lastAppliedProposalId,
+      switchEvent,
+      createEvent,
+      duplicateEvent,
+      deleteEvent,
+      updateEventName,
+      updateProfile,
+      addBudgetItem,
+      updateBudgetItem,
+      deleteBudgetItem,
+      addTask,
+      updateTask,
+      deleteTask,
+      toggleTaskStatus,
+      addVendor,
+      updateVendor,
+      deleteVendor,
+      toggleSaveIdea,
+      applyProposal,
+      rejectProposal,
+      setFullPlan,
+    ]
+  );
 
   return (
-    <PlanContext.Provider
-      value={{
-        plan,
-        plans,
-        activePlanId,
-        isHydrated,
-        activeProposal,
-        lastAppliedProposalId,
-        switchEvent,
-        createEvent,
-        duplicateEvent,
-        deleteEvent,
-        updateEventName,
-        updateProfile,
-        addBudgetItem,
-        updateBudgetItem,
-        deleteBudgetItem,
-        addTask,
-        updateTask,
-        deleteTask,
-        toggleTaskStatus,
-        addVendor,
-        updateVendor,
-        deleteVendor,
-        toggleSaveIdea,
-        setActiveProposal,
-        applyProposal,
-        rejectProposal,
-        setFullPlan,
-      }}
-    >
+    <PlanContext.Provider value={contextValue}>
       {children}
     </PlanContext.Provider>
   );
