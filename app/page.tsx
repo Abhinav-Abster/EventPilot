@@ -1,15 +1,56 @@
 "use client";
 
 import React, { useState } from "react";
-import { Navbar, NavTab } from "../components/layout/Navbar";
+import dynamic from "next/dynamic";
+import { Navbar, type NavTab } from "../components/layout/Navbar";
 import { DashboardView } from "../components/dashboard/DashboardView";
-import { EventIntakeView } from "../components/intake/EventIntakeView";
-import { BudgetStudioView } from "../components/budget/BudgetStudioView";
-import { TimelineView } from "../components/timeline/TimelineView";
-import { VendorManagementView } from "../components/vendors/VendorManagementView";
-import { CreativeIdeasView } from "../components/ideas/CreativeIdeasView";
-import { AIAssistantView } from "../components/assistant/AIAssistantView";
-import { EventManagerModal } from "../components/events/EventManagerModal";
+
+const TabLoadingFallback = () => (
+  <small role="status" className="font-mono text-xs uppercase tracking-widest font-bold text-black/60 p-6 block">
+    LOADING DIRECTIVE...
+  </small>
+);
+
+const EventIntakeView = dynamic(
+  () => import("../components/intake/EventIntakeView").then((m) => m.EventIntakeView),
+  { loading: TabLoadingFallback }
+);
+
+const BudgetStudioView = dynamic(
+  () => import("../components/budget/BudgetStudioView").then((m) => m.BudgetStudioView),
+  { loading: TabLoadingFallback }
+);
+
+const TimelineView = dynamic(
+  () => import("../components/timeline/TimelineView").then((m) => m.TimelineView),
+  { loading: TabLoadingFallback }
+);
+
+const VendorManagementView = dynamic(
+  () => import("../components/vendors/VendorManagementView").then((m) => m.VendorManagementView),
+  { loading: TabLoadingFallback }
+);
+
+const CreativeIdeasView = dynamic(
+  () => import("../components/ideas/CreativeIdeasView").then((m) => m.CreativeIdeasView),
+  { loading: TabLoadingFallback }
+);
+
+const AIAssistantView = dynamic(
+  () => import("../components/assistant/AIAssistantView").then((m) => m.AIAssistantView),
+  { loading: TabLoadingFallback }
+);
+
+const EventManagerModal = dynamic(
+  () => import("../components/events/EventManagerModal").then((m) => m.EventManagerModal),
+  {
+    loading: () => (
+      <small role="status" className="sr-only">
+        LOADING MODAL...
+      </small>
+    ),
+  }
+);
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<NavTab>("dashboard");
