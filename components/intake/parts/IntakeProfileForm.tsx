@@ -1,8 +1,9 @@
 import React from "react";
-import { Calendar, Users, Wallet, MapPin, X, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { Calendar, Users, Wallet, MapPin, Sparkles, ArrowRight, RefreshCw } from "lucide-react";
 import { EventProfile, DietaryPreference, VenueType } from "../../../lib/types/event";
 import { paiseToRupees, rupeesToPaise } from "../../../lib/budget/moneyUtils";
 import { DEFAULT_CITY } from "../../../lib/config/constants";
+import { IntakeMustHaves } from "./IntakeMustHaves";
 
 interface IntakeProfileFormProps {
   stagedProfile: Partial<EventProfile>;
@@ -21,6 +22,20 @@ export function IntakeProfileForm({
   isGeneratingPlan,
   onGeneratePlan,
 }: IntakeProfileFormProps) {
+  const handleAddMustHave = (val: string) => {
+    onUpdateProfile({
+      ...stagedProfile,
+      mustHaves: [...(stagedProfile.mustHaves || []), val],
+    });
+  };
+
+  const handleRemoveMustHave = (index: number) => {
+    onUpdateProfile({
+      ...stagedProfile,
+      mustHaves: stagedProfile.mustHaves?.filter((_, i) => i !== index),
+    });
+  };
+
   return (
     <div className="lg:col-span-5 border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] p-6 sm:p-8 space-y-6">
       <div className="flex items-center justify-between pb-4 border-b-4 border-black bg-[#F0C020] -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 p-6 text-black">
@@ -186,55 +201,13 @@ export function IntakeProfileForm({
           />
         </div>
 
-        {/* Non-Negotiable Must-Haves */}
-        <div className="space-y-2">
-          <label className="block font-black uppercase tracking-wider text-[11px] text-black">
-            PROTECTED MUST-HAVES (NON-NEGOTIABLES)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {(stagedProfile.mustHaves || []).map((mh, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-2 text-xs font-black bg-[#D02020] text-white px-2.5 py-1 border-2 border-black shadow-[2px_2px_0px_0px_black]"
-              >
-                <span>{mh}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onUpdateProfile({
-                      ...stagedProfile,
-                      mustHaves: stagedProfile.mustHaves?.filter((_, i) => i !== idx),
-                    })
-                  }
-                  className="hover:text-black font-black"
-                >
-                  <X size={14} strokeWidth={3} />
-                </button>
-              </span>
-            ))}
-          </div>
-          <input
-            type="text"
-            placeholder="Press Enter to register constraint..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                e.preventDefault();
-                onUpdateProfile({
-                  ...stagedProfile,
-                  mustHaves: [
-                    ...(stagedProfile.mustHaves || []),
-                    e.currentTarget.value.trim(),
-                  ],
-                });
-                e.currentTarget.value = "";
-              }
-            }}
-            className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold placeholder:text-black/50 shadow-[2px_2px_0px_0px_black] focus:bg-white focus:outline-none"
-          />
-        </div>
+        <IntakeMustHaves
+          mustHaves={stagedProfile.mustHaves || []}
+          onAddMustHave={handleAddMustHave}
+          onRemoveMustHave={handleRemoveMustHave}
+        />
       </div>
 
-      {/* Action to Generate Plan */}
       <div className="pt-4 border-t-4 border-black space-y-4">
         <label className="flex items-center gap-3 text-xs font-black uppercase tracking-wider cursor-pointer select-none">
           <input
