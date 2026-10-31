@@ -12,9 +12,11 @@ import {
   ReplanningProposal,
   EventType,
 } from "../types/event";
-import { createEmptyEventPlan, createReferenceEventPlan, createCustomEventPlan } from "./defaultEvent";
+import { createReferenceEventPlan, createCustomEventPlan } from "./defaultEvent";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { recalculateSchedule } from "../timeline/timelineEngine";
+import { loadStoredPlans, saveStoredPlans } from "./storage";
+import { createId } from "../utils/id";
 
 export interface PlanContextType {
   plan: EventPlan;
@@ -54,10 +56,6 @@ export interface PlanContextType {
   setFullPlan: (newPlan: EventPlan, createAsNew?: boolean) => void;
 }
 
-const STORAGE_EVENTS_KEY = "eventpilot_events_v2";
-const STORAGE_ACTIVE_ID_KEY = "eventpilot_active_event_id";
-const LEGACY_STORAGE_KEY = "eventpilot_active_plan_v2";
-
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export function PlanProvider({ children }: { children: ReactNode }) {
@@ -75,68 +73,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   // Hydrate from localStorage on client mount
   useEffect(() => {
-    try {
-      const storedEvents = localStorage.getItem(STORAGE_EVENTS_KEY);
-      const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-
-      let loadedPlans: EventPlan[] = [];
-
-      if (storedEvents) {
-        try {
-          const parsed = JSON.parse(storedEvents);
-          if (Array.isArray(parsed)) {
-            for (const item of parsed) {
-              const validated = EventPlanSchema.safeParse(item);
-              if (validated.success) {
-                loadedPlans.push(validated.data as EventPlan);
-              }
-            }
-          }
-        } catch (e) {
-          console.warn("Failed to parse stored events collection:", e);
-        }
-      }
-
-      // Fallback to legacy single plan if no multi-event store exists
-      if (loadedPlans.length === 0) {
-        const legacyStored = localStorage.getItem(LEGACY_STORAGE_KEY);
-        if (legacyStored) {
-          try {
-            const parsed = JSON.parse(legacyStored);
-            const validated = EventPlanSchema.safeParse(parsed);
-            if (validated.success) {
-              loadedPlans.push(validated.data as EventPlan);
-              try {
-                localStorage.removeItem(LEGACY_STORAGE_KEY);
-              } catch (_) {}
-            }
-          } catch (e) {
-            console.warn("Failed to parse legacy stored plan:", e);
-          }
-        }
-      }
-
-      // If still empty, initialize with rich reference plan
-      if (loadedPlans.length === 0) {
-        loadedPlans = [createReferenceEventPlan()];
-      }
-
-      setPlans(loadedPlans);
-
-      // Determine active event ID
-      if (storedActiveId && loadedPlans.some((p) => p.profile.id === storedActiveId)) {
-        setActivePlanId(storedActiveId);
-      } else {
-        setActivePlanId(loadedPlans[0].profile.id);
-      }
-    } catch (e) {
-      console.error("Failed to load plans from localStorage, using fallback:", e);
-      const defaultPlan = createReferenceEventPlan();
-      setPlans([defaultPlan]);
-      setActivePlanId(defaultPlan.profile.id);
-    } finally {
-      setIsHydrated(true);
-    }
+    const { loadedPlans, activeId } = loadStoredPlans();
+    setPlans(loadedPlans);
+    setActivePlanId(activeId);
+    setIsHydrated(true);
   }, []);
 
   const plansRef = useRef(plans);
@@ -154,14 +94,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     ) {
       return;
     }
-    try {
-      localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(plansRef.current));
-      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activePlanIdRef.current);
-      lastSavedPlansRef.current = plansRef.current;
-      lastSavedActiveIdRef.current = activePlanIdRef.current;
-    } catch (e) {
-      console.error("Failed to persist events to localStorage:", e);
-    }
+    saveStoredPlans(plansRef.current, activePlanIdRef.current);
+    lastSavedPlansRef.current = plansRef.current;
+    lastSavedActiveIdRef.current = activePlanIdRef.current;
   }, [isHydrated]);
 
   // Sync to localStorage on state changes (debounced by ~500ms)
@@ -237,9 +172,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const duplicateEvent = useCallback((id: string): string => {
     const currentPlans = plansRef.current;
     const source = currentPlans.find((p) => p.profile.id === id) || currentPlans[0] || createReferenceEventPlan();
-    const newId = "ep-" + Math.random().toString(36).substring(2, 9);
+    const newId = createId("ep");
     const clone: EventPlan = {
-      ...JSON.parse(JSON.stringify(source)),
+      ...structuredClone(source),
       profile: {
         ...source.profile,
         id: newId,
@@ -313,7 +248,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const addBudgetItem = useCallback((item: Omit<BudgetItem, "id">) => {
     const newItem: BudgetItem = {
       ...item,
-      id: "bi-" + Math.random().toString(36).substring(2, 9),
+      id: createId("bi"),
     };
     updateActivePlan((prev) => ({
       ...prev,
@@ -346,7 +281,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const addTask = useCallback((task: Omit<Task, "id">) => {
     const newTask: Task = {
       ...task,
-      id: "t-" + Math.random().toString(36).substring(2, 9),
+      id: createId("t"),
     };
     updateActivePlan((prev) => {
       const newTasks = [...prev.tasks, newTask];
@@ -411,7 +346,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const addVendor = useCallback((vendor: Omit<VendorRecord, "id">) => {
     const newVendor: VendorRecord = {
       ...vendor,
-      id: "v-" + Math.random().toString(36).substring(2, 9),
+      id: createId("v"),
     };
     updateActivePlan((prev) => ({
       ...prev,
@@ -469,7 +404,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const setFullPlan = useCallback((newPlan: EventPlan, createAsNew = false) => {
     if (createAsNew) {
-      const freshId = "ep-" + Math.random().toString(36).substring(2, 9);
+      const freshId = createId("ep");
       const freshPlan: EventPlan = {
         ...newPlan,
         profile: {
