@@ -66,6 +66,54 @@ export function determineTrimOrder(profile: EventProfile): BudgetCategory[] {
   return trimOrder;
 }
 
+interface CategoryCutConfig {
+  percentage: number;
+  reason: string;
+}
+
+const CATEGORY_CUT_CONFIGS: Partial<Record<BudgetCategory, CategoryCutConfig>> = {
+  invitations: {
+    percentage: 85,
+    reason: "Switched to bespoke animated WhatsApp/digital invites instead of printed stationery.",
+  },
+  photography: {
+    percentage: 50,
+    reason: "Adjusted photography to 2.5-hour key moments package (cake cutting & portraits).",
+  },
+  entertainment: {
+    percentage: 60,
+    reason: "Selected curated anime playlist + portable PA speaker & DIY trivia games.",
+  },
+  venue: {
+    percentage: 25,
+    reason: "Negotiated 4-hour evening slot rate with local society club hall / outdoor lawn.",
+  },
+  contingency_reserve: {
+    percentage: 75,
+    reason: "Streamlined contingency buffer to meet revised budget limit.",
+  },
+};
+
+function computeFoodReduction(
+  currentCost: number,
+  deficit: number,
+  guestCount: number
+): { reductionMinor: number; reason: string } {
+  const minPerGuestMinor = rupeesToPaise(200);
+  const minFoodTotalMinor = minPerGuestMinor * guestCount;
+  const availableReduction = Math.max(0, currentCost - minFoodTotalMinor);
+  if (availableReduction > 0) {
+    const reductionMinor = Math.min(deficit, availableReduction);
+    return {
+      reductionMinor,
+      reason: `Optimized vegetarian menu: 2 starters, live chaat counter, 1 main course & dessert (₹${Math.round(
+        paiseToRupees(currentCost - reductionMinor) / guestCount
+      )}/guest), strictly preserving 100% vegetarian quality.`,
+    };
+  }
+  return { reductionMinor: 0, reason: "" };
+}
+
 /**
  * Calculates the minor-unit reduction to apply to a budget item without exceeding its maximum cut.
  */
@@ -77,65 +125,25 @@ export function computeItemReduction(
   const currentCost = item.estimatedCostMinor;
   if (currentCost <= 0) return { reductionMinor: 0, reason: "" };
 
-  const { category } = item;
-  if (category === "invitations") {
-    return {
-      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 85)),
-      reason:
-        "Switched to bespoke animated WhatsApp/digital invites instead of printed stationery.",
-    };
+  if (item.category === "food_beverage") {
+    return computeFoodReduction(currentCost, deficit, profile.guestCount);
   }
-  if (category === "photography") {
+
+  if (item.category === "decorations") {
+    const percentage = item.isProtected ? 35 : 50;
     return {
-      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 50)),
-      reason: "Adjusted photography to 2.5-hour key moments package (cake cutting & portraits).",
-    };
-  }
-  if (category === "entertainment") {
-    return {
-      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 60)),
-      reason: "Selected curated anime playlist + portable PA speaker & DIY trivia games.",
-    };
-  }
-  if (category === "decorations") {
-    const maxDecorCut = item.isProtected
-      ? percentOfMoney(currentCost, 35)
-      : percentOfMoney(currentCost, 50);
-    return {
-      reductionMinor: Math.min(deficit, maxDecorCut),
+      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, percentage)),
       reason: "Streamlined stage setup with DIY printed anime standees & fairy light backdrop.",
     };
   }
-  if (category === "venue") {
-    return {
-      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 25)),
-      reason: "Negotiated 4-hour evening slot rate with local society club hall / outdoor lawn.",
-    };
-  }
-  if (category === "food_beverage") {
-    const minPerGuestMinor = rupeesToPaise(200);
-    const minFoodTotalMinor = minPerGuestMinor * profile.guestCount;
-    const availableReduction = Math.max(0, currentCost - minFoodTotalMinor);
-    if (availableReduction > 0) {
-      const reductionMinor = Math.min(deficit, availableReduction);
-      return {
-        reductionMinor,
-        reason: `Optimized vegetarian menu: 2 starters, live chaat counter, 1 main course & dessert (₹${Math.round(
-          paiseToRupees(currentCost - reductionMinor) / profile.guestCount
-        )}/guest), strictly preserving 100% vegetarian quality.`,
-      };
-    }
-    return { reductionMinor: 0, reason: "" };
-  }
-  if (category === "contingency_reserve") {
-    return {
-      reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 75)),
-      reason: "Streamlined contingency buffer to meet revised budget limit.",
-    };
-  }
+
+  const config = CATEGORY_CUT_CONFIGS[item.category] || {
+    percentage: 35,
+    reason: "Streamlined non-essential expenses.",
+  };
 
   return {
-    reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 35)),
-    reason: "Streamlined non-essential expenses.",
+    reductionMinor: Math.min(deficit, percentOfMoney(currentCost, config.percentage)),
+    reason: config.reason,
   };
 }

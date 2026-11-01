@@ -54,17 +54,7 @@ export function detectCircularDependencies(tasks: Task[]): {
   return { hasCycle: false, cycleTaskIds: [] };
 }
 
-/**
- * Topologically sorts tasks while respecting dependencies and relative urgency
- */
-export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
-  // Fall back to chronological due date sorting if graph contains circular dependencies
-  const { hasCycle } = detectCircularDependencies(tasks);
-  if (hasCycle) {
-    return [...tasks].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-  }
-
-  // Build adjacency list and in-degree counts for Kahn's topological sort
+function buildGraphAndInDegrees(tasks: Task[]) {
   const taskMap = new Map<string, Task>(tasks.map((t) => [t.id, t]));
   const inDegree = new Map<string, number>();
   const dependents = new Map<string, string[]>();
@@ -83,6 +73,15 @@ export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
     }
   }
 
+  return { taskMap, inDegree, dependents };
+}
+
+function kahnTopologicalSort(
+  tasks: Task[],
+  taskMap: Map<string, Task>,
+  inDegree: Map<string, number>,
+  dependents: Map<string, string[]>
+): Task[] {
   const queue = new PriorityQueue<Task>((a, b) => a.dueDate.localeCompare(b.dueDate));
   for (const t of tasks) {
     if ((inDegree.get(t.id) || 0) === 0) {
@@ -119,6 +118,76 @@ export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
 }
 
 /**
+ * Topologically sorts tasks while respecting dependencies and relative urgency
+ */
+export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
+  // Fall back to chronological due date sorting if graph contains circular dependencies
+  const { hasCycle } = detectCircularDependencies(tasks);
+  if (hasCycle) {
+    return [...tasks].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  }
+
+  const { taskMap, inDegree, dependents } = buildGraphAndInDegrees(tasks);
+  return kahnTopologicalSort(tasks, taskMap, inDegree, dependents);
+}
+
+interface ScheduleContext {
+  today: string;
+  eventDateStr: string;
+  daysUntilEvent: number;
+  isLastMinute: boolean;
+  completedTaskIds: Set<string>;
+}
+
+function calculateSingleTaskSchedule(task: Task, ctx: ScheduleContext): Task {
+  let effectiveRelativeDays = task.relativeDays;
+
+  if (ctx.isLastMinute && effectiveRelativeDays < -ctx.daysUntilEvent) {
+    effectiveRelativeDays = -ctx.daysUntilEvent;
+  }
+
+  let calculatedDueDate = addDaysToDate(ctx.eventDateStr, effectiveRelativeDays);
+  if (ctx.isLastMinute && calculatedDueDate.localeCompare(ctx.today) < 0) {
+    calculatedDueDate = ctx.today;
+  }
+
+  const hasUnmetDependencies = (task.dependencies || []).some(
+    (depId) => !ctx.completedTaskIds.has(depId)
+  );
+
+  const isBlocked = hasUnmetDependencies && task.status !== "completed";
+  const isOverdue = task.status !== "completed" && calculatedDueDate.localeCompare(ctx.today) < 0;
+
+  let priority: TaskPriority = task.priority;
+  if (isOverdue) {
+    priority = "urgent";
+  } else if (
+    task.status !== "completed" &&
+    daysBetween(ctx.today, calculatedDueDate) <= 2 &&
+    priority !== "urgent"
+  ) {
+    priority = "high";
+  }
+
+  let status: TaskStatus = task.status;
+  if (isBlocked && status === "todo") {
+    status = "blocked";
+  } else if (!isBlocked && status === "blocked") {
+    status = "todo";
+  }
+
+  return {
+    ...task,
+    relativeDays: effectiveRelativeDays,
+    dueDate: calculatedDueDate,
+    isBlocked,
+    isOverdue,
+    priority,
+    status,
+  };
+}
+
+/**
  * Recalculates task due dates, blocked status, and overdue flags
  * whenever the event date or task statuses change.
  */
@@ -146,54 +215,15 @@ export function recalculateSchedule(
   }
 
   const completedTaskIds = new Set(tasks.filter((t) => t.status === "completed").map((t) => t.id));
+  const ctx: ScheduleContext = {
+    today,
+    eventDateStr,
+    daysUntilEvent,
+    isLastMinute,
+    completedTaskIds,
+  };
 
-  const updatedTasks: Task[] = tasks.map((task) => {
-    let effectiveRelativeDays = task.relativeDays;
-
-    if (isLastMinute && effectiveRelativeDays < -daysUntilEvent) {
-      effectiveRelativeDays = -daysUntilEvent;
-    }
-
-    let calculatedDueDate = addDaysToDate(eventDateStr, effectiveRelativeDays);
-    if (isLastMinute && calculatedDueDate.localeCompare(today) < 0) {
-      calculatedDueDate = today;
-    }
-
-    const hasUnmetDependencies = (task.dependencies || []).some(
-      (depId) => !completedTaskIds.has(depId)
-    );
-
-    const isBlocked = hasUnmetDependencies && task.status !== "completed";
-    const isOverdue = task.status !== "completed" && calculatedDueDate.localeCompare(today) < 0;
-
-    let priority: TaskPriority = task.priority;
-    if (isOverdue) {
-      priority = "urgent";
-    } else if (
-      task.status !== "completed" &&
-      daysBetween(today, calculatedDueDate) <= 2 &&
-      priority !== "urgent"
-    ) {
-      priority = "high";
-    }
-
-    let status: TaskStatus = task.status;
-    if (isBlocked && status === "todo") {
-      status = "blocked";
-    } else if (!isBlocked && status === "blocked") {
-      status = "todo";
-    }
-
-    return {
-      ...task,
-      relativeDays: effectiveRelativeDays,
-      dueDate: calculatedDueDate,
-      isBlocked,
-      isOverdue,
-      priority,
-      status,
-    };
-  });
+  const updatedTasks = tasks.map((task) => calculateSingleTaskSchedule(task, ctx));
 
   return {
     updatedTasks: sortTasksByExecutionOrder(updatedTasks),

@@ -58,14 +58,14 @@ export function calculateBudgetSummary(
   const contingencyPercent =
     totalBudgetMinor > 0 ? Math.round((contingencyMinor / totalBudgetMinor) * 100) : 0;
 
-  const { warnings, savingsTips } = buildBudgetWarningsAndTips(
+  const { warnings, savingsTips } = buildBudgetWarningsAndTips({
     breakdown,
     totalBudgetMinor,
     totalEstimatedMinor,
     guestCount,
     deficitMinor,
-    contingencyPercent
-  );
+    contingencyPercent,
+  });
 
   return {
     totalBudgetMinor,

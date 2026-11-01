@@ -19,6 +19,45 @@ export const STORAGE_ACTIVE_ID_KEY = "eventpilot_active_event_id";
  */
 export const LEGACY_STORAGE_KEY = "eventpilot_active_plan_v2";
 
+function parsePlansCollection(raw: string | null): EventPlan[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    const validPlans: EventPlan[] = [];
+    for (const item of parsed) {
+      const validated = EventPlanSchema.safeParse(item);
+      if (validated.success) {
+        validPlans.push(validated.data as EventPlan);
+      }
+    }
+    return validPlans;
+  } catch (e) {
+    logger.warn("Failed to parse stored events collection:", e);
+    return [];
+  }
+}
+
+function migrateLegacyPlan(legacyStored: string | null): EventPlan | null {
+  if (!legacyStored) return null;
+  try {
+    const parsed = JSON.parse(legacyStored);
+    const validated = EventPlanSchema.safeParse(parsed);
+    if (validated.success) {
+      try {
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      } catch {
+        // ignore cleanup error
+      }
+      return validated.data as EventPlan;
+    }
+  } catch (e) {
+    logger.warn("Failed to parse legacy stored plan:", e);
+  }
+  return null;
+}
+
 /**
  * Retrieves and validates event plans from browser localStorage with corruption fallback.
  */
@@ -27,41 +66,12 @@ export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string 
     const storedEvents = localStorage.getItem(STORAGE_EVENTS_KEY);
     const storedActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
 
-    const loadedPlans: EventPlan[] = [];
-
-    if (storedEvents) {
-      try {
-        const parsed = JSON.parse(storedEvents);
-        if (Array.isArray(parsed)) {
-          for (const item of parsed) {
-            const validated = EventPlanSchema.safeParse(item);
-            if (validated.success) {
-              loadedPlans.push(validated.data as EventPlan);
-            }
-          }
-        }
-      } catch (e) {
-        logger.warn("Failed to parse stored events collection:", e);
-      }
-    }
+    let loadedPlans = parsePlansCollection(storedEvents);
 
     if (loadedPlans.length === 0) {
-      const legacyStored = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (legacyStored) {
-        try {
-          const parsed = JSON.parse(legacyStored);
-          const validated = EventPlanSchema.safeParse(parsed);
-          if (validated.success) {
-            loadedPlans.push(validated.data as EventPlan);
-            try {
-              localStorage.removeItem(LEGACY_STORAGE_KEY);
-            } catch {
-              // ignore cleanup error
-            }
-          }
-        } catch (e) {
-          logger.warn("Failed to parse legacy stored plan:", e);
-        }
+      const legacyPlan = migrateLegacyPlan(localStorage.getItem(LEGACY_STORAGE_KEY));
+      if (legacyPlan) {
+        loadedPlans = [legacyPlan];
       }
     }
 

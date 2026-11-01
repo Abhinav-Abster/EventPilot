@@ -14,13 +14,41 @@ export class AIRequestError extends Error {
   }
 }
 
+function handleAIRequestError(
+  error: unknown,
+  timedOut: boolean,
+  externalSignal?: AbortSignal
+): never {
+  if (timedOut) {
+    throw new AIRequestError("The request timed out after 60 seconds. Please try again.", true);
+  }
+  if (externalSignal?.aborted || (error instanceof Error && error.name === "AbortError")) {
+    throw new AIRequestError("Request was cancelled.");
+  }
+  if (error instanceof AIRequestError) throw error;
+  throw new AIRequestError(
+    error instanceof Error ? error.message : "The AI request failed. Please try again."
+  );
+}
+
+async function parseJsonResponse<T>(response: Response): Promise<T> {
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new AIRequestError(
+      typeof payload.error === "string" ? payload.error : "The AI request failed. Please try again."
+    );
+  }
+  return payload as T;
+}
+
 /**
  * Dispatches an HTTP POST request to an AI route with an automatic timeout abort signal.
- * @param endpoint Relative API route path.
- * @param payload JSON request payload.
- * @param timeoutMs Timeout duration in milliseconds before aborting (default 25s).
+ * @param path Relative API route path.
+ * @param body JSON request payload.
+ * @param externalSignal Optional external AbortSignal to cancel the request.
+ * @param timeoutMs Timeout duration in milliseconds before aborting (default 60s).
  * @returns Parsed JSON response from the server.
- * @throws Error if network fails, status is non-OK, or timeout expires.
+ * @throws AIRequestError if network fails, status is non-OK, or timeout expires.
  */
 export async function requestAI<T>(
   path: string,
@@ -55,26 +83,9 @@ export async function requestAI<T>(
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new AIRequestError(
-        typeof payload.error === "string"
-          ? payload.error
-          : "The AI request failed. Please try again."
-      );
-    }
-    return payload as T;
+    return await parseJsonResponse<T>(response);
   } catch (error) {
-    if (timedOut) {
-      throw new AIRequestError("The request timed out after 60 seconds. Please try again.", true);
-    }
-    if (externalSignal?.aborted || (error instanceof Error && error.name === "AbortError")) {
-      throw new AIRequestError("Request was cancelled.");
-    }
-    if (error instanceof AIRequestError) throw error;
-    throw new AIRequestError(
-      error instanceof Error ? error.message : "The AI request failed. Please try again."
-    );
+    return handleAIRequestError(error, timedOut, externalSignal);
   } finally {
     clearTimeout(timer);
     if (externalSignal) {

@@ -1,7 +1,7 @@
 /**
  * Seed data generators producing realistic reference events and blank starter plans for EventPilot.
  */
-import { EventPlan, EventType } from "../types/event";
+import { EventPlan, EventType, BudgetItem } from "../types/event";
 import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
 import { generateDefaultVendors } from "../vendor/vendorEngine";
 import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
@@ -172,19 +172,62 @@ export function createReferenceEventPlan(): EventPlan {
   };
 }
 
-/**
- * Creates a tailored event plan with customized title, type, date, and pre-allocated baseline tasks.
- */
-export function createCustomEventPlan(
-  name = "New Celebration",
-  type: EventType = "other",
-  overrides: Partial<EventPlan["profile"]> = {}
-): EventPlan {
+function buildCustomBudgetItems(eventId: string, budgetMinor: number): BudgetItem[] {
+  const suffix = eventId.slice(-4);
+  return [
+    {
+      id: "bi-venue-" + suffix,
+      category: "venue" as const,
+      name: "Venue Space Rental & Setup",
+      estimatedCostMinor: Math.round(budgetMinor * 0.25),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Space reservation, lighting, seating, and basic amenities.",
+    },
+    {
+      id: "bi-food-" + suffix,
+      category: "food_beverage" as const,
+      name: "Catering & Refreshments",
+      estimatedCostMinor: Math.round(budgetMinor * 0.45),
+      actualCostMinor: 0,
+      flexible: false,
+      isProtected: true,
+      notes: "Food service tailored to dietary needs.",
+    },
+    {
+      id: "bi-decor-" + suffix,
+      category: "decorations" as const,
+      name: "Theme Decor & Lighting",
+      estimatedCostMinor: Math.round(budgetMinor * 0.15),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Atmosphere, balloon/flower styling, or backdrop installation.",
+    },
+    {
+      id: "bi-contingency-" + suffix,
+      category: "contingency_reserve" as const,
+      name: "Emergency Contingency Reserve",
+      estimatedCostMinor: Math.round(budgetMinor * 0.15),
+      actualCostMinor: 0,
+      flexible: true,
+      isProtected: false,
+      notes: "Buffer for unplanned needs and errands.",
+    },
+  ];
+}
+
+function buildCustomProfile(
+  name: string,
+  type: EventType,
+  overrides: Partial<EventPlan["profile"]>,
+  eventId: string
+) {
   const targetDate = addDaysToDate(formatISODate(new Date()), 30);
-  const eventId = "ep-" + Math.random().toString(36).substring(2, 9);
   const budgetMinor = overrides.totalBudgetMinor || 5000000;
 
-  const profile = {
+  return {
     id: eventId,
     name,
     type,
@@ -206,60 +249,26 @@ export function createCustomEventPlan(
     priorities: overrides.priorities || ["food" as const, "decor" as const, "budget" as const],
     notes: overrides.notes || `Planning for ${name}.`,
   };
+}
 
-  const tasks = generateDefaultTasks(profile.date, true);
-  const vendors = generateDefaultVendors();
-  const ideas = generatePersonalizedIdeas(profile);
-
-  const budgetItems = [
-    {
-      id: "bi-venue-" + eventId.slice(-4),
-      category: "venue" as const,
-      name: "Venue Space Rental & Setup",
-      estimatedCostMinor: Math.round(budgetMinor * 0.25),
-      actualCostMinor: 0,
-      flexible: true,
-      isProtected: false,
-      notes: "Space reservation, lighting, seating, and basic amenities.",
-    },
-    {
-      id: "bi-food-" + eventId.slice(-4),
-      category: "food_beverage" as const,
-      name: "Catering & Refreshments",
-      estimatedCostMinor: Math.round(budgetMinor * 0.45),
-      actualCostMinor: 0,
-      flexible: false,
-      isProtected: true,
-      notes: "Food service tailored to dietary needs.",
-    },
-    {
-      id: "bi-decor-" + eventId.slice(-4),
-      category: "decorations" as const,
-      name: "Theme Decor & Lighting",
-      estimatedCostMinor: Math.round(budgetMinor * 0.15),
-      actualCostMinor: 0,
-      flexible: true,
-      isProtected: false,
-      notes: "Atmosphere, balloon/flower styling, or backdrop installation.",
-    },
-    {
-      id: "bi-contingency-" + eventId.slice(-4),
-      category: "contingency_reserve" as const,
-      name: "Emergency Contingency Reserve",
-      estimatedCostMinor: Math.round(budgetMinor * 0.15),
-      actualCostMinor: 0,
-      flexible: true,
-      isProtected: false,
-      notes: "Buffer for unplanned needs and errands.",
-    },
-  ];
+/**
+ * Creates a tailored event plan with customized title, type, date, and pre-allocated baseline tasks.
+ */
+export function createCustomEventPlan(
+  name = "New Celebration",
+  type: EventType = "other",
+  overrides: Partial<EventPlan["profile"]> = {}
+): EventPlan {
+  const eventId = "ep-" + Math.random().toString(36).substring(2, 9);
+  const profile = buildCustomProfile(name, type, overrides, eventId);
+  const budgetItems = buildCustomBudgetItems(eventId, profile.totalBudgetMinor);
 
   return {
     profile,
     budgetItems,
-    tasks,
-    vendors,
-    ideas,
+    tasks: generateDefaultTasks(profile.date, true),
+    vendors: generateDefaultVendors(),
+    ideas: generatePersonalizedIdeas(profile),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     version: 1,

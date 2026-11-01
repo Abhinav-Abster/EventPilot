@@ -48,69 +48,66 @@ function parseBudgetMinor(raw: unknown): number {
   return total;
 }
 
+function parseGuestCount(rawGuestCount: unknown): number {
+  const rawNum = typeof rawGuestCount === "number" ? rawGuestCount : Number(rawGuestCount);
+  return Number.isFinite(rawNum) ? Math.min(5000, Math.max(1, Math.round(rawNum))) : 50;
+}
+
+function parseLocation(rawLoc: unknown) {
+  const loc = (rawLoc && typeof rawLoc === "object" ? rawLoc : {}) as Record<string, unknown>;
+  const city = typeof loc.city === "string" && loc.city.trim() ? loc.city.trim() : DEFAULT_CITY;
+  const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
+  const venueType: VenueType = isOneOf(VENUE_TYPES, rawVenue) ? rawVenue : "outdoor";
+  const venueName =
+    typeof loc.venueName === "string" && loc.venueName.trim() ? loc.venueName.trim() : undefined;
+
+  return { city, venueType, venueName };
+}
+
+function parseStringList(raw: unknown): string[] {
+  return Array.isArray(raw) ? raw.filter((s): s is string => typeof s === "string") : [];
+}
+
+function parseEventDate(rawDate: unknown): string {
+  return typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+    ? rawDate
+    : addDaysToDate(new Date().toISOString().slice(0, 10), 30);
+}
+
+function parseProfileId(rawId: unknown): string {
+  return typeof rawId === "string" && rawId
+    ? rawId
+    : "ep-" + Math.random().toString(36).substring(2, 9);
+}
+
 /**
  * Sanitizes and bounds intake parameters into a strictly validated EventProfile entity.
  * @param raw Untrusted raw profile record from LLM intake output.
- * @param currentPlan Optional existing plan to inherit unset values from.
  * @returns Validated EventProfile object.
  */
 export function normalizeProfile(
   raw: Partial<EventProfile> | Record<string, unknown> | undefined
 ): EventProfile {
   const p = (raw || {}) as Record<string, unknown>;
-  const type = parseEventType(p.type);
-  const date =
-    typeof p.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.date)
-      ? p.date
-      : addDaysToDate(new Date().toISOString().slice(0, 10), 30);
-
   const sanitizedDiets = normalizeDiets(p.dietaryPreferences);
-  const dietaryPreferences =
-    sanitizedDiets.length > 0 ? sanitizedDiets : [...DEFAULT_DIETARY_PREFERENCES];
-
-  const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<
-    string,
-    unknown
-  >;
-  const city = typeof loc.city === "string" && loc.city.trim() ? loc.city.trim() : DEFAULT_CITY;
-  const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
-  const venueType: VenueType = isOneOf(VENUE_TYPES, rawVenue) ? rawVenue : "outdoor";
-
-  const rawGuestCount = typeof p.guestCount === "number" ? p.guestCount : Number(p.guestCount);
-  const guestCount = Number.isFinite(rawGuestCount)
-    ? Math.min(5000, Math.max(1, Math.round(rawGuestCount)))
-    : 50;
 
   return {
-    id:
-      typeof p.id === "string" && p.id ? p.id : "ep-" + Math.random().toString(36).substring(2, 9),
+    id: parseProfileId(p.id),
     name:
       typeof p.name === "string" && p.name.trim().length >= 2 ? p.name.trim() : "Celebration Event",
-    type,
-    date,
+    type: parseEventType(p.type),
+    date: parseEventDate(p.date),
     time: typeof p.time === "string" && p.time.trim() ? p.time.trim() : "18:00",
-    location: {
-      city,
-      venueType,
-      venueName:
-        typeof loc.venueName === "string" && loc.venueName.trim()
-          ? loc.venueName.trim()
-          : undefined,
-    },
-    guestCount,
+    location: parseLocation(p.location),
+    guestCount: parseGuestCount(p.guestCount),
     totalBudgetMinor: parseBudgetMinor(p.totalBudgetMinor),
     currency: "INR",
     theme: typeof p.theme === "string" && p.theme.trim() ? p.theme.trim() : "General Celebration",
-    dietaryPreferences,
-    accessibilityRequirements: Array.isArray(p.accessibilityRequirements)
-      ? p.accessibilityRequirements.filter((s): s is string => typeof s === "string")
-      : [],
-    mustHaves: Array.isArray(p.mustHaves)
-      ? p.mustHaves.filter((s): s is string => typeof s === "string")
-      : [],
-    excludedFeatures: Array.isArray(p.excludedFeatures)
-      ? p.excludedFeatures.filter((s): s is string => typeof s === "string")
-      : [],
+    dietaryPreferences:
+      sanitizedDiets.length > 0 ? sanitizedDiets : [...DEFAULT_DIETARY_PREFERENCES],
+    accessibilityRequirements: parseStringList(p.accessibilityRequirements),
+    mustHaves: parseStringList(p.mustHaves),
+    excludedFeatures: parseStringList(p.excludedFeatures),
     priorities: parsePriorities(p.priorities),
     notes: typeof p.notes === "string" ? p.notes : "",
   };

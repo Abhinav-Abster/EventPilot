@@ -54,14 +54,14 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     return found || plans[0] || createReferenceEventPlan();
   }, [plans, activePlanId]);
 
-  const { plansRef } = usePlanStorage(
+  const { plansRef } = usePlanStorage({
     plans,
     activePlanId,
     setPlans,
     setActivePlanId,
     setIsHydrated,
-    isHydrated
-  );
+    isHydrated,
+  });
 
   const updateActivePlan = useCallback(
     (updater: (prev: EventPlan) => EventPlan) => {

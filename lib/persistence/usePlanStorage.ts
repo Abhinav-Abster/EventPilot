@@ -6,16 +6,22 @@ import { EventPlan } from "../types/event";
 import { loadStoredPlans, saveStoredPlans } from "./storage";
 
 /**
+ * Options configuring synchronized browser storage for event plans.
+ */
+export interface UsePlanStorageOptions {
+  plans: EventPlan[];
+  activePlanId: string;
+  setPlans: React.Dispatch<React.SetStateAction<EventPlan[]>>;
+  setActivePlanId: React.Dispatch<React.SetStateAction<string>>;
+  setIsHydrated: React.Dispatch<React.SetStateAction<boolean>>;
+  isHydrated: boolean;
+}
+
+/**
  * React hook managing synchronized storage reads, writes, and initial plan hydration.
  */
-export function usePlanStorage(
-  plans: EventPlan[],
-  activePlanId: string,
-  setPlans: React.Dispatch<React.SetStateAction<EventPlan[]>>,
-  setActivePlanId: React.Dispatch<React.SetStateAction<string>>,
-  setIsHydrated: React.Dispatch<React.SetStateAction<boolean>>,
-  isHydrated: boolean
-) {
+export function usePlanStorage(options: UsePlanStorageOptions) {
+  const { plans, activePlanId, setPlans, setActivePlanId, setIsHydrated, isHydrated } = options;
   useEffect(() => {
     const { loadedPlans, activeId } = loadStoredPlans();
     setPlans(loadedPlans);

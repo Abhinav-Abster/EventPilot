@@ -70,30 +70,63 @@ export function computeCategoryBreakdown(
 }
 
 /**
+ * Configuration options for generating budget warnings and actionable savings advice.
+ */
+export interface BudgetWarningsAndTipsOptions {
+  breakdown: CategoryBreakdownMap;
+  totalBudgetMinor: number;
+  totalEstimatedMinor: number;
+  guestCount: number;
+  deficitMinor: number;
+  contingencyPercent: number;
+}
+
+/**
  * Analyzes total spending against budget caps and generates actionable financial guidance.
  */
 export function buildBudgetWarningsAndTips(
-  breakdown: CategoryBreakdownMap,
-  totalBudgetMinor: number,
-  totalEstimatedMinor: number,
-  guestCount: number,
-  deficitMinor: number,
-  contingencyPercent: number
+  optionsOrBreakdown: BudgetWarningsAndTipsOptions | CategoryBreakdownMap,
+  totalBudgetMinor?: number,
+  totalEstimatedMinor?: number,
+  guestCount?: number,
+  deficitMinor?: number,
+  contingencyPercent?: number
 ): { warnings: string[]; savingsTips: string[] } {
+  const opts: BudgetWarningsAndTipsOptions =
+    "breakdown" in optionsOrBreakdown
+      ? optionsOrBreakdown
+      : {
+          breakdown: optionsOrBreakdown,
+          totalBudgetMinor: totalBudgetMinor ?? 0,
+          totalEstimatedMinor: totalEstimatedMinor ?? 0,
+          guestCount: guestCount ?? 0,
+          deficitMinor: deficitMinor ?? 0,
+          contingencyPercent: contingencyPercent ?? 0,
+        };
+
+  const {
+    breakdown,
+    totalBudgetMinor: budgetMinor,
+    totalEstimatedMinor: estimatedMinor,
+    guestCount: count,
+    deficitMinor: deficit,
+    contingencyPercent: contingencyPct,
+  } = opts;
+
   const warnings: string[] = [];
   const savingsTips: string[] = [];
 
-  if (totalEstimatedMinor > totalBudgetMinor) {
+  if (estimatedMinor > budgetMinor) {
     warnings.push(
-      `Budget exceeded by ${formatINR(deficitMinor)}. The current plan costs ${formatINR(
-        totalEstimatedMinor
-      )} against your total limit of ${formatINR(totalBudgetMinor)}.`
+      `Budget exceeded by ${formatINR(deficit)}. The current plan costs ${formatINR(
+        estimatedMinor
+      )} against your total limit of ${formatINR(budgetMinor)}.`
     );
   }
 
   const cateringMinor = breakdown.food_beverage.estimatedMinor;
-  if (guestCount > 0 && cateringMinor > 0) {
-    const costPerGuest = paiseToRupees(cateringMinor) / guestCount;
+  if (count > 0 && cateringMinor > 0) {
+    const costPerGuest = paiseToRupees(cateringMinor) / count;
     if (costPerGuest < 150) {
       warnings.push(
         `Catering estimate of ₹${Math.round(costPerGuest)}/guest is extremely low for a sit-down or buffet meal in Pune. Consider snacks/high-tea format or budget ₹250-₹350/guest.`
@@ -101,27 +134,27 @@ export function buildBudgetWarningsAndTips(
     }
   }
 
-  if (contingencyPercent < 5) {
+  if (contingencyPct < 5) {
     warnings.push(
-      `Contingency buffer is only ${contingencyPercent}% of total budget. A minimum 5-10% reserve (${formatINR(
-        percentOfMoney(totalBudgetMinor, 7.5)
+      `Contingency buffer is only ${contingencyPct}% of total budget. A minimum 5-10% reserve (${formatINR(
+        percentOfMoney(budgetMinor, 7.5)
       )}) is strongly recommended for unexpected expenses.`
     );
   }
 
-  if (breakdown.decorations.estimatedMinor > percentOfMoney(totalBudgetMinor, 25)) {
+  if (breakdown.decorations.estimatedMinor > percentOfMoney(budgetMinor, 25)) {
     savingsTips.push(
       "Decorations account for over 25% of budget. Switch to DIY character cutouts, digital photo backdrops, or reusable bunting to save up to 40%."
     );
   }
 
-  if (breakdown.photography.estimatedMinor > percentOfMoney(totalBudgetMinor, 20)) {
+  if (breakdown.photography.estimatedMinor > percentOfMoney(budgetMinor, 20)) {
     savingsTips.push(
       "Professional photography is taking a large share. Consider booking an 2-3 hour student/freelance photographer or a dedicated guest photo booth station."
     );
   }
 
-  if (breakdown.venue.estimatedMinor > percentOfMoney(totalBudgetMinor, 35)) {
+  if (breakdown.venue.estimatedMinor > percentOfMoney(budgetMinor, 35)) {
     savingsTips.push(
       "Venue cost is high. Consider society clubhouse, private rooftop, or public community garden with nominal municipal permits."
     );

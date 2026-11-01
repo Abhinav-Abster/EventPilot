@@ -35,6 +35,15 @@ export function parseBudgetIntent(q: string, query: string): ParsedConstraintCha
   }
   return null;
 }
+function computeTargetGuestCount(rawVal: number, q: string, currentCount: number): number {
+  const isAdditional =
+    q.includes("additional") || q.includes("more") || q.includes("extra") || q.includes("add");
+  const isLess = q.includes("less") || q.includes("fewer") || q.includes("decrease");
+
+  if (isAdditional) return currentCount + rawVal;
+  if (isLess) return Math.max(5, currentCount - rawVal);
+  return rawVal;
+}
 
 /**
  * Extracts updated guest count figures from natural language input.
@@ -52,14 +61,7 @@ export function parseGuestCountIntent(
   if (!guestMatch) return null;
 
   const rawVal = parseInt(guestMatch[1], 10);
-  const isAdditional =
-    q.includes("additional") || q.includes("more") || q.includes("extra") || q.includes("add");
-  const isLess = q.includes("less") || q.includes("fewer") || q.includes("decrease");
-
-  let finalGuestCount = currentPlan.profile.guestCount;
-  if (isAdditional) finalGuestCount += rawVal;
-  else if (isLess) finalGuestCount = Math.max(5, finalGuestCount - rawVal);
-  else finalGuestCount = rawVal;
+  const finalGuestCount = computeTargetGuestCount(rawVal, q, currentPlan.profile.guestCount);
 
   return {
     changeType: "guest_count_change",
@@ -98,6 +100,25 @@ export function parseVenueIntent(q: string, query: string): ParsedConstraintChan
   return null;
 }
 
+const VENDOR_CANCELLATION_CONFIGS = [
+  {
+    keyword: "cater",
+    category: "caterer",
+    explanation:
+      "Primary caterer cancelled reservation. Immediate replacement and menu review required.",
+  },
+  {
+    keyword: "photo",
+    category: "photographer",
+    explanation: "Photographer cancelled booking.",
+  },
+  {
+    keyword: "decor",
+    category: "decorator",
+    explanation: "Decorator cancelled booking.",
+  },
+] as const;
+
 /**
  * Identifies vendor cancellation notifications and affected vendor categories.
  */
@@ -105,41 +126,19 @@ export function parseVendorCancellationIntent(
   q: string,
   query: string
 ): ParsedConstraintChange | null {
-  if (
-    q.includes("cater") &&
-    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
-  ) {
-    return {
-      changeType: "vendor_cancellation",
-      rawQuery: query,
-      cancelledVendorCategory: "caterer",
-      explanation:
-        "Primary caterer cancelled reservation. Immediate replacement and menu review required.",
-    };
-  }
-  if (
-    q.includes("photo") &&
-    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
-  ) {
-    return {
-      changeType: "vendor_cancellation",
-      rawQuery: query,
-      cancelledVendorCategory: "photographer",
-      explanation: "Photographer cancelled booking.",
-    };
-  }
-  if (
-    q.includes("decor") &&
-    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
-  ) {
-    return {
-      changeType: "vendor_cancellation",
-      rawQuery: query,
-      cancelledVendorCategory: "decorator",
-      explanation: "Decorator cancelled booking.",
-    };
-  }
-  return null;
+  const isCancellation =
+    q.includes("cancel") || q.includes("backed out") || q.includes("unavailable");
+  if (!isCancellation) return null;
+
+  const match = VENDOR_CANCELLATION_CONFIGS.find((cfg) => q.includes(cfg.keyword));
+  if (!match) return null;
+
+  return {
+    changeType: "vendor_cancellation",
+    rawQuery: query,
+    cancelledVendorCategory: match.category,
+    explanation: match.explanation,
+  };
 }
 
 /**
