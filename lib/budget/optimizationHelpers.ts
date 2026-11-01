@@ -53,6 +53,7 @@ export function determineTrimOrder(profile: EventProfile): BudgetCategory[] {
   };
 
   const userPriorities: readonly string[] = profile.priorities || [];
+  // Sort in reverse priority order: unprioritized and lower-priority categories trim first
   trimOrder.sort((a, b) => {
     const aPriority = getPriorityRank(a, userPriorities);
     const bPriority = getPriorityRank(b, userPriorities);

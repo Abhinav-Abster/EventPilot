@@ -58,11 +58,13 @@ export function detectCircularDependencies(tasks: Task[]): {
  * Topologically sorts tasks while respecting dependencies and relative urgency
  */
 export function sortTasksByExecutionOrder(tasks: Task[]): Task[] {
+  // Fall back to chronological due date sorting if graph contains circular dependencies
   const { hasCycle } = detectCircularDependencies(tasks);
   if (hasCycle) {
     return [...tasks].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }
 
+  // Build adjacency list and in-degree counts for Kahn's topological sort
   const taskMap = new Map<string, Task>(tasks.map((t) => [t.id, t]));
   const inDegree = new Map<string, number>();
   const dependents = new Map<string, string[]>();
