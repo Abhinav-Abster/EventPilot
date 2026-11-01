@@ -1,4 +1,4 @@
-import { VendorRecord, VendorCategory, VendorBookingStatus } from "../types/event";
+import { VendorRecord, VendorCategory } from "../types/event";
 
 export const VENDOR_CATEGORY_LABELS: Record<VendorCategory, string> = {
   venue: "Venue",
@@ -9,18 +9,6 @@ export const VENDOR_CATEGORY_LABELS: Record<VendorCategory, string> = {
   transportation: "Logistics",
   invitations: "Stationery",
   other: "Other Services",
-};
-
-export const BOOKING_STATUS_CONFIG: Record<
-  VendorBookingStatus,
-  { label: string; color: string; badgeBg: string }
-> = {
-  planned: { label: "Planned", color: "text-slate-600", badgeBg: "bg-slate-100" },
-  contacted: { label: "Contacted", color: "text-blue-700", badgeBg: "bg-blue-50" },
-  quote_received: { label: "Quote Received", color: "text-purple-700", badgeBg: "bg-purple-50" },
-  shortlisted: { label: "Shortlisted", color: "text-amber-700", badgeBg: "bg-amber-50" },
-  booked: { label: "Booked", color: "text-emerald-700", badgeBg: "bg-emerald-50" },
-  cancelled: { label: "Cancelled", color: "text-rose-700", badgeBg: "bg-rose-50" },
 };
 
 /**

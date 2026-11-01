@@ -41,13 +41,6 @@ export function formatINR(paise: number, showDecimals: boolean = false): string 
 }
 
 /**
- * Formats Rupees directly
- */
-export function formatRupees(rupees: number, showDecimals: boolean = false): string {
-  return formatINR(rupeesToPaise(rupees), showDecimals);
-}
-
-/**
  * Safe integer addition
  */
 export function addMoney(aPaise: number, bPaise: number): number {
@@ -59,13 +52,6 @@ export function addMoney(aPaise: number, bPaise: number): number {
  */
 export function subtractMoney(aPaise: number, bPaise: number): number {
   return Math.round(aPaise) - Math.round(bPaise);
-}
-
-/**
- * Safe integer multiplication by scalar factor (e.g., percentage)
- */
-export function multiplyMoney(paise: number, factor: number): number {
-  return Math.round(paise * factor);
 }
 
 /**
