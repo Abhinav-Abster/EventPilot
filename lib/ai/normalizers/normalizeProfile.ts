@@ -11,7 +11,7 @@ import {
   PLANNING_PRIORITIES,
 } from "../../types/event";
 import { addDaysToDate } from "../../timeline/timelineEngine";
-import { normalizeDiets } from "../normalizers";
+import { normalizeDiets } from "../dietNormalizer";
 import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../../config/constants";
 import { isOneOf } from "../../utils/guards";
 

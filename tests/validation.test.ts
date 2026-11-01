@@ -6,7 +6,7 @@ import {
   normalizeProfile,
   normalizePlanOutput,
 } from "../lib/ai/aiService";
-import { normalizeDiets } from "../lib/ai/normalizers";
+import { normalizeDiets } from "../lib/ai/dietNormalizer";
 import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 
 describe("Validation & Gemini configuration", () => {

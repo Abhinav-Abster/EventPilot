@@ -12,7 +12,7 @@ import { EventPlan, EventProfile, ReplanningProposal } from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
 import { buildCompactReplanningSummary } from "./replanningSummary";
-import { normalizeDiets } from "./normalizers";
+import { normalizeDiets } from "./dietNormalizer";
 import { AIServiceError, generateJson } from "./transport";
 import { normalizeProfile } from "./normalizers/normalizeProfile";
 import { normalizePlanOutput } from "./normalizers/normalizePlanOutput";
