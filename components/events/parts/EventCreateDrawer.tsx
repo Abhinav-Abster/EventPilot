@@ -32,21 +32,21 @@ export function EventCreateDrawer({
   return (
     <form
       onSubmit={onSubmit}
-      className="p-6 border-4 border-black bg-[#F0C020] shadow-[6px_6px_0px_0px_black] space-y-4 text-xs font-mono"
+      className="p-6 border-4 border-black bg-bauhausYellow shadow-hard-6 space-y-4 text-xs font-mono"
     >
       <div className="flex items-center justify-between border-b-2 border-black pb-3">
         <h3 className="font-mono text-xs uppercase tracking-widest font-black text-black flex items-center gap-2">
-          <Sparkles size={16} strokeWidth={2.5} className="text-[#1040C0]" />
+          <Sparkles size={16} strokeWidth={2.5} className="text-bauhausBlue" />
           <span>INITIALIZE EVENT PARAMETERS</span>
         </h3>
-        <span className="text-[10px] text-black font-bold uppercase tracking-wider bg-white px-2 py-0.5 border border-black">
+        <span className="text-micro text-black font-bold uppercase tracking-wider bg-white px-2 py-0.5 border border-black">
           DETERMINISTIC COMPOSITION
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-[11px]">
+          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-tiny">
             EVENT DESIGNATION *
           </label>
           <input
@@ -60,7 +60,7 @@ export function EventCreateDrawer({
         </div>
 
         <div>
-          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-[11px]">
+          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-tiny">
             TYPE
           </label>
           <select
@@ -78,7 +78,7 @@ export function EventCreateDrawer({
         </div>
 
         <div>
-          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-[11px]">
+          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-tiny">
             CITY
           </label>
           <input
@@ -90,7 +90,7 @@ export function EventCreateDrawer({
         </div>
 
         <div>
-          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-[11px]">
+          <label className="block text-black font-black uppercase tracking-wider mb-1.5 text-tiny">
             GUEST CENSUS
           </label>
           <input
@@ -106,7 +106,7 @@ export function EventCreateDrawer({
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t-2 border-black">
         <div className="w-full sm:w-auto flex items-center gap-3">
-          <label className="text-black font-black uppercase tracking-wider text-[11px]">
+          <label className="text-black font-black uppercase tracking-wider text-tiny">
             BUDGET (₹):
           </label>
           <input
@@ -129,7 +129,7 @@ export function EventCreateDrawer({
           </button>
           <button
             type="submit"
-            className="px-5 py-2 bg-black text-white hover:bg-gray-900 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black] btn-bauhaus"
+            className="px-5 py-2 bg-black text-white hover:bg-gray-900 border-2 border-black uppercase tracking-widest font-black shadow-hard-3 btn-bauhaus"
           >
             CREATE BLANK
           </button>
@@ -137,7 +137,7 @@ export function EventCreateDrawer({
             <button
               type="button"
               onClick={onCreateAndIntake}
-              className="px-5 py-2 bg-[#D02020] text-white hover:bg-[#D02020]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black] btn-bauhaus flex items-center gap-1.5"
+              className="px-5 py-2 bg-bauhausRed text-white hover:bg-bauhausRed/90 border-2 border-black uppercase tracking-widest font-black shadow-hard-3 btn-bauhaus flex items-center gap-1.5"
             >
               <Sparkles size={14} strokeWidth={2.5} />
               <span>CREATE & INTAKE</span>

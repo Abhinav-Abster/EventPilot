@@ -149,7 +149,7 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
       <DashboardMetricGauges plan={plan} percentSpent={percentSpent} />
 
       {budgetSummary.warnings.length > 0 && (
-        <section className="border-4 border-black p-6 bg-[#D02020] text-white shadow-[6px_6px_0px_0px_black] space-y-3">
+        <section className="border-4 border-black p-6 bg-bauhausRed text-white shadow-hard-6 space-y-3">
           <div className="flex items-center gap-3 border-b-2 border-white pb-2">
             <AlertCircle size={20} strokeWidth={2.5} className="text-white shrink-0" />
             <h2 className="font-mono uppercase tracking-widest text-xs font-black text-white">

@@ -17,7 +17,7 @@ export function DashboardDirectiveRegister({
   onToggleTask,
 }: DashboardDirectiveRegisterProps) {
   return (
-    <section className="bg-white border-4 border-black p-8 sm:p-10 shadow-[8px_8px_0px_0px_black] space-y-6">
+    <section className="bg-white border-4 border-black p-8 sm:p-10 shadow-hard-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-4 border-black pb-4">
         <div>
           <h2 className="font-display font-black text-2xl uppercase tracking-tight text-black">
@@ -29,7 +29,7 @@ export function DashboardDirectiveRegister({
         </div>
         <button
           onClick={() => onNavigate("timeline")}
-          className="btn-bauhaus font-mono text-xs uppercase tracking-widest font-black px-4 py-2 bg-[#F0C020] text-black border-2 border-black shadow-[3px_3px_0px_0px_black] hover:bg-black hover:text-white self-start sm:self-auto transition-all"
+          className="btn-bauhaus font-mono text-xs uppercase tracking-widest font-black px-4 py-2 bg-bauhausYellow text-black border-2 border-black shadow-hard-3 hover:bg-black hover:text-white self-start sm:self-auto transition-all"
         >
           VIEW ALL {totalTasksCount} DIRECTIVES →
         </button>

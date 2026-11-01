@@ -101,16 +101,16 @@ export function VendorManagementView() {
   return (
     <div className="space-y-12 pb-12">
       {/* Editorial Bauhaus Header */}
-      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0px_0px_black] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-hard-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest font-black">
-            <span className="w-3.5 h-3.5 bg-[#F0C020] border-2 border-black inline-block" />
+            <span className="w-3.5 h-3.5 bg-bauhausYellow border-2 border-black inline-block" />
             <span>MODULE 04 / SERVICE ROSTER & PROCUREMENT</span>
           </div>
           <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tighter uppercase text-black">
             VENDOR DIRECTORY
           </h1>
-          <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
+          <p className="font-medium text-sm text-bauhausBlack max-w-2xl leading-relaxed">
             Curated index of verified suppliers, caterers, decorators, and venues. Track contractual
             quotations and execution commitments.
           </p>
@@ -118,7 +118,7 @@ export function VendorManagementView() {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-bauhaus px-6 py-4 bg-[#D02020] hover:bg-[#D02020]/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-[4px_4px_0px_0px_black] flex items-center gap-2 shrink-0"
+          className="btn-bauhaus px-6 py-4 bg-bauhausRed hover:bg-bauhausRed/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-hard-4 flex items-center gap-2 shrink-0"
         >
           <Plus size={16} strokeWidth={2.5} />
           <span>ENROLL VENDOR</span>
@@ -126,8 +126,8 @@ export function VendorManagementView() {
       </div>
 
       {/* Transparent Disclosure */}
-      <div className="bg-[#FFF9C4] border-4 border-black p-5 shadow-[4px_4px_0px_0px_black] text-xs font-mono text-black flex items-start gap-3">
-        <AlertCircle size={18} strokeWidth={2.5} className="text-[#D02020] shrink-0 mt-0.5" />
+      <div className="bg-bauhausLightYellow border-4 border-black p-5 shadow-hard-4 text-xs font-mono text-black flex items-start gap-3">
+        <AlertCircle size={18} strokeWidth={2.5} className="text-bauhausRed shrink-0 mt-0.5" />
         <span className="leading-relaxed">
           <strong className="uppercase font-black">BENCHMARK DISCLOSURE:</strong> Initial vendor
           profiles reflect market calibrations for Pune venues and services. EventPilot conducts

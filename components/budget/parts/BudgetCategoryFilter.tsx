@@ -26,8 +26,8 @@ export function BudgetCategoryFilter({
           onClick={() => onSelectCategory("all")}
           className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
             selectedCategory === "all"
-              ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
-              : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
+              ? "bg-bauhausRed text-white font-black shadow-hard-4"
+              : "bg-white text-black font-bold shadow-hard-2 hover:bg-bauhausYellow"
           }`}
         >
           ALL ITEMS ({totalItemsCount})
@@ -42,8 +42,8 @@ export function BudgetCategoryFilter({
               onClick={() => onSelectCategory(catKey)}
               className={`btn-bauhaus px-4 py-2 border-2 border-black text-xs font-mono uppercase tracking-widest shrink-0 transition-all ${
                 isSelected
-                  ? "bg-[#D02020] text-white font-black shadow-[4px_4px_0px_0px_black]"
-                  : "bg-white text-black font-bold shadow-[2px_2px_0px_0px_black] hover:bg-[#F0C020]"
+                  ? "bg-bauhausRed text-white font-black shadow-hard-4"
+                  : "bg-white text-black font-bold shadow-hard-2 hover:bg-bauhausYellow"
               }`}
             >
               {CATEGORY_LABELS[catKey]} ({formatINR(catInfo.estimatedMinor)})

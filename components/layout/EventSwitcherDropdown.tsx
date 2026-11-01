@@ -34,22 +34,22 @@ export function EventSwitcherDropdown({
     <div className="relative hidden md:block" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-[#F0C020] text-black border-2 border-black shadow-[3px_3px_0px_0px_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-bold uppercase tracking-wider transition-all max-w-[210px] lg:max-w-[260px]"
+        className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-bauhausYellow text-black border-2 border-black shadow-hard-3 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-bold uppercase tracking-wider transition-all max-w-[210px] lg:max-w-[260px]"
         aria-expanded={open}
         aria-haspopup="true"
         title="Switch active event dossier"
       >
-        <span className="w-3 h-3 rounded-full bg-[#D02020] border border-black shrink-0" />
+        <span className="w-3 h-3 rounded-full bg-bauhausRed border border-black shrink-0" />
         <span className="truncate text-left flex-1 font-bold">{currentPlan.profile.name}</span>
-        <span className="text-[10px] bg-[#1040C0] text-white px-1.5 py-0.5 border border-black shrink-0 font-black">
+        <span className="text-micro bg-bauhausBlue text-white px-1.5 py-0.5 border border-black shrink-0 font-black">
           {plans.length}
         </span>
         <ChevronDown size={14} strokeWidth={2.5} className="shrink-0" />
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] p-0 z-50">
-          <div className="px-4 py-3 flex items-center justify-between border-b-4 border-black bg-[#F0C020] text-xs font-black uppercase tracking-wider text-black">
+        <div className="absolute top-full left-0 mt-2 w-80 bg-white border-4 border-black shadow-hard-8 p-0 z-50">
+          <div className="px-4 py-3 flex items-center justify-between border-b-4 border-black bg-bauhausYellow text-xs font-black uppercase tracking-wider text-black">
             <span>DOSSIER SELECTOR ({plans.length})</span>
             {onOpenEventManager && (
               <button
@@ -76,22 +76,22 @@ export function EventSwitcherDropdown({
                   }}
                   className={`w-full px-4 py-3 text-left flex items-start justify-between gap-2 text-xs transition-colors ${
                     isItemActive
-                      ? "bg-[#1040C0] text-white font-black"
-                      : "text-black hover:bg-[#FFF9C4]"
+                      ? "bg-bauhausBlue text-white font-black"
+                      : "text-black hover:bg-bauhausLightYellow"
                   }`}
                 >
                   <div className="truncate">
                     <div className="font-black text-sm uppercase truncate">{p.profile.name}</div>
                     <div
-                      className={`text-[11px] font-bold uppercase tracking-wider truncate mt-0.5 ${
-                        isItemActive ? "text-[#F0C020]" : "text-[#121212]/70"
+                      className={`text-tiny font-bold uppercase tracking-wider truncate mt-0.5 ${
+                        isItemActive ? "text-bauhausYellow" : "text-bauhausBlack/70"
                       }`}
                     >
                       {p.profile.date} • {p.profile.location.city} • {p.profile.guestCount} GUESTS
                     </div>
                   </div>
                   {isItemActive && (
-                    <Check size={16} strokeWidth={3} className="shrink-0 mt-1 text-[#F0C020]" />
+                    <Check size={16} strokeWidth={3} className="shrink-0 mt-1 text-bauhausYellow" />
                   )}
                 </button>
               );
@@ -99,13 +99,13 @@ export function EventSwitcherDropdown({
           </div>
 
           {onOpenEventManager && (
-            <div className="p-3 border-t-4 border-black bg-[#F0F0F0]">
+            <div className="p-3 border-t-4 border-black bg-bauhausCanvas">
               <button
                 onClick={() => {
                   setOpen(false);
                   onOpenEventManager();
                 }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wider text-white bg-[#D02020] hover:bg-[#D02020]/90 border-2 border-black shadow-[3px_3px_0px_0px_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-wider text-white bg-bauhausRed hover:bg-bauhausRed/90 border-2 border-black shadow-hard-3 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 <Layers size={14} strokeWidth={2.5} />
                 <span>OPEN EVENT MANAGER</span>

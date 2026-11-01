@@ -10,10 +10,10 @@ interface BudgetTableProps {
 
 export function BudgetTable({ items, onEdit, onDelete }: BudgetTableProps) {
   return (
-    <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] overflow-hidden">
+    <div className="border-4 border-black bg-white shadow-hard-8 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs font-mono">
-          <thead className="bg-[#121212] text-white uppercase text-[11px] tracking-widest border-b-4 border-black">
+          <thead className="bg-bauhausBlack text-white uppercase text-tiny tracking-widest border-b-4 border-black">
             <tr>
               <th className="py-4 px-6 font-black">EXPENSE ITEM</th>
               <th className="py-4 px-4 font-black">CATEGORY</th>

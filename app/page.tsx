@@ -60,7 +60,7 @@ export default function HomePage() {
   const [isEventManagerOpen, setIsEventManagerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F0F0F0] text-[#121212]">
+    <div className="min-h-screen flex flex-col bg-bauhausCanvas text-bauhausBlack">
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -102,19 +102,19 @@ export default function HomePage() {
       <div className="w-full border-t-4 border-black" />
 
       {/* Bauhaus Colophon Footer */}
-      <footer className="bg-[#121212] text-white py-12">
+      <footer className="bg-bauhausBlack text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 p-1 bg-white border-2 border-white">
-                <span className="w-3.5 h-3.5 rounded-full bg-[#D02020] inline-block" />
-                <span className="w-3.5 h-3.5 rounded-none bg-[#1040C0] inline-block" />
-                <span className="w-3.5 h-3.5 shape-triangle bg-[#F0C020] inline-block" />
+                <span className="w-3.5 h-3.5 rounded-full bg-bauhausRed inline-block" />
+                <span className="w-3.5 h-3.5 rounded-none bg-bauhausBlue inline-block" />
+                <span className="w-3.5 h-3.5 shape-triangle bg-bauhausYellow inline-block" />
               </div>
               <span className="font-display font-black text-lg tracking-wider uppercase text-white">
                 EVENTPILOT
               </span>
-              <span className="text-[#F0C020] font-mono text-xs font-bold uppercase">
+              <span className="text-bauhausYellow font-mono text-xs font-bold uppercase">
                 / 1920 CONSTRUCTIVIST
               </span>
             </div>
@@ -125,13 +125,13 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider">
-            <span className="px-3 py-1 bg-[#D02020] text-white border-2 border-white shadow-[2px_2px_0px_0px_white]">
+            <span className="px-3 py-1 bg-bauhausRed text-white border-2 border-white shadow-hard-white-2">
               DETERMINISTIC SOLVER
             </span>
-            <span className="px-3 py-1 bg-[#1040C0] text-white border-2 border-white shadow-[2px_2px_0px_0px_white]">
+            <span className="px-3 py-1 bg-bauhausBlue text-white border-2 border-white shadow-hard-white-2">
               MULTI-EVENT MATRIX
             </span>
-            <span className="px-3 py-1 bg-[#F0C020] text-black border-2 border-white shadow-[2px_2px_0px_0px_white]">
+            <span className="px-3 py-1 bg-bauhausYellow text-black border-2 border-white shadow-hard-white-2">
               GOOGLE GENAI SDK
             </span>
           </div>

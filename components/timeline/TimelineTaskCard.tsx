@@ -23,8 +23,12 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
 
   return (
     <div
-      className={`card-bauhaus border-4 border-black p-6 shadow-[6px_6px_0px_0px_black] transition-all ${
-        isDone ? "bg-[#F0F0F0] opacity-80" : task.isOverdue ? "bg-[#FFF9C4]" : "bg-white"
+      className={`card-bauhaus border-4 border-black p-6 shadow-hard-6 transition-all ${
+        isDone
+          ? "bg-bauhausCanvas opacity-80"
+          : task.isOverdue
+            ? "bg-bauhausLightYellow"
+            : "bg-white"
       }`}
     >
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -34,10 +38,10 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
             onClick={() => onToggle(task.id)}
             className={`mt-1 w-6 h-6 border-2 border-black flex items-center justify-center transition-all shrink-0 ${
               isDone
-                ? "bg-[#D02020] text-white shadow-[2px_2px_0px_0px_black]"
+                ? "bg-bauhausRed text-white shadow-hard-2"
                 : task.isBlocked
-                  ? "bg-[#E0E0E0] text-black cursor-not-allowed border-dashed"
-                  : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
+                  ? "bg-bauhausMuted text-black cursor-not-allowed border-dashed"
+                  : "bg-white hover:bg-bauhausYellow shadow-hard-2"
             }`}
             title={
               task.isBlocked
@@ -62,11 +66,11 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
 
               {/* Priority Badge */}
               <span
-                className={`text-[10px] font-mono uppercase px-2 py-0.5 border-2 border-black font-black shadow-[2px_2px_0px_0px_black] ${
+                className={`text-micro font-mono uppercase px-2 py-0.5 border-2 border-black font-black shadow-hard-2 ${
                   task.priority === "urgent"
-                    ? "bg-[#D02020] text-white"
+                    ? "bg-bauhausRed text-white"
                     : task.priority === "high"
-                      ? "bg-[#F0C020] text-black"
+                      ? "bg-bauhausYellow text-black"
                       : "bg-white text-black"
                 }`}
               >
@@ -75,14 +79,14 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
 
               {/* Overdue Badge */}
               {task.isOverdue && !isDone && (
-                <span className="text-[10px] font-mono uppercase bg-[#D02020] text-white px-2 py-0.5 font-black border-2 border-black shadow-[2px_2px_0px_0px_black]">
+                <span className="text-micro font-mono uppercase bg-bauhausRed text-white px-2 py-0.5 font-black border-2 border-black shadow-hard-2">
                   OVERDUE
                 </span>
               )}
 
               {/* Blocked Badge */}
               {task.isBlocked && !isDone && (
-                <span className="text-[10px] font-mono uppercase bg-[#1040C0] text-white px-2 py-0.5 font-black border-2 border-black shadow-[2px_2px_0px_0px_black]">
+                <span className="text-micro font-mono uppercase bg-bauhausBlue text-white px-2 py-0.5 font-black border-2 border-black shadow-hard-2">
                   BLOCKED BY PREREQUISITE
                 </span>
               )}
@@ -92,17 +96,17 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
 
             {/* Dependencies listing */}
             {depTasks.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 text-[11px] font-mono">
-                <span className="text-black/70 flex items-center gap-1 uppercase tracking-wider text-[10px] font-black">
+              <div className="flex flex-wrap items-center gap-2 pt-2 text-tiny font-mono">
+                <span className="text-black/70 flex items-center gap-1 uppercase tracking-wider text-micro font-black">
                   <LinkIcon size={12} strokeWidth={2} /> REQUIRES:
                 </span>
                 {depTasks.map((dep) => (
                   <span
                     key={dep.id}
-                    className={`px-2 py-0.5 text-[10px] uppercase tracking-wider border-2 border-black font-bold shadow-[2px_2px_0px_0px_black] ${
+                    className={`px-2 py-0.5 text-micro uppercase tracking-wider border-2 border-black font-bold shadow-hard-2 ${
                       dep.status === "completed"
-                        ? "bg-[#E0E0E0] text-black/50 line-through"
-                        : "bg-[#F0C020] text-black font-black"
+                        ? "bg-bauhausMuted text-black/50 line-through"
+                        : "bg-bauhausYellow text-black font-black"
                     }`}
                   >
                     {dep.title}
@@ -117,7 +121,7 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
         <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-3 shrink-0 self-stretch sm:self-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-black font-mono">
           <div className="text-right">
             <span className="text-xs font-black text-black block">DUE {task.dueDate}</span>
-            <span className="text-[10px] font-bold text-black/70 uppercase tracking-wider block">
+            <span className="text-micro font-bold text-black/70 uppercase tracking-wider block">
               {task.relativeDays === 0
                 ? "EVENT DAY"
                 : `${Math.abs(task.relativeDays)}D ${task.relativeDays < 0 ? "PRIOR" : "POST"}`}
@@ -127,14 +131,14 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
           <div className="flex items-center gap-1.5 pt-1">
             <button
               onClick={() => onEdit(task)}
-              className="p-1.5 border-2 border-black bg-white hover:bg-[#F0C020] text-black shadow-[2px_2px_0px_0px_black] transition-all"
+              className="p-1.5 border-2 border-black bg-white hover:bg-bauhausYellow text-black shadow-hard-2 transition-all"
               title="Edit Directive"
             >
               <Edit2 size={13} strokeWidth={2.5} />
             </button>
             <button
               onClick={() => onDelete(task.id)}
-              className="p-1.5 border-2 border-black bg-white hover:bg-[#D02020] hover:text-white text-black shadow-[2px_2px_0px_0px_black] transition-all"
+              className="p-1.5 border-2 border-black bg-white hover:bg-bauhausRed hover:text-white text-black shadow-hard-2 transition-all"
               title="Delete Directive"
             >
               <Trash2 size={13} strokeWidth={2.5} />

@@ -115,16 +115,16 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
   return (
     <div className="space-y-12 pb-12">
       {/* Editorial Bauhaus Header */}
-      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0px_0px_black] space-y-4">
+      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-hard-8 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest font-black">
           <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#D02020] border-2 border-black inline-block" />
+            <span className="w-3.5 h-3.5 rounded-full bg-bauhausRed border-2 border-black inline-block" />
             <span>MODULE 01 / CONVERSATIONAL INTAKE & SPECIFICATION</span>
           </div>
           {onOpenEventManager && (
             <button
               onClick={onOpenEventManager}
-              className="btn-bauhaus flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-[#F0C020] text-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_black]"
+              className="btn-bauhaus flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-bauhausYellow text-black font-black text-xs uppercase tracking-wider shadow-hard-3"
             >
               <Layers size={14} strokeWidth={2.5} />
               <span>ACTIVE: {plan.profile.name}</span>
@@ -136,7 +136,7 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
           CONSTRUCTIVIST INTAKE
         </h1>
 
-        <p className="font-medium text-base text-[#121212] max-w-3xl leading-relaxed">
+        <p className="font-medium text-base text-bauhausBlack max-w-3xl leading-relaxed">
           State your requirements in free prose. EventPilot converts your requirements into
           structured Zod schemas, identifying bound trade-offs and verifying safety constraints.
         </p>
@@ -145,7 +145,7 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
       {error && (
         <div
           role="alert"
-          className="border-4 border-black bg-[#D02020] text-white p-5 font-mono text-xs font-black shadow-[6px_6px_0px_0px_black]"
+          className="border-4 border-black bg-bauhausRed text-white p-5 font-mono text-xs font-black shadow-hard-6"
         >
           SYSTEM AUDIT EXCEPTION: {error}
         </div>

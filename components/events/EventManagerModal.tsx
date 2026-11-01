@@ -93,14 +93,14 @@ export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: Event
       aria-modal="true"
       aria-labelledby="event-manager-title"
     >
-      <div className="bg-[#F0F0F0] border-4 border-black shadow-[8px_8px_0px_0px_black] max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-bauhausCanvas border-4 border-black shadow-hard-8 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
-        <div className="px-8 py-6 bg-[#121212] text-white flex items-center justify-between border-b-4 border-black">
+        <div className="px-8 py-6 bg-bauhausBlack text-white flex items-center justify-between border-b-4 border-black">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-[#F0C020] font-bold">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D02020] inline-block" />
-              <span className="w-2.5 h-2.5 bg-[#1040C0] inline-block" />
-              <span className="w-2.5 h-2.5 bg-[#F0C020] inline-block shape-triangle" />
+            <div className="flex items-center gap-2 font-mono text-micro uppercase tracking-widest text-bauhausYellow font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-bauhausRed inline-block" />
+              <span className="w-2.5 h-2.5 bg-bauhausBlue inline-block" />
+              <span className="w-2.5 h-2.5 bg-bauhausYellow inline-block shape-triangle" />
               <span>SYSTEM ARCHIVE // MULTI-EVENT DOSSIERS</span>
             </div>
             <h2
@@ -112,7 +112,7 @@ export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: Event
           </div>
           <button
             onClick={onClose}
-            className="p-2 border-2 border-white bg-transparent text-white hover:bg-[#D02020] hover:border-black transition-colors duration-200 btn-bauhaus"
+            className="p-2 border-2 border-white bg-transparent text-white hover:bg-bauhausRed hover:border-black transition-colors duration-200 btn-bauhaus"
             aria-label="Close Event Manager"
           >
             <X size={20} strokeWidth={2.5} />
@@ -142,7 +142,7 @@ export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: Event
         </div>
 
         {/* Event List Area */}
-        <div className="flex-1 p-6 sm:p-8 overflow-y-auto space-y-6 bg-[#F0F0F0]">
+        <div className="flex-1 p-6 sm:p-8 overflow-y-auto space-y-6 bg-bauhausCanvas">
           {filteredPlans.length === 0 ? (
             <div className="text-center py-16 text-black font-mono font-bold uppercase tracking-widest text-xs">
               NO EVENT DOSSIERS MATCH CURRENT QUERY.
@@ -189,7 +189,7 @@ export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: Event
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-2.5 border-2 border-black bg-black text-white hover:bg-gray-900 uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black] btn-bauhaus transition-colors duration-200"
+            className="px-6 py-2.5 border-2 border-black bg-black text-white hover:bg-gray-900 uppercase tracking-widest font-black shadow-hard-3 btn-bauhaus transition-colors duration-200"
           >
             DISMISS
           </button>

@@ -16,15 +16,15 @@ export const DashboardTaskItem = React.memo(function DashboardTaskItem({
   const isDone = task.status === "completed";
 
   return (
-    <div className="py-4 flex items-start sm:items-center justify-between gap-4 group hover:bg-[#FFF9C4]/40 transition-colors p-2">
+    <div className="py-4 flex items-start sm:items-center justify-between gap-4 group hover:bg-bauhausLightYellow/40 transition-colors p-2">
       <div className="flex items-start gap-4">
         {/* Square Checkbox Button */}
         <button
           onClick={() => onToggle(task.id)}
           className={`mt-0.5 w-6 h-6 border-2 border-black flex items-center justify-center transition-all shrink-0 ${
             isDone
-              ? "bg-[#D02020] text-white shadow-[2px_2px_0px_0px_black]"
-              : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
+              ? "bg-bauhausRed text-white shadow-hard-2"
+              : "bg-white hover:bg-bauhausYellow shadow-hard-2"
           }`}
           aria-label={`Mark directive '${task.title}' as complete`}
         >
@@ -43,13 +43,13 @@ export const DashboardTaskItem = React.memo(function DashboardTaskItem({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0 font-mono text-[11px]">
+      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0 font-mono text-tiny">
         <span
-          className={`px-2.5 py-1 uppercase tracking-wider font-black border-2 border-black shadow-[2px_2px_0px_0px_black] ${
+          className={`px-2.5 py-1 uppercase tracking-wider font-black border-2 border-black shadow-hard-2 ${
             task.priority === "urgent"
-              ? "bg-[#D02020] text-white"
+              ? "bg-bauhausRed text-white"
               : task.priority === "high"
-                ? "bg-[#F0C020] text-black"
+                ? "bg-bauhausYellow text-black"
                 : "bg-white text-black"
           }`}
         >

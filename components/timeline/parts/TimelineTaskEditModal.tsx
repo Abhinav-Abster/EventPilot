@@ -23,14 +23,14 @@ export function TimelineTaskEditModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
-        <div className="flex items-center justify-between p-6 bg-[#F0C020] text-black border-b-4 border-black">
+      <div className="bg-white border-4 border-black max-w-md w-full shadow-hard-8 overflow-hidden">
+        <div className="flex items-center justify-between p-6 bg-bauhausYellow text-black border-b-4 border-black">
           <h2 className="font-display font-black text-lg uppercase tracking-tight text-black">
             EDIT DIRECTIVE
           </h2>
           <button
             onClick={onClose}
-            className="p-1 border-2 border-black bg-white hover:bg-[#D02020] hover:text-white transition-colors"
+            className="p-1 border-2 border-black bg-white hover:bg-bauhausRed hover:text-white transition-colors"
           >
             <X size={18} strokeWidth={2.5} />
           </button>
@@ -38,7 +38,7 @@ export function TimelineTaskEditModal({
 
         <form onSubmit={onSubmit} className="p-6 space-y-4 text-xs font-mono">
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               TITLE
             </label>
             <input
@@ -46,25 +46,25 @@ export function TimelineTaskEditModal({
               required
               value={editingTask.title}
               onChange={(e) => onChange({ ...editingTask, title: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               DESCRIPTION
             </label>
             <textarea
               rows={2}
               value={editingTask.description}
               onChange={(e) => onChange({ ...editingTask, description: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 PRIORITY
               </label>
               <select
@@ -72,7 +72,7 @@ export function TimelineTaskEditModal({
                 onChange={(e) =>
                   onChange({ ...editingTask, priority: e.target.value as TaskPriority })
                 }
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               >
                 <option value="urgent">URGENT</option>
                 <option value="high">HIGH</option>
@@ -81,13 +81,13 @@ export function TimelineTaskEditModal({
               </select>
             </div>
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 STATUS
               </label>
               <select
                 value={editingTask.status}
                 onChange={(e) => onChange({ ...editingTask, status: e.target.value as TaskStatus })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               >
                 <option value="todo">PENDING</option>
                 <option value="in_progress">IN PROGRESS</option>
@@ -101,13 +101,13 @@ export function TimelineTaskEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
+              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-bauhausCanvas text-black uppercase tracking-wider font-bold shadow-hard-2"
             >
               CANCEL
             </button>
             <button
               type="submit"
-              className="btn-bauhaus px-6 py-2 bg-[#F0C020] text-black hover:bg-[#F0C020]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
+              className="btn-bauhaus px-6 py-2 bg-bauhausYellow text-black hover:bg-bauhausYellow/90 border-2 border-black uppercase tracking-widest font-black shadow-hard-3"
             >
               COMMIT DIRECTIVE
             </button>

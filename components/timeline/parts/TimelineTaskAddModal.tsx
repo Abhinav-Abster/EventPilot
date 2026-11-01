@@ -35,14 +35,14 @@ export function TimelineTaskAddModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
-        <div className="flex items-center justify-between p-6 bg-[#1040C0] text-white border-b-4 border-black">
+      <div className="bg-white border-4 border-black max-w-md w-full shadow-hard-8 overflow-hidden">
+        <div className="flex items-center justify-between p-6 bg-bauhausBlue text-white border-b-4 border-black">
           <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
             CREATE DIRECTIVE
           </h2>
           <button
             onClick={onClose}
-            className="p-1 border-2 border-white bg-white text-black hover:bg-[#D02020] hover:text-white transition-colors"
+            className="p-1 border-2 border-white bg-white text-black hover:bg-bauhausRed hover:text-white transition-colors"
           >
             <X size={18} strokeWidth={2.5} />
           </button>
@@ -50,7 +50,7 @@ export function TimelineTaskAddModal({
 
         <form onSubmit={onSubmit} className="p-6 space-y-4 text-xs font-mono">
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               DIRECTIVE TITLE
             </label>
             <input
@@ -59,12 +59,12 @@ export function TimelineTaskAddModal({
               placeholder="e.g. Inspect Pune Lawn Sound & Lighting"
               value={form.title}
               onChange={(e) => onChange({ ...form, title: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               OPERATIONAL DESCRIPTION
             </label>
             <textarea
@@ -72,19 +72,19 @@ export function TimelineTaskAddModal({
               placeholder="Vendor instructions or milestone criteria..."
               value={form.description}
               onChange={(e) => onChange({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 PRIORITY
               </label>
               <select
                 value={form.priority}
                 onChange={(e) => onChange({ ...form, priority: e.target.value as TaskPriority })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               >
                 <option value="urgent">URGENT</option>
                 <option value="high">HIGH</option>
@@ -93,7 +93,7 @@ export function TimelineTaskAddModal({
               </select>
             </div>
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 RELATIVE DAYS OFFSET
               </label>
               <input
@@ -101,16 +101,16 @@ export function TimelineTaskAddModal({
                 value={form.relativeDays}
                 onChange={(e) => onChange({ ...form, relativeDays: e.target.value })}
                 placeholder="-7"
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               />
-              <span className="text-[10px] text-black/60 font-bold block mt-0.5">
+              <span className="text-micro text-black/60 font-bold block mt-0.5">
                 -7 = 7 DAYS BEFORE EVENT
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               PREREQUISITE DIRECTIVES
             </label>
             <select
@@ -120,7 +120,7 @@ export function TimelineTaskAddModal({
                 const selected = Array.from(e.target.selectedOptions, (option) => option.value);
                 onChange({ ...form, dependencies: selected });
               }}
-              className="w-full p-2 border-2 border-black text-xs font-mono text-black bg-[#F0F0F0] h-24 shadow-[2px_2px_0px_0px_black]"
+              className="w-full p-2 border-2 border-black text-xs font-mono text-black bg-bauhausCanvas h-24 shadow-hard-2"
             >
               {availableTasks.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -128,7 +128,7 @@ export function TimelineTaskAddModal({
                 </option>
               ))}
             </select>
-            <span className="text-[10px] text-black/60 font-bold block mt-0.5">
+            <span className="text-micro text-black/60 font-bold block mt-0.5">
               Hold Ctrl/Cmd to select multiple dependencies
             </span>
           </div>
@@ -137,13 +137,13 @@ export function TimelineTaskAddModal({
             <button
               type="button"
               onClick={onClose}
-              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
+              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-bauhausCanvas text-black uppercase tracking-wider font-bold shadow-hard-2"
             >
               CANCEL
             </button>
             <button
               type="submit"
-              className="btn-bauhaus px-6 py-2 bg-[#1040C0] text-white hover:bg-[#1040C0]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
+              className="btn-bauhaus px-6 py-2 bg-bauhausBlue text-white hover:bg-bauhausBlue/90 border-2 border-black uppercase tracking-widest font-black shadow-hard-3"
             >
               REGISTER DIRECTIVE
             </button>

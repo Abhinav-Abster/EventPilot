@@ -124,7 +124,7 @@ export function TimelineView() {
 
       <div className="space-y-4">
         {filteredTasks.length === 0 ? (
-          <div className="bg-white border-4 border-black p-12 text-center text-xs font-mono uppercase tracking-widest font-black text-black/60 shadow-[6px_6px_0px_0px_black]">
+          <div className="bg-white border-4 border-black p-12 text-center text-xs font-mono uppercase tracking-widest font-black text-black/60 shadow-hard-6">
             NO DIRECTIVES MATCHING ACTIVE FILTER.
           </div>
         ) : (

@@ -32,8 +32,8 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white border-4 border-black max-w-md w-full shadow-[8px_8px_0px_0px_black] overflow-hidden">
-        <div className="flex items-center justify-between p-6 bg-[#D02020] text-white border-b-4 border-black">
+      <div className="bg-white border-4 border-black max-w-md w-full shadow-hard-8 overflow-hidden">
+        <div className="flex items-center justify-between p-6 bg-bauhausRed text-white border-b-4 border-black">
           <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">
             ENROLL SERVICE VENDOR
           </h2>
@@ -47,7 +47,7 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
 
         <form onSubmit={onSubmit} className="p-6 space-y-4 text-xs font-mono">
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               VENDOR / ESTABLISHMENT NAME
             </label>
             <input
@@ -56,19 +56,19 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
               placeholder="e.g. Pune Anime Decor Studio"
               value={form.name}
               onChange={(e) => onChange({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 DISCIPLINE
               </label>
               <select
                 value={form.category}
                 onChange={(e) => onChange({ ...form, category: e.target.value as VendorCategory })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               >
                 {Object.entries(VENDOR_CATEGORY_LABELS).map(([k, l]) => (
                   <option key={k} value={k}>
@@ -78,7 +78,7 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
               </select>
             </div>
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 QUOTE (₹)
               </label>
               <input
@@ -86,14 +86,14 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
                 placeholder="5000"
                 value={form.estimatedQuote}
                 onChange={(e) => onChange({ ...form, estimatedQuote: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 CONTACT PERSON
               </label>
               <input
@@ -101,11 +101,11 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
                 placeholder="Mr. Rajesh"
                 value={form.contactPerson}
                 onChange={(e) => onChange({ ...form, contactPerson: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               />
             </div>
             <div>
-              <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+              <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
                 PHONE
               </label>
               <input
@@ -113,13 +113,13 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
                 placeholder="+91 98220..."
                 value={form.phone}
                 onChange={(e) => onChange({ ...form, phone: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+                className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               EMAIL
             </label>
             <input
@@ -127,12 +127,12 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
               placeholder="vendor@pune.in"
               value={form.email}
               onChange={(e) => onChange({ ...form, email: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
           <div>
-            <label className="block text-black font-black uppercase tracking-wider mb-1 text-[11px]">
+            <label className="block text-black font-black uppercase tracking-wider mb-1 text-tiny">
               TERMS & NOTES
             </label>
             <textarea
@@ -140,7 +140,7 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
               placeholder="Deliverables covered, deposit terms, cancellation policies..."
               value={form.notes}
               onChange={(e) => onChange({ ...form, notes: e.target.value })}
-              className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
+              className="w-full px-3 py-2 bg-bauhausCanvas border-2 border-black text-xs font-bold text-black focus:bg-white focus:outline-none shadow-hard-2"
             />
           </div>
 
@@ -148,13 +148,13 @@ export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: Ve
             <button
               type="button"
               onClick={onClose}
-              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-[#F0F0F0] text-black uppercase tracking-wider font-bold shadow-[2px_2px_0px_0px_black]"
+              className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-bauhausCanvas text-black uppercase tracking-wider font-bold shadow-hard-2"
             >
               CANCEL
             </button>
             <button
               type="submit"
-              className="btn-bauhaus px-6 py-2 bg-[#D02020] text-white hover:bg-[#D02020]/90 border-2 border-black uppercase tracking-widest font-black shadow-[3px_3px_0px_0px_black]"
+              className="btn-bauhaus px-6 py-2 bg-bauhausRed text-white hover:bg-bauhausRed/90 border-2 border-black uppercase tracking-widest font-black shadow-hard-3"
             >
               ENROLL VENDOR
             </button>

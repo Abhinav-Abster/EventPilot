@@ -28,12 +28,12 @@ export function EventToolbar({
           placeholder="SEARCH DOSSIERS BY NAME OR CITY..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full sm:max-w-xs px-3.5 py-2.5 bg-white border-2 border-black text-xs uppercase font-medium focus:outline-none focus:ring-2 focus:ring-[#1040C0]"
+          className="w-full sm:max-w-xs px-3.5 py-2.5 bg-white border-2 border-black text-xs uppercase font-medium focus:outline-none focus:ring-2 focus:ring-bauhausBlue"
         />
         <select
           value={selectedTypeFilter}
           onChange={(e) => onTypeFilterChange(e.target.value)}
-          className="px-3.5 py-2.5 bg-white border-2 border-black text-xs uppercase font-bold text-black focus:outline-none focus:ring-2 focus:ring-[#1040C0]"
+          className="px-3.5 py-2.5 bg-white border-2 border-black text-xs uppercase font-bold text-black focus:outline-none focus:ring-2 focus:ring-bauhausBlue"
         >
           <option value="all">ALL ARCHETYPES ({totalPlansCount})</option>
           <option value="birthday">BIRTHDAY</option>
@@ -47,7 +47,7 @@ export function EventToolbar({
 
       <button
         onClick={onToggleCreating}
-        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1040C0] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus font-mono text-xs uppercase tracking-widest font-black transition-colors duration-200 hover:bg-[#1040C0]/90"
+        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-bauhausBlue text-white border-2 border-black shadow-hard-4 btn-bauhaus font-mono text-xs uppercase tracking-widest font-black transition-colors duration-200 hover:bg-bauhausBlue/90"
       >
         <Plus size={16} strokeWidth={2.5} />
         <span>{isCreating ? "CLOSE FORM" : "INITIALIZE NEW DOSSIER"}</span>

@@ -24,27 +24,27 @@ export function IntakeChatBox({
   onSendMessage,
 }: IntakeChatBoxProps) {
   return (
-    <div className="lg:col-span-7 border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] flex flex-col h-[650px] overflow-hidden">
+    <div className="lg:col-span-7 border-4 border-black bg-white shadow-hard-8 flex flex-col h-[650px] overflow-hidden">
       {/* Bauhaus Blue Header */}
-      <div className="px-6 py-4 border-b-4 border-black bg-[#1040C0] text-white flex items-center justify-between">
+      <div className="px-6 py-4 border-b-4 border-black bg-bauhausBlue text-white flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Bot size={20} strokeWidth={2.5} className="text-[#F0C020]" />
+          <Bot size={20} strokeWidth={2.5} className="text-bauhausYellow" />
           <div>
             <h2 className="font-display font-black text-sm uppercase tracking-wider text-white">
               INTAKE TERMINAL
             </h2>
-            <span className="font-mono text-[10px] text-[#F0C020] uppercase font-bold tracking-wider block">
+            <span className="font-mono text-micro text-bauhausYellow uppercase font-bold tracking-wider block">
               DETERMINISTIC CONVERSATIONAL AGENT
             </span>
           </div>
         </div>
-        <span className="font-mono text-[10px] font-black uppercase bg-[#D02020] text-white border-2 border-black px-2.5 py-1 shadow-[2px_2px_0px_0px_black]">
+        <span className="font-mono text-micro font-black uppercase bg-bauhausRed text-white border-2 border-black px-2.5 py-1 shadow-hard-2">
           CONNECTED
         </span>
       </div>
 
       {/* Messages Stream */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-[#F0F0F0]">
+      <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-bauhausCanvas">
         {messages.map((m) => {
           const isUser = m.sender === "user";
           return (
@@ -53,8 +53,8 @@ export function IntakeChatBox({
               className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
             >
               <div
-                className={`w-8 h-8 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-[2px_2px_0px_0px_black] ${
-                  isUser ? "bg-[#F0C020] text-black" : "bg-[#1040C0] text-white"
+                className={`w-8 h-8 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-hard-2 ${
+                  isUser ? "bg-bauhausYellow text-black" : "bg-bauhausBlue text-white"
                 }`}
               >
                 {isUser ? (
@@ -64,13 +64,15 @@ export function IntakeChatBox({
                 )}
               </div>
               <div
-                className={`p-4 max-w-[85%] text-xs sm:text-sm leading-relaxed border-2 border-black shadow-[4px_4px_0px_0px_black] ${
-                  isUser ? "bg-[#D02020] text-white font-medium" : "bg-white text-black font-medium"
+                className={`p-4 max-w-[85%] text-xs sm:text-sm leading-relaxed border-2 border-black shadow-hard-4 ${
+                  isUser
+                    ? "bg-bauhausRed text-white font-medium"
+                    : "bg-white text-black font-medium"
                 }`}
               >
                 <p className="leading-relaxed">{m.text}</p>
                 <div
-                  className={`text-[10px] font-mono mt-2 uppercase font-black ${
+                  className={`text-micro font-mono mt-2 uppercase font-black ${
                     isUser ? "text-white/80 text-right" : "text-black/60"
                   }`}
                 >
@@ -102,12 +104,12 @@ export function IntakeChatBox({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="State parameters (e.g. 60 guests in Pune, ₹40,000 budget, anime theme, vegetarian)..."
-            className="flex-1 px-4 py-3 bg-[#F0F0F0] border-2 border-black text-xs sm:text-sm font-bold text-black focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_black]"
+            className="flex-1 px-4 py-3 bg-bauhausCanvas border-2 border-black text-xs sm:text-sm font-bold text-black focus:outline-none focus:bg-white shadow-hard-2"
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isProcessing}
-            className="btn-bauhaus px-5 py-3 bg-[#D02020] hover:bg-[#D02020]/90 text-white border-2 border-black shadow-[3px_3px_0px_0px_black] disabled:opacity-40"
+            className="btn-bauhaus px-5 py-3 bg-bauhausRed hover:bg-bauhausRed/90 text-white border-2 border-black shadow-hard-3 disabled:opacity-40"
             aria-label="Send message"
           >
             <Send size={16} strokeWidth={2.5} />

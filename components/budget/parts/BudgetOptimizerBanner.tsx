@@ -13,7 +13,7 @@ export function BudgetOptimizerBanner({
   onSimulate,
 }: BudgetOptimizerBannerProps) {
   return (
-    <div className="bg-[#F0C020] text-black border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div className="bg-bauhausYellow text-black border-4 border-black p-8 shadow-hard-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
       <div className="space-y-2 max-w-xl">
         <div className="flex items-center gap-2 font-mono uppercase text-xs tracking-widest font-black text-black">
           <Sparkles size={16} strokeWidth={2.5} />
@@ -37,13 +37,13 @@ export function BudgetOptimizerBanner({
             step="1000"
             value={targetOptimizationRupees}
             onChange={(e) => setTargetOptimizationRupees(e.target.value)}
-            className="pl-8 pr-4 py-3 w-full sm:w-36 bg-white border-4 border-black text-xs font-mono font-black text-black shadow-[3px_3px_0px_0px_black] focus:outline-none"
+            className="pl-8 pr-4 py-3 w-full sm:w-36 bg-white border-4 border-black text-xs font-mono font-black text-black shadow-hard-3 focus:outline-none"
             placeholder="30000"
           />
         </div>
         <button
           onClick={onSimulate}
-          className="btn-bauhaus w-full sm:w-auto px-6 py-3.5 bg-[#1040C0] hover:bg-[#1040C0]/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-[4px_4px_0px_0px_black] shrink-0 flex items-center justify-center gap-2"
+          className="btn-bauhaus w-full sm:w-auto px-6 py-3.5 bg-bauhausBlue hover:bg-bauhausBlue/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-hard-4 shrink-0 flex items-center justify-center gap-2"
         >
           <span>SIMULATE CUTS</span>
           <ArrowRight size={16} strokeWidth={2.5} />

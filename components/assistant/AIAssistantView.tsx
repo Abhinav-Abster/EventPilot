@@ -98,9 +98,9 @@ export function AIAssistantView() {
       {/* Bauhaus Constructivist Header */}
       <div className="space-y-4 border-b-4 border-black pb-8">
         <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-black">
-          <span className="w-3.5 h-3.5 rounded-full bg-[#D02020] border-2 border-black inline-block" />
-          <span className="w-3.5 h-3.5 bg-[#1040C0] border-2 border-black inline-block" />
-          <span className="w-3.5 h-3.5 bg-[#F0C020] border-2 border-black inline-block shape-triangle" />
+          <span className="w-3.5 h-3.5 rounded-full bg-bauhausRed border-2 border-black inline-block" />
+          <span className="w-3.5 h-3.5 bg-bauhausBlue border-2 border-black inline-block" />
+          <span className="w-3.5 h-3.5 bg-bauhausYellow border-2 border-black inline-block shape-triangle" />
           <span className="font-bold">SYSTEM MODULE 06 // ADAPTIVE REPLANNING ENGINE</span>
         </div>
         <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tighter uppercase text-black leading-none">
@@ -116,7 +116,7 @@ export function AIAssistantView() {
       {error && (
         <div
           role="alert"
-          className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black] uppercase tracking-wider"
+          className="border-4 border-black bg-bauhausRed text-white p-4 text-xs font-mono font-bold shadow-hard-4 uppercase tracking-wider"
         >
           SYSTEM ERROR NOTICE: {error}
         </div>
@@ -125,23 +125,23 @@ export function AIAssistantView() {
       <AssistantScenarioPresets onSelectScenario={handleSendQuery} />
 
       {/* Main Conversation Stream Window */}
-      <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_black] flex flex-col min-h-[640px] overflow-hidden">
+      <div className="border-4 border-black bg-white shadow-hard-8 flex flex-col min-h-[640px] overflow-hidden">
         {/* Stream Header Panel */}
-        <div className="px-6 py-4 bg-[#1040C0] border-b-4 border-black text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-bauhausBlue border-b-4 border-black text-white flex items-center justify-between">
           <div className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-widest">
             <Bot size={18} strokeWidth={2.5} />
             <span>DIRECTIVE ADAPTATION FEED</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#F0C020] border-2 border-black inline-block" />
-            <span className="font-mono text-[10px] uppercase font-bold tracking-widest">
+            <span className="w-3 h-3 rounded-full bg-bauhausYellow border-2 border-black inline-block" />
+            <span className="font-mono text-micro uppercase font-bold tracking-widest">
               ENGINE OPERATIONAL
             </span>
           </div>
         </div>
 
         {/* Stream Messages */}
-        <div className="flex-1 p-6 sm:p-8 space-y-6 overflow-y-auto bg-[#F0F0F0]">
+        <div className="flex-1 p-6 sm:p-8 space-y-6 overflow-y-auto bg-bauhausCanvas">
           {messages.map((msg) => {
             const isUser = msg.sender === "user";
             return (
@@ -150,8 +150,8 @@ export function AIAssistantView() {
                 className={`flex items-start gap-4 ${isUser ? "flex-row-reverse" : "flex-row"}`}
               >
                 <div
-                  className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-[3px_3px_0px_0px_black] ${
-                    isUser ? "bg-[#D02020] text-white rounded-full" : "bg-[#121212] text-white"
+                  className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 border-black font-mono text-xs shadow-hard-3 ${
+                    isUser ? "bg-bauhausRed text-white rounded-full" : "bg-bauhausBlack text-white"
                   }`}
                 >
                   {isUser ? (
@@ -163,13 +163,15 @@ export function AIAssistantView() {
 
                 <div className="space-y-4 max-w-2xl flex-1">
                   <div
-                    className={`p-5 border-2 border-black shadow-[4px_4px_0px_0px_black] text-xs sm:text-sm leading-relaxed ${
-                      isUser ? "bg-[#121212] text-white ml-auto" : "bg-white text-black font-sans"
+                    className={`p-5 border-2 border-black shadow-hard-4 text-xs sm:text-sm leading-relaxed ${
+                      isUser
+                        ? "bg-bauhausBlack text-white ml-auto"
+                        : "bg-white text-black font-sans"
                     }`}
                   >
                     <p className="font-sans font-medium leading-relaxed">{msg.text}</p>
                     <div
-                      className={`text-[10px] font-mono mt-3 uppercase tracking-widest font-bold ${
+                      className={`text-micro font-mono mt-3 uppercase tracking-widest font-bold ${
                         isUser ? "text-gray-300 text-right" : "text-gray-600"
                       }`}
                     >
@@ -192,7 +194,7 @@ export function AIAssistantView() {
 
           {isEvaluating && (
             <div className="flex items-center gap-3 text-black font-mono text-xs pl-12 uppercase tracking-widest font-bold">
-              <RefreshCw size={16} className="animate-spin text-[#1040C0]" />
+              <RefreshCw size={16} className="animate-spin text-bauhausBlue" />
               <span>CALCULATING TRADE-OFFS & CONSTRAINTS...</span>
             </div>
           )}

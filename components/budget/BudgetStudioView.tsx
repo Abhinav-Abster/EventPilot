@@ -132,16 +132,16 @@ export function BudgetStudioView() {
 
   return (
     <div className="space-y-12 pb-12">
-      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0px_0px_black] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div className="bg-white border-4 border-black p-6 sm:p-10 shadow-hard-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest font-black">
-            <span className="w-3.5 h-3.5 rounded-none bg-[#1040C0] border-2 border-black inline-block" />
+            <span className="w-3.5 h-3.5 rounded-none bg-bauhausBlue border-2 border-black inline-block" />
             <span>MODULE 02 / CAPITAL EXPENDITURE & AUDIT</span>
           </div>
           <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tighter uppercase text-black">
             BUDGET STUDIO
           </h1>
-          <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
+          <p className="font-medium text-sm text-bauhausBlack max-w-2xl leading-relaxed">
             Deterministic minor-unit integer arithmetic prevents precision drift. Every category
             constraint is strictly verified against event mandates.
           </p>
@@ -149,7 +149,7 @@ export function BudgetStudioView() {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-bauhaus px-6 py-4 bg-[#D02020] hover:bg-[#D02020]/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-[4px_4px_0px_0px_black] flex items-center gap-2 shrink-0"
+          className="btn-bauhaus px-6 py-4 bg-bauhausRed hover:bg-bauhausRed/90 text-white text-xs font-mono uppercase tracking-widest font-black border-4 border-black shadow-hard-4 flex items-center gap-2 shrink-0"
         >
           <Plus size={16} strokeWidth={2.5} />
           <span>ADD EXPENSE LINE</span>

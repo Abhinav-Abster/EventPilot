@@ -22,12 +22,12 @@ export function AssistantInputBar({
           value={inputQuery}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder="Hypothetical disruption (e.g. 'Budget is now ₹30,000' or 'Move party indoors')..."
-          className="flex-1 px-4 py-3 bg-white border-2 border-black text-xs sm:text-sm font-sans font-medium focus:outline-none focus:ring-2 focus:ring-[#1040C0]"
+          className="flex-1 px-4 py-3 bg-white border-2 border-black text-xs sm:text-sm font-sans font-medium focus:outline-none focus:ring-2 focus:ring-bauhausBlue"
         />
         <button
           type="submit"
           disabled={!inputQuery.trim() || isEvaluating}
-          className="px-6 py-3 bg-[#1040C0] text-white border-2 border-black shadow-[4px_4px_0px_0px_black] btn-bauhaus font-mono text-xs uppercase tracking-widest font-bold disabled:opacity-40 flex items-center gap-2 shrink-0 hover:bg-[#1040C0]/90"
+          className="px-6 py-3 bg-bauhausBlue text-white border-2 border-black shadow-hard-4 btn-bauhaus font-mono text-xs uppercase tracking-widest font-bold disabled:opacity-40 flex items-center gap-2 shrink-0 hover:bg-bauhausBlue/90"
         >
           <Sparkles size={16} strokeWidth={2} />
           <span>SOLVE</span>

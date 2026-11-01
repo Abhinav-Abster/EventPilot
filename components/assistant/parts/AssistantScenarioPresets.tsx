@@ -50,23 +50,23 @@ export function AssistantScenarioPresets({ onSelectScenario }: AssistantScenario
           <button
             key={idx}
             onClick={() => onSelectScenario(sc.query)}
-            className="text-left p-3.5 border-2 border-black bg-white shadow-[4px_4px_0px_0px_black] hover:bg-[#F0C020] hover:text-black btn-bauhaus font-mono text-xs group transition-colors duration-200"
+            className="text-left p-3.5 border-2 border-black bg-white shadow-hard-4 hover:bg-bauhausYellow hover:text-black btn-bauhaus font-mono text-xs group transition-colors duration-200"
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="font-bold uppercase tracking-wider text-[11px] block truncate">
+              <span className="font-bold uppercase tracking-wider text-tiny block truncate">
                 {sc.title}
               </span>
               <span
                 className={`w-2 h-2 border border-black ${
                   idx % 3 === 0
-                    ? "bg-[#D02020] rounded-full"
+                    ? "bg-bauhausRed rounded-full"
                     : idx % 3 === 1
-                      ? "bg-[#1040C0]"
-                      : "bg-[#F0C020] shape-triangle"
+                      ? "bg-bauhausBlue"
+                      : "bg-bauhausYellow shape-triangle"
                 }`}
               />
             </div>
-            <span className="font-sans text-[11px] text-gray-700 group-hover:text-black block truncate">
+            <span className="font-sans text-tiny text-gray-700 group-hover:text-black block truncate">
               &ldquo;{sc.query}&rdquo;
             </span>
           </button>
