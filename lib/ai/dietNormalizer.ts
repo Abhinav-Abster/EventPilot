@@ -2,21 +2,9 @@
  * Dietary preference normalization utilities mapping colloquial terms to supported categories.
  */
 import { DietaryPreference } from "../types/event";
+import { VALID_DIETS, ValidDiet } from "../config/constants";
 
-/**
- * Supported dietary preference tags recognized by EventPilot normalizers.
- */
-export const VALID_DIETS = [
-  "vegetarian",
-  "non-vegetarian",
-  "vegan",
-  "jain",
-  "halal",
-  "gluten-free",
-  "nut-allergy",
-] as const;
-
-export type ValidDiet = (typeof VALID_DIETS)[number];
+export { VALID_DIETS, type ValidDiet };
 
 interface DietRule {
   target: DietaryPreference;

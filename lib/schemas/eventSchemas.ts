@@ -14,8 +14,7 @@ import {
   VENDOR_PAYMENT_STATUSES,
   CREATIVE_IDEA_CATEGORIES,
 } from "../types/event";
-import { VALID_DIETS } from "../ai/dietNormalizer";
-import { DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
+import { VALID_DIETS, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
 /** Zod schema validating supported event types. */
 export const EventTypeSchema = z.enum(EVENT_TYPES);
