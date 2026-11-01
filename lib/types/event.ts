@@ -3,6 +3,7 @@
  * Strict typing for event profiles, budget items, tasks, vendors, ideas, and replanning proposals.
  */
 
+/** Canonical list of supported event types. */
 export const EVENT_TYPES = [
   "birthday",
   "wedding",
@@ -11,12 +12,15 @@ export const EVENT_TYPES = [
   "anniversary",
   "other",
 ] as const;
+
+/** Recognized event category type. */
 export type EventType = (typeof EVENT_TYPES)[number];
 
 /** Canonical list of supported event venue environments. */
 export const VENUE_TYPES = ["indoor", "outdoor", "hybrid", "unselected"] as const;
 export type VenueType = (typeof VENUE_TYPES)[number];
 
+/** Dietary preference categories supported in catering plans. */
 export type DietaryPreference =
   "vegetarian" | "non-vegetarian" | "vegan" | "jain" | "halal" | "gluten-free" | "nut-allergy";
 
@@ -29,8 +33,11 @@ export const PLANNING_PRIORITIES = [
   "venue",
   "budget",
 ] as const;
+
+/** Priority classification for event planning categories. */
 export type PlanningPriority = (typeof PLANNING_PRIORITIES)[number];
 
+/** Core event profile entity containing high-level parameters and constraints. */
 export interface EventProfile {
   id: string;
   name: string;
@@ -66,8 +73,11 @@ export const BUDGET_CATEGORIES = [
   "miscellaneous",
   "contingency_reserve",
 ] as const;
+
+/** Expenditure category identifier for budget line items. */
 export type BudgetCategory = (typeof BUDGET_CATEGORIES)[number];
 
+/** Individual line-item expenditure entry in an event budget. */
 export interface BudgetItem {
   id: string;
   category: BudgetCategory;
@@ -79,6 +89,7 @@ export interface BudgetItem {
   notes?: string;
 }
 
+/** Comprehensive financial summary calculated across all budget categories. */
 export interface BudgetSummary {
   totalBudgetMinor: number;
   totalEstimatedMinor: number;
@@ -142,6 +153,7 @@ export const VENDOR_CATEGORIES = [
   "invitations",
   "other",
 ] as const;
+/** Category identifier for professional vendor services. */
 export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
 /** Engagement lifecycle stages for a vendor. */
@@ -153,12 +165,17 @@ export const VENDOR_BOOKING_STATUSES = [
   "booked",
   "cancelled",
 ] as const;
+
+/** Booking stage lifecycle classification for vendors. */
 export type VendorBookingStatus = (typeof VENDOR_BOOKING_STATUSES)[number];
 
 /** Payment status tracking vendor invoices and deposits. */
 export const VENDOR_PAYMENT_STATUSES = ["unpaid", "advance_paid", "fully_paid"] as const;
+
+/** Payment fulfillment stage for vendor services. */
 export type VendorPaymentStatus = (typeof VENDOR_PAYMENT_STATUSES)[number];
 
+/** Vendor engagement profile and financial tracking record. */
 export interface VendorRecord {
   id: string;
   name: string;
@@ -187,8 +204,11 @@ export const CREATIVE_IDEA_CATEGORIES = [
   "schedule",
   "weather_contingency",
 ] as const;
+
+/** Category classification for creative inspiration suggestions. */
 export type CreativeIdeaCategory = (typeof CREATIVE_IDEA_CATEGORIES)[number];
 
+/** Creative thematic or operational recommendation tailored to event constraints. */
 export interface CreativeIdea {
   id: string;
   category: CreativeIdeaCategory;
@@ -203,6 +223,7 @@ export interface CreativeIdea {
   isSaved?: boolean;
 }
 
+/** Granular delta describing a specific change applied during plan revision. */
 export interface PlanChangeDiff {
   type: "budget" | "task" | "vendor" | "profile" | "preference";
   field: string;
@@ -213,6 +234,7 @@ export interface PlanChangeDiff {
   isProtectedConflict?: boolean;
 }
 
+/** Evaluated replanning proposal presenting trade-offs and diffs against the active plan. */
 export interface ReplanningProposal {
   id: string;
   title: string;
@@ -230,6 +252,7 @@ export interface ReplanningProposal {
   revisedPlan: EventPlan;
 }
 
+/** Complete canonical event plan containing profile, budget, timeline, vendors, and ideas. */
 export interface EventPlan {
   profile: EventProfile;
   budgetItems: BudgetItem[];

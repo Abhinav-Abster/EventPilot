@@ -84,6 +84,9 @@ export function calculateBudgetSummary(
   };
 }
 
+/**
+ * Result returned by budget optimization algorithm containing revised line items and savings achieved.
+ */
 export interface BudgetOptimizationResult {
   isFeasible: boolean;
   targetBudgetMinor: number;

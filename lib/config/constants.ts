@@ -15,7 +15,7 @@ export const REFERENCE_PLAN_ID = "ep-aanya-18th-anime";
 export const DEFAULT_CITY = "Pune";
 
 /**
- * Supported dietary preference tags recognized across EventPilot schemas and normalizers.
+ * Supported dietary constraint keys recognized by intake and planning engines.
  */
 export const VALID_DIETS = [
   "vegetarian",
@@ -27,6 +27,9 @@ export const VALID_DIETS = [
   "nut-allergy",
 ] as const;
 
+/**
+ * Type representing valid recognized dietary constraint values.
+ */
 export type ValidDiet = (typeof VALID_DIETS)[number];
 
 /**

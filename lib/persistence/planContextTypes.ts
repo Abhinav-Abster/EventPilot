@@ -11,6 +11,9 @@ import {
   EventType,
 } from "../types/event";
 
+/**
+ * Interface representing the complete application event plan context state and mutation methods.
+ */
 export interface PlanContextType {
   plan: EventPlan;
   plans: EventPlan[];

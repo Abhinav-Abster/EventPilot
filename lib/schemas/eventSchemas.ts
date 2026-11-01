@@ -144,9 +144,27 @@ export const EventPlanSchema = z.object({
   version: z.number().int().default(1),
 });
 
+/**
+ * Type inferred from EventProfileSchema validation.
+ */
 export type ValidatedEventProfile = z.infer<typeof EventProfileSchema>;
+/**
+ * Type inferred from BudgetItemSchema validation.
+ */
 export type ValidatedBudgetItem = z.infer<typeof BudgetItemSchema>;
+/**
+ * Type inferred from TaskSchema validation.
+ */
 export type ValidatedTask = z.infer<typeof TaskSchema>;
+/**
+ * Type inferred from VendorRecordSchema validation.
+ */
 export type ValidatedVendorRecord = z.infer<typeof VendorRecordSchema>;
+/**
+ * Type inferred from CreativeIdeaSchema validation.
+ */
 export type ValidatedCreativeIdea = z.infer<typeof CreativeIdeaSchema>;
+/**
+ * Type inferred from EventPlanSchema validation.
+ */
 export type ValidatedEventPlan = z.infer<typeof EventPlanSchema>;

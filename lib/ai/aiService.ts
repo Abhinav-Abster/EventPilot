@@ -26,6 +26,9 @@ export {
   AIServiceError,
 };
 
+/**
+ * Outcome of conversational AI intake parsing.
+ */
 export interface IntakeResult {
   reply: string;
   extractedProfile: Partial<EventProfile>;
@@ -33,11 +36,17 @@ export interface IntakeResult {
   missingFields: string[];
 }
 
+/**
+ * Result returned by the complete AI plan generation pipeline.
+ */
 export interface PlanGenerationResult {
   plan: EventPlan;
   modelUsed: string;
 }
 
+/**
+ * Result of AI replanning containing proposed constraint modifications.
+ */
 export interface ReplanningResult {
   proposals: ReplanningProposal[];
   explanation: string;
