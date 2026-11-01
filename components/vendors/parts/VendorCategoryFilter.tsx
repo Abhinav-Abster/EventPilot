@@ -8,6 +8,9 @@ interface VendorCategoryFilterProps {
   onSelectCategory: (cat: string) => void;
 }
 
+/**
+ * Category filter pills for segmenting vendor records by service specialty.
+ */
 export function VendorCategoryFilter({
   vendors,
   selectedCategory,

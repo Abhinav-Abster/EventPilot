@@ -17,6 +17,9 @@ const CATEGORY_NAMES: Record<CreativeIdeaCategory, string> = {
   weather_contingency: "Weather & Contingency",
 };
 
+/**
+ * Grid of personalized, theme-tailored ideas and activities generated for the active event.
+ */
 export function CreativeIdeasView() {
   const { plan, toggleSaveIdea } = usePlan();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");

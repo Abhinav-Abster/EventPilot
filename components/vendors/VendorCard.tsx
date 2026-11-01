@@ -14,6 +14,9 @@ export interface VendorCardProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * Card displaying vendor details, quotes, contact info, booking status, and payment tracking.
+ */
 export const VendorCard = React.memo(function VendorCard({
   vendor,
   index,

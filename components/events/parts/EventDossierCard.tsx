@@ -31,6 +31,9 @@ interface EventDossierCardProps {
   onCloseModal: () => void;
 }
 
+/**
+ * Summary card for an event plan displaying guest counts, budget totals, and selection controls.
+ */
 export function EventDossierCard({
   plan,
   index,

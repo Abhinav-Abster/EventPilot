@@ -10,6 +10,9 @@ interface EventSwitcherDropdownProps {
   onOpenEventManager?: () => void;
 }
 
+/**
+ * Dropdown selector in navigation bar enabling seamless switching between saved events.
+ */
 export function EventSwitcherDropdown({
   currentPlan,
   plans,

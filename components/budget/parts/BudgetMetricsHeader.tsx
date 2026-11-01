@@ -7,6 +7,9 @@ interface BudgetMetricsHeaderProps {
   itemsCount: number;
 }
 
+/**
+ * Top-level summary strip displaying total budget, allocated expenses, and remaining variance.
+ */
 export function BudgetMetricsHeader({ summary, itemsCount }: BudgetMetricsHeaderProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

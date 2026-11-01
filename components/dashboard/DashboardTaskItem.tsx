@@ -9,6 +9,9 @@ export interface DashboardTaskItemProps {
   onToggle: (id: string) => void;
 }
 
+/**
+ * Compact dashboard item rendering an urgent or overdue task with quick-completion action.
+ */
 export const DashboardTaskItem = React.memo(function DashboardTaskItem({
   task,
   onToggle,

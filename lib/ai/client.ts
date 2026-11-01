@@ -1,3 +1,6 @@
+/**
+ * Client-side HTTP client invoking EventPilot API endpoints with abortable timeouts.
+ */
 import type { EventPlan, EventProfile } from "../types/event";
 import type { IntakeResult, PlanGenerationResult, ReplanningResult } from "./aiService";
 
@@ -11,6 +14,14 @@ export class AIRequestError extends Error {
   }
 }
 
+/**
+ * Dispatches an HTTP POST request to an AI route with an automatic timeout abort signal.
+ * @param endpoint Relative API route path.
+ * @param payload JSON request payload.
+ * @param timeoutMs Timeout duration in milliseconds before aborting (default 25s).
+ * @returns Parsed JSON response from the server.
+ * @throws Error if network fails, status is non-OK, or timeout expires.
+ */
 export async function requestAI<T>(
   path: string,
   body: unknown,
@@ -72,6 +83,12 @@ export async function requestAI<T>(
   }
 }
 
+/**
+ * Requests conversational intake parsing to extract structured profile fields from free-form text.
+ * @param message Raw intake chat message from the user.
+ * @param currentProfile Existing profile state to preserve and augment.
+ * @param signal Optional AbortSignal to cancel the request.
+ */
 export function requestIntake(
   message: string,
   currentProfile: Partial<EventProfile>,
@@ -80,10 +97,21 @@ export function requestIntake(
   return requestAI<IntakeResult>("/api/ai/intake", { message, currentProfile }, signal);
 }
 
+/**
+ * Requests complete plan synthesis based on the provided event profile.
+ * @param profile Event profile parameters specifying constraints.
+ * @param signal Optional AbortSignal to cancel the request.
+ */
 export function requestPlan(profile: Partial<EventProfile>, signal?: AbortSignal) {
   return requestAI<PlanGenerationResult>("/api/ai/plan", { profile }, signal);
 }
 
+/**
+ * Dispatches a replanning request evaluating user query against the active plan.
+ * @param query Natural language description of requested change.
+ * @param plan Active EventPlan instance.
+ * @param signal Optional AbortSignal to cancel the request.
+ */
 export function requestReplanning(query: string, plan: EventPlan, signal?: AbortSignal) {
   return requestAI<ReplanningResult>("/api/ai/replanning", { query, plan }, signal);
 }

@@ -10,6 +10,9 @@ interface DashboardDirectiveRegisterProps {
   onToggleTask: (id: string) => void;
 }
 
+/**
+ * List of active event constraints and must-haves being actively enforced across planning engines.
+ */
 export function DashboardDirectiveRegister({
   upcomingTasks,
   totalTasksCount,

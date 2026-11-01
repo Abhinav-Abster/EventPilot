@@ -1,5 +1,11 @@
+/**
+ * Vendor catalog management, category definitions, and baseline vendor graph generators.
+ */
 import { VendorRecord, VendorCategory } from "../types/event";
 
+/**
+ * User-facing display labels for each vendor specialization category.
+ */
 export const VENDOR_CATEGORY_LABELS: Record<VendorCategory, string> = {
   venue: "Venue",
   caterer: "Catering",

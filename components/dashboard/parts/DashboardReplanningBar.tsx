@@ -10,6 +10,9 @@ interface DashboardReplanningBarProps {
   sampleScenarios: string[];
 }
 
+/**
+ * Quick replanning invocation strip accessible directly from the dashboard view.
+ */
 export function DashboardReplanningBar({
   query,
   onQueryChange,

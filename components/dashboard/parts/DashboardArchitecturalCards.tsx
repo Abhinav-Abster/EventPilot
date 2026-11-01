@@ -19,6 +19,9 @@ interface DashboardArchitecturalCardsProps {
   onNavigate: (tab: NavTab) => void;
 }
 
+/**
+ * Cards highlighting core architectural capabilities: deterministic budgeting, DAG scheduling, and adaptive replanning.
+ */
 export function DashboardArchitecturalCards({
   budgetSummary,
   percentSpent,

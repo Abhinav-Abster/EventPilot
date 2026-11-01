@@ -1,6 +1,12 @@
+/**
+ * Heuristics and proportional reduction algorithms for trimming non-essential event budget items.
+ */
 import { BudgetItem, BudgetCategory, EventProfile, PlanningPriority } from "../types/event";
 import { percentOfMoney, rupeesToPaise, paiseToRupees } from "./moneyUtils";
 
+/**
+ * Returns a new item array with protected and essential items flagged against automatic reductions.
+ */
 export function markProtectedItems(items: BudgetItem[], mustHaves: string[]): void {
   const protectedKeywords = mustHaves.map((m) => m.toLowerCase());
   for (const item of items) {
@@ -15,6 +21,9 @@ export function markProtectedItems(items: BudgetItem[], mustHaves: string[]): vo
   }
 }
 
+/**
+ * Orders budget items by priority and flexibility for deterministic expenditure reduction.
+ */
 export function determineTrimOrder(profile: EventProfile): BudgetCategory[] {
   const trimOrder: BudgetCategory[] = [
     "entertainment",
@@ -56,6 +65,9 @@ export function determineTrimOrder(profile: EventProfile): BudgetCategory[] {
   return trimOrder;
 }
 
+/**
+ * Calculates the minor-unit reduction to apply to a budget item without exceeding its maximum cut.
+ */
 export function computeItemReduction(
   item: BudgetItem,
   deficit: number,

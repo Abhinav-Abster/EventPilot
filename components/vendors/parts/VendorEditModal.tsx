@@ -10,6 +10,9 @@ interface VendorEditModalProps {
   onChange: (v: VendorRecord) => void;
 }
 
+/**
+ * Modal dialog allowing updates to vendor booking status, quotes, and contact information.
+ */
 export function VendorEditModal({
   editingVendor,
   onClose,

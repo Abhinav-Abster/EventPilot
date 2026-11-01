@@ -1,8 +1,14 @@
+/**
+ * Strategy generating plan modifications when total event budget is reduced or increased.
+ */
 import { EventPlan, EventProfile, ReplanningProposal, PlanChangeDiff } from "../../types/event";
 import { optimizeBudget } from "../../budget/budgetEngine";
 import { formatINR, subtractMoney } from "../../budget/moneyUtils";
 import { ParsedConstraintChange } from "../types";
 
+/**
+ * Generates a replanning proposal that adjusts line items to fit a new budget limit.
+ */
 export function createBudgetChangeProposal(
   currentPlan: EventPlan,
   changeIntent: ParsedConstraintChange

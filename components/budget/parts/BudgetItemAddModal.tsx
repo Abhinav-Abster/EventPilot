@@ -17,6 +17,9 @@ interface BudgetItemAddModalProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+/**
+ * Modal dialog facilitating the creation and validation of new event budget line items.
+ */
 export function BudgetItemAddModal({
   isOpen,
   onClose,

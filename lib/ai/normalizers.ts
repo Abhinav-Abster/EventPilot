@@ -1,5 +1,11 @@
+/**
+ * Dietary preference normalization utilities mapping colloquial terms to supported categories.
+ */
 import { DietaryPreference } from "../types/event";
 
+/**
+ * Supported dietary preference tags recognized by EventPilot normalizers.
+ */
 export const VALID_DIETS = [
   "vegetarian",
   "non-vegetarian",

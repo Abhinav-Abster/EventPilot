@@ -1,3 +1,6 @@
+/**
+ * Aggregation utilities computing category breakdowns, variance metrics, and heuristic budget health tips.
+ */
 import { BudgetItem, BudgetCategory, BUDGET_CATEGORIES } from "../types/event";
 import { addMoney, percentOfMoney, formatINR, paiseToRupees } from "./moneyUtils";
 
@@ -6,6 +9,9 @@ export type CategoryBreakdownMap = Record<
   { estimatedMinor: number; actualMinor: number; count: number; percentageOfBudget: number }
 >;
 
+/**
+ * Initializes an empty category breakdown map with zero allocation and spending.
+ */
 export function createEmptyCategoryBreakdown(): CategoryBreakdownMap {
   return {
     venue: { estimatedMinor: 0, actualMinor: 0, count: 0, percentageOfBudget: 0 },
@@ -20,6 +26,9 @@ export function createEmptyCategoryBreakdown(): CategoryBreakdownMap {
   };
 }
 
+/**
+ * Aggregates budget items into categorical allocations and calculates percentage distributions.
+ */
 export function computeCategoryBreakdown(
   items: BudgetItem[],
   totalBudgetMinor: number
@@ -60,6 +69,9 @@ export function computeCategoryBreakdown(
   return { breakdown, totalEstimatedMinor, totalActualMinor, contingencyMinor };
 }
 
+/**
+ * Analyzes total spending against budget caps and generates actionable financial guidance.
+ */
 export function buildBudgetWarningsAndTips(
   breakdown: CategoryBreakdownMap,
   totalBudgetMinor: number,

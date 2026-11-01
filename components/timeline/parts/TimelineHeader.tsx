@@ -9,6 +9,9 @@ interface TimelineHeaderProps {
   onUpdateEventDate: (newDate: string) => void;
 }
 
+/**
+ * Header bar displaying task completion counts, circular dependency warnings, and add-task trigger.
+ */
 export function TimelineHeader({
   onOpenAddModal,
   cycleCheck,

@@ -14,6 +14,9 @@ interface IntakeProfileFormProps {
   onGeneratePlan: () => void;
 }
 
+/**
+ * Structured fallback form for directly configuring event dates, locations, guests, and budgets.
+ */
 export function IntakeProfileForm({
   stagedProfile,
   onUpdateProfile,

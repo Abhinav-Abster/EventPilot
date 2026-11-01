@@ -9,6 +9,9 @@ interface TimelineTaskEditModalProps {
   onChange: (t: Task) => void;
 }
 
+/**
+ * Modal dialog allowing modifications to task properties, deadlines, and dependencies.
+ */
 export function TimelineTaskEditModal({
   editingTask,
   onClose,

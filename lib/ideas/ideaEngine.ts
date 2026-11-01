@@ -1,3 +1,6 @@
+/**
+ * Generates personalized, thematic ideas deterministically from event profile parameters and guest constraints.
+ */
 import { CreativeIdea, EventProfile } from "../types/event";
 
 /**

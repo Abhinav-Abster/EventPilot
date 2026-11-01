@@ -1,11 +1,26 @@
+/**
+ * Browser localStorage persistence manager with legacy schema migration and error recovery.
+ */
 import { EventPlan } from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { createReferenceEventPlan } from "./defaultEvent";
 
+/**
+ * localStorage key under which the collection of event plans is persisted.
+ */
 export const STORAGE_EVENTS_KEY = "eventpilot_events_v2";
+/**
+ * localStorage key holding the identifier of the currently selected event plan.
+ */
 export const STORAGE_ACTIVE_ID_KEY = "eventpilot_active_event_id";
+/**
+ * Legacy localStorage key checked for backward-compatible migration of single-event plans.
+ */
 export const LEGACY_STORAGE_KEY = "eventpilot_active_plan_v2";
 
+/**
+ * Retrieves and validates event plans from browser localStorage with corruption fallback.
+ */
 export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string } {
   try {
     const storedEvents = localStorage.getItem(STORAGE_EVENTS_KEY);
@@ -66,6 +81,9 @@ export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string 
   }
 }
 
+/**
+ * Serializes event plans to browser localStorage safely.
+ */
 export function saveStoredPlans(plans: EventPlan[], activeId: string): void {
   try {
     localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(plans));

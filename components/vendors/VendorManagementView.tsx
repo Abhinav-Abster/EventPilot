@@ -22,6 +22,9 @@ const INITIAL_VENDOR_FORM: NewVendorFormData = {
   notes: "",
 };
 
+/**
+ * Vendor directory managing vendor bookings, quotes, contacts, and categorical allocations.
+ */
 export function VendorManagementView() {
   const { plan, addVendor, updateVendor, deleteVendor } = usePlan();
 

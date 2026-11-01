@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Global React context provider managing multi-event planning state, active selection, and replanning proposals.
+ */
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react";
 import {
   EventPlan,
@@ -35,6 +38,9 @@ export type { PlanContextType };
 
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
+/**
+ * React context provider establishing global event planning state, persistence, and dispatch handlers.
+ */
 export function PlanProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<EventPlan[]>([createReferenceEventPlan()]);
   const [activePlanId, setActivePlanId] = useState<string>("ep-aanya-18th-anime");
@@ -344,6 +350,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   return <PlanContext.Provider value={contextValue}>{children}</PlanContext.Provider>;
 }
 
+/**
+ * Hook accessing active event planning state, mutators, and replanning actions from PlanContext.
+ */
 export function usePlan() {
   const context = useContext(PlanContext);
   if (!context) {

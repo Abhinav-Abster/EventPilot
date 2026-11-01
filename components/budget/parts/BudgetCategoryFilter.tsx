@@ -10,6 +10,9 @@ interface BudgetCategoryFilterProps {
   summary: BudgetSummary;
 }
 
+/**
+ * Category filter pill list allowing users to narrow visible budget items by domain category.
+ */
 export function BudgetCategoryFilter({
   selectedCategory,
   onSelectCategory,

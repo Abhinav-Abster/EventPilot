@@ -9,6 +9,9 @@ interface AssistantProposalCardProps {
   onApply: () => void;
 }
 
+/**
+ * Displays an actionable replanning proposal with trade-offs, financial deltas, and acceptance actions.
+ */
 export function AssistantProposalCard({
   proposal,
   isApplied,

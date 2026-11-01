@@ -1,3 +1,6 @@
+/**
+ * Topological task scheduler and circular-dependency detector for deadline-driven planning.
+ */
 import { Task, TaskPriority, TaskStatus } from "../types/event";
 import { PriorityQueue } from "../utils/priorityQueue";
 import { parseISODate, formatISODate, addDaysToDate, daysBetween } from "./dateUtils";

@@ -1,8 +1,14 @@
+/**
+ * Strategy shifting milestone deadlines and vendor dates when an event date changes.
+ */
 import { EventPlan, EventProfile, ReplanningProposal, PlanChangeDiff } from "../../types/event";
 import { addMoney } from "../../budget/moneyUtils";
 import { recalculateSchedule, daysBetween } from "../../timeline/timelineEngine";
 import { ParsedConstraintChange } from "../types";
 
+/**
+ * Generates a replanning proposal shifting timeline deadlines according to a new event date.
+ */
 export function createDateChangeProposal(
   currentPlan: EventPlan,
   changeIntent: ParsedConstraintChange

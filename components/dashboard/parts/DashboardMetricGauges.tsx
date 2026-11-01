@@ -7,6 +7,9 @@ interface DashboardMetricGaugesProps {
   percentSpent: number;
 }
 
+/**
+ * High-level KPI indicators showing budget utilization, task progress, and confirmed vendor ratios.
+ */
 export function DashboardMetricGauges({ plan, percentSpent }: DashboardMetricGaugesProps) {
   return (
     <section className="bg-bauhausYellow text-black border-4 border-black p-6 sm:p-10 shadow-hard-8 space-y-6">

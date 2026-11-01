@@ -1,9 +1,15 @@
+/**
+ * Seed data generators producing realistic reference events and blank starter plans for EventPilot.
+ */
 import { EventPlan, EventType } from "../types/event";
 import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
 import { generateDefaultVendors } from "../vendor/vendorEngine";
 import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
 import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
+/**
+ * Creates a clean starter event plan initialized with default properties and no line items.
+ */
 export function createEmptyEventPlan(): EventPlan {
   const targetDate = addDaysToDate(formatISODate(new Date()), 25);
 
@@ -36,6 +42,9 @@ export function createEmptyEventPlan(): EventPlan {
   };
 }
 
+/**
+ * Generates a fully populated reference event ("Aanya's 18th Birthday") for demonstrations.
+ */
 export function createReferenceEventPlan(): EventPlan {
   // Event date set ~25 days into future from today
   const targetDate = addDaysToDate(formatISODate(new Date()), 25);
@@ -163,6 +172,9 @@ export function createReferenceEventPlan(): EventPlan {
   };
 }
 
+/**
+ * Creates a tailored event plan with customized title, type, date, and pre-allocated baseline tasks.
+ */
 export function createCustomEventPlan(
   name = "New Celebration",
   type: EventType = "other",

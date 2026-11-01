@@ -1,6 +1,12 @@
+/**
+ * Default milestone templates and task graphs tailored for indoor and outdoor event profiles.
+ */
 import { Task } from "../types/event";
 import { addDaysToDate } from "./dateUtils";
 
+/**
+ * Builds the standard milestone task templates for an event given date and outdoor settings.
+ */
 export function getBaseEventTasks(
   isOutdoor: boolean
 ): Array<Omit<Task, "dueDate" | "isOverdue" | "isBlocked">> {
@@ -116,6 +122,9 @@ export function getBaseEventTasks(
   ];
 }
 
+/**
+ * Instantiates and schedules default tasks using a recalculateSchedule delegate.
+ */
 export function buildDefaultTasks(
   eventDateStr: string,
   isOutdoor: boolean,

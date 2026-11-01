@@ -12,6 +12,9 @@ export interface BudgetItemRowProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * Renders an individual budget line item with cost details, protection status, and edit controls.
+ */
 export const BudgetItemRow = React.memo(function BudgetItemRow({
   item,
   onEdit,

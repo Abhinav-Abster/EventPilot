@@ -1,3 +1,6 @@
+/**
+ * Normalizes and validates raw creative ideas into typed suggestion cards with feasibility tags.
+ */
 import { CreativeIdea, CreativeIdeaCategory, CREATIVE_IDEA_CATEGORIES } from "../../types/event";
 import { isOneOf } from "../../utils/guards";
 import { asRecord, text, integer } from "../parsingHelpers";
@@ -13,6 +16,11 @@ function resolveIdeaCategory(raw: unknown): CreativeIdeaCategory {
   return isOneOf(CREATIVE_IDEA_CATEGORIES, candidate) ? candidate : "activities";
 }
 
+/**
+ * Normalizes raw suggestion cards into validated CreativeIdea records with categories and impact tags.
+ * @param rawIdeas Raw idea data extracted from LLM JSON response.
+ * @returns Sanitized list of CreativeIdea items.
+ */
 export function normalizeIdeas(rawList: unknown[]): CreativeIdea[] {
   return rawList.map((value, index) => {
     const idea = asRecord(value) ?? {};

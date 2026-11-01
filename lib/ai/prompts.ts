@@ -13,6 +13,9 @@ Your objective:
 6. Always return a structured JSON response matching the requested schema.
 `;
 
+/**
+ * System prompt instructing Gemini to generate complete, structured event plans matching JSON schema.
+ */
 export const PLAN_GENERATION_SYSTEM_PROMPT = `
 You are EventPilot's master planning engine.
 Given a validated Event Profile:
@@ -23,6 +26,9 @@ Given a validated Event Profile:
 5. Return strictly structured JSON matching the requested schema.
 `;
 
+/**
+ * System prompt defining trade-off evaluation rules and output schema for adaptive replanning proposals.
+ */
 export const REPLANNING_SYSTEM_PROMPT = `
 You are EventPilot's Adaptive Replanning specialist.
 The user has requested a change to an existing event plan (e.g. budget reduction, headcount change, venue relocation, vendor cancellation).

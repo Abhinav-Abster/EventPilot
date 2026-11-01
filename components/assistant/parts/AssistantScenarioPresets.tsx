@@ -5,6 +5,9 @@ export interface QuickScenario {
   query: string;
 }
 
+/**
+ * Pre-configured common event replanning scenarios for rapid simulation.
+ */
 export const QUICK_SCENARIOS: QuickScenario[] = [
   {
     title: "BUDGET CAP: ₹30,000",
@@ -36,6 +39,9 @@ interface AssistantScenarioPresetsProps {
   onSelectScenario: (query: string) => void;
 }
 
+/**
+ * Preset button pills allowing users to test common replanning scenarios with one click.
+ */
 export function AssistantScenarioPresets({ onSelectScenario }: AssistantScenarioPresetsProps) {
   return (
     <div className="space-y-3">

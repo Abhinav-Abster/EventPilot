@@ -1,8 +1,14 @@
+/**
+ * Regex and rule-based intent parsers classifying natural-language replanning requests into structured constraint changes.
+ */
 import { EventPlan, BudgetCategory } from "../types/event";
 import { formatINR, rupeesToPaise } from "../budget/moneyUtils";
 import { addDaysToDate } from "../timeline/timelineEngine";
 import { ParsedConstraintChange } from "./types";
 
+/**
+ * Extracts target budget limits from natural language input.
+ */
 export function parseBudgetIntent(q: string, query: string): ParsedConstraintChange | null {
   const budgetMatch =
     q.match(
@@ -30,6 +36,9 @@ export function parseBudgetIntent(q: string, query: string): ParsedConstraintCha
   return null;
 }
 
+/**
+ * Extracts updated guest count figures from natural language input.
+ */
 export function parseGuestCountIntent(
   q: string,
   query: string,
@@ -60,6 +69,9 @@ export function parseGuestCountIntent(
   };
 }
 
+/**
+ * Identifies indoor/outdoor venue preference shifts from natural language input.
+ */
 export function parseVenueIntent(q: string, query: string): ParsedConstraintChange | null {
   if (
     q.includes("indoor") ||
@@ -86,6 +98,9 @@ export function parseVenueIntent(q: string, query: string): ParsedConstraintChan
   return null;
 }
 
+/**
+ * Identifies vendor cancellation notifications and affected vendor categories.
+ */
 export function parseVendorCancellationIntent(
   q: string,
   query: string
@@ -127,6 +142,9 @@ export function parseVendorCancellationIntent(
   return null;
 }
 
+/**
+ * Extracts new target dates or relative postponement days from user requests.
+ */
 export function parseDateChangeIntent(
   q: string,
   query: string,
@@ -154,6 +172,9 @@ export function parseDateChangeIntent(
   return null;
 }
 
+/**
+ * Detects requests to cut specific categories or feature priorities.
+ */
 export function parsePriorityReductionIntent(
   q: string,
   query: string

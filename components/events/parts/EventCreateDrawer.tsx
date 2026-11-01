@@ -19,6 +19,9 @@ interface EventCreateDrawerProps {
   onCreateAndIntake?: (e: React.FormEvent) => void;
 }
 
+/**
+ * Side drawer form for entering basic parameters to initialize a new custom event plan.
+ */
 export function EventCreateDrawer({
   isCreating,
   onClose,

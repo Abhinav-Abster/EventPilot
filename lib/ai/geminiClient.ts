@@ -1,3 +1,6 @@
+/**
+ * Singleton Google GenAI client factory and model configuration for server-side generation.
+ */
 import { GoogleGenAI } from "@google/genai";
 
 let geminiClientInstance: GoogleGenAI | null = null;
@@ -35,4 +38,7 @@ export function getGeminiClient(): GoogleGenAI {
   return geminiClientInstance;
 }
 
+/**
+ * Default Gemini model identifier used for structured schema-guided event generation.
+ */
 export const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";

@@ -1,3 +1,6 @@
+/**
+ * Normalizes, coerces, and clamps raw event intake fields into a strictly validated EventProfile.
+ */
 import {
   EventProfile,
   EventType,
@@ -45,6 +48,12 @@ function parseBudgetMinor(raw: unknown): number {
   return total;
 }
 
+/**
+ * Sanitizes and bounds intake parameters into a strictly validated EventProfile entity.
+ * @param raw Untrusted raw profile record from LLM intake output.
+ * @param currentPlan Optional existing plan to inherit unset values from.
+ * @returns Validated EventProfile object.
+ */
 export function normalizeProfile(
   raw: Partial<EventProfile> | Record<string, unknown> | undefined
 ): EventProfile {

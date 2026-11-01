@@ -7,6 +7,9 @@ interface IntakeMustHavesProps {
   onRemoveMustHave: (index: number) => void;
 }
 
+/**
+ * Checklist of mandatory non-negotiable requirements extracted from event intake.
+ */
 export function IntakeMustHaves({
   mustHaves,
   onAddMustHave,

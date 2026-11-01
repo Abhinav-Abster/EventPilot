@@ -1,3 +1,6 @@
+/**
+ * Runtime Zod validation schemas establishing data boundary contracts for events, tasks, budgets, and vendors.
+ */
 import { z } from "zod";
 import {
   EVENT_TYPES,
@@ -14,11 +17,16 @@ import {
 import { VALID_DIETS } from "../ai/normalizers";
 import { DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
 
+/** Zod schema validating supported event types. */
 export const EventTypeSchema = z.enum(EVENT_TYPES);
+/** Zod schema validating venue categories (indoor, outdoor, hybrid). */
 export const VenueTypeSchema = z.enum(VENUE_TYPES);
+/** Zod schema validating recognized dietary restriction tags. */
 export const DietaryPreferenceSchema = z.enum(VALID_DIETS);
+/** Zod schema validating planning trade-off priority dimensions. */
 export const PlanningPrioritySchema = z.enum(PLANNING_PRIORITIES);
 
+/** Zod schema enforcing event profile parameters, guest counts, and constraints. */
 export const EventProfileSchema = z.object({
   id: z.string().default(() => "ep-" + Math.random().toString(36).substring(2, 9)),
   name: z.string().min(2, "Event name must be at least 2 characters").max(100),
@@ -42,8 +50,10 @@ export const EventProfileSchema = z.object({
   notes: z.string().default(""),
 });
 
+/** Zod schema validating canonical budget expense categories. */
 export const BudgetCategorySchema = z.enum(BUDGET_CATEGORIES);
 
+/** Zod schema validating individual budget line items with minor-unit costs. */
 export const BudgetItemSchema = z.object({
   id: z.string().default(() => "bi-" + Math.random().toString(36).substring(2, 9)),
   category: BudgetCategorySchema,
@@ -55,9 +65,12 @@ export const BudgetItemSchema = z.object({
   notes: z.string().optional(),
 });
 
+/** Zod schema validating milestone task priority levels. */
 export const TaskPrioritySchema = z.enum(TASK_PRIORITIES);
+/** Zod schema validating milestone task lifecycle statuses. */
 export const TaskStatusSchema = z.enum(TASK_STATUSES);
 
+/** Zod schema validating milestone tasks with dependencies and timeline offsets. */
 export const TaskSchema = z.object({
   id: z.string().default(() => "t-" + Math.random().toString(36).substring(2, 9)),
   title: z.string().min(1),
@@ -74,11 +87,15 @@ export const TaskSchema = z.object({
   isBlocked: z.boolean().default(false),
 });
 
+/** Zod schema validating vendor specialization categories. */
 export const VendorCategorySchema = z.enum(VENDOR_CATEGORIES);
 
+/** Zod schema validating vendor engagement workflow states. */
 export const VendorBookingStatusSchema = z.enum(VENDOR_BOOKING_STATUSES);
+/** Zod schema validating vendor contract payment statuses. */
 export const VendorPaymentStatusSchema = z.enum(VENDOR_PAYMENT_STATUSES);
 
+/** Zod schema validating vendor contact records and quotes. */
 export const VendorRecordSchema = z.object({
   id: z.string().default(() => "v-" + Math.random().toString(36).substring(2, 9)),
   name: z.string().min(1),
@@ -98,8 +115,10 @@ export const VendorRecordSchema = z.object({
   relatedTaskIds: z.array(z.string()).default([]),
 });
 
+/** Zod schema validating classification categories for creative ideas. */
 export const CreativeIdeaCategorySchema = z.enum(CREATIVE_IDEA_CATEGORIES);
 
+/** Zod schema validating creative idea recommendation cards. */
 export const CreativeIdeaSchema = z.object({
   id: z.string().default(() => "ci-" + Math.random().toString(36).substring(2, 9)),
   category: CreativeIdeaCategorySchema,
@@ -114,6 +133,7 @@ export const CreativeIdeaSchema = z.object({
   isSaved: z.boolean().optional().default(false),
 });
 
+/** Zod schema validating full aggregate EventPlan domain models. */
 export const EventPlanSchema = z.object({
   profile: EventProfileSchema,
   budgetItems: z.array(BudgetItemSchema),

@@ -17,6 +17,9 @@ interface AssistantMessage {
   timestamp: string;
 }
 
+/**
+ * Main AI Assistant container providing conversational intake, intent replanning, and scenario presets.
+ */
 export function AIAssistantView() {
   const { plan, setActiveProposal, applyProposal, lastAppliedProposalId } = usePlan();
 

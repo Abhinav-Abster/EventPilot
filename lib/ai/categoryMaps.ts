@@ -1,3 +1,6 @@
+/**
+ * Normalization mappings and validation sets converting informal AI category labels into domain constants.
+ */
 import {
   BUDGET_CATEGORIES,
   VENDOR_CATEGORIES,
@@ -7,8 +10,14 @@ import {
   CreativeIdeaCategory,
 } from "../types/event";
 
+/**
+ * Set of all supported budget category identifiers for O(1) membership checks.
+ */
 export const VALID_BUDGET_CATEGORIES_SET = new Set<string>(BUDGET_CATEGORIES);
 
+/**
+ * Normalization lookup mapping aliases and informal category phrases to canonical BudgetCategory values.
+ */
 export const BUDGET_CATEGORY_MAP: Record<string, BudgetCategory> = {
   food: "food_beverage",
   catering: "food_beverage",
@@ -62,8 +71,14 @@ export const BUDGET_CATEGORY_MAP: Record<string, BudgetCategory> = {
   other: "miscellaneous",
 };
 
+/**
+ * Set of all supported vendor category identifiers for membership validation.
+ */
 export const VALID_VENDOR_CATEGORIES_SET = new Set<string>(VENDOR_CATEGORIES);
 
+/**
+ * Normalization lookup mapping vendor category aliases to canonical VendorCategory values.
+ */
 export const VENDOR_CATEGORY_MAP: Record<string, VendorCategory> = {
   food: "caterer",
   catering: "caterer",
@@ -102,8 +117,14 @@ export const VENDOR_CATEGORY_MAP: Record<string, VendorCategory> = {
   other: "other",
 };
 
+/**
+ * Set of supported creative idea category keys for validation.
+ */
 export const VALID_IDEA_CATEGORIES_SET = new Set<string>(CREATIVE_IDEA_CATEGORIES);
 
+/**
+ * Normalization lookup mapping idea classification synonyms to canonical CreativeIdeaCategory values.
+ */
 export const IDEA_CATEGORY_MAP: Record<string, CreativeIdeaCategory> = {
   theme: "theme",
   concept: "theme",

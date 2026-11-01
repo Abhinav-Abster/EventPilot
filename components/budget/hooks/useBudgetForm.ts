@@ -11,6 +11,9 @@ export interface BudgetFormData {
   notes: string;
 }
 
+/**
+ * Hook managing form state, validation, and submission for adding or editing budget items.
+ */
 export function useBudgetForm() {
   const [form, setForm] = useState<BudgetFormData>({
     name: "",

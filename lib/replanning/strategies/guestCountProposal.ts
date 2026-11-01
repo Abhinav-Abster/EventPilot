@@ -1,3 +1,6 @@
+/**
+ * Strategy scaling per-head catering, seating, and venue arrangements upon guest count changes.
+ */
 import {
   EventPlan,
   EventProfile,
@@ -9,6 +12,9 @@ import { calculateBudgetSummary } from "../../budget/budgetEngine";
 import { formatINR, subtractMoney, addMoney } from "../../budget/moneyUtils";
 import { ParsedConstraintChange } from "../types";
 
+/**
+ * Generates a proposal recalibrating per-person food, beverage, and venue capacities.
+ */
 export function createGuestCountProposal(
   currentPlan: EventPlan,
   changeIntent: ParsedConstraintChange

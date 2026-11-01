@@ -13,12 +13,14 @@ export const EVENT_TYPES = [
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
+/** Canonical list of supported event venue environments. */
 export const VENUE_TYPES = ["indoor", "outdoor", "hybrid", "unselected"] as const;
 export type VenueType = (typeof VENUE_TYPES)[number];
 
 export type DietaryPreference =
   "vegetarian" | "non-vegetarian" | "vegan" | "jain" | "halal" | "gluten-free" | "nut-allergy";
 
+/** Core priority dimensions considered during trade-off negotiations. */
 export const PLANNING_PRIORITIES = [
   "food",
   "decor",
@@ -52,6 +54,7 @@ export interface EventProfile {
   notes: string;
 }
 
+/** Canonical list of budget expenditure categories. */
 export const BUDGET_CATEGORIES = [
   "venue",
   "food_beverage",
@@ -100,12 +103,15 @@ export interface BudgetSummary {
   savingsTips: string[];
 }
 
+/** Priority levels assigned to preparation milestone tasks. */
 export const TASK_PRIORITIES = ["urgent", "high", "medium", "low"] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
+/** Lifecycle states of a milestone task. */
 export const TASK_STATUSES = ["todo", "in_progress", "completed", "blocked"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
+/** Categories classifying milestone tasks. */
 export const TASK_CATEGORIES = [...BUDGET_CATEGORIES, "general", "coordination"] as const;
 export type TaskCategory = (typeof TASK_CATEGORIES)[number];
 
@@ -125,6 +131,7 @@ export interface Task {
   isBlocked: boolean;
 }
 
+/** Specialization categories classifying external vendors. */
 export const VENDOR_CATEGORIES = [
   "venue",
   "caterer",
@@ -137,6 +144,7 @@ export const VENDOR_CATEGORIES = [
 ] as const;
 export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
+/** Engagement lifecycle stages for a vendor. */
 export const VENDOR_BOOKING_STATUSES = [
   "planned",
   "contacted",
@@ -147,6 +155,7 @@ export const VENDOR_BOOKING_STATUSES = [
 ] as const;
 export type VendorBookingStatus = (typeof VENDOR_BOOKING_STATUSES)[number];
 
+/** Payment status tracking vendor invoices and deposits. */
 export const VENDOR_PAYMENT_STATUSES = ["unpaid", "advance_paid", "fully_paid"] as const;
 export type VendorPaymentStatus = (typeof VENDOR_PAYMENT_STATUSES)[number];
 
@@ -167,6 +176,7 @@ export interface VendorRecord {
   relatedTaskIds: string[];
 }
 
+/** Categorization buckets for personalized event suggestions. */
 export const CREATIVE_IDEA_CATEGORIES = [
   "theme",
   "decor",

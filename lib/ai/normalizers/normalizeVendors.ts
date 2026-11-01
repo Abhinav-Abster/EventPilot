@@ -1,3 +1,6 @@
+/**
+ * Converts raw vendor recommendations into typed VendorRecord domain objects with standardized statuses.
+ */
 import {
   VendorRecord,
   VendorCategory,
@@ -39,6 +42,11 @@ function resolveContact(raw: unknown) {
   };
 }
 
+/**
+ * Normalizes raw vendor outputs into structured VendorRecord objects with contact details and quotes.
+ * @param rawVendors Untrusted vendor list from LLM output.
+ * @returns Array of validated VendorRecord items.
+ */
 export function normalizeVendors(rawList: unknown[]): VendorRecord[] {
   return rawList.map((value, index) => {
     const vendor = asRecord(value) ?? {};

@@ -12,6 +12,9 @@ interface DashboardHeroPosterProps {
   onOpenEventManager?: () => void;
 }
 
+/**
+ * Prominent visual header summarizing event title, countdown, venue type, and quick navigation.
+ */
 export function DashboardHeroPoster({
   plan,
   dossierIndex,

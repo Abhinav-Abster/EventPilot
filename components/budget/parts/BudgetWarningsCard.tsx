@@ -5,6 +5,9 @@ interface BudgetWarningsCardProps {
   warnings: string[];
 }
 
+/**
+ * Alert panel summarizing budget overages, under-allocated categories, and financial risks.
+ */
 export function BudgetWarningsCard({ warnings }: BudgetWarningsCardProps) {
   if (warnings.length === 0) return null;
 

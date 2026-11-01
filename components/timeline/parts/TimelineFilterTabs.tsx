@@ -14,6 +14,9 @@ interface TimelineFilterTabsProps {
   statusCounts: StatusCounts;
 }
 
+/**
+ * Filter tab controls for isolating tasks by status (all, pending, completed, blocked).
+ */
 export function TimelineFilterTabs({
   filterStatus,
   onFilterChange,

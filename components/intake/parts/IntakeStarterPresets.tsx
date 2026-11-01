@@ -6,6 +6,9 @@ export interface StarterPrompt {
   accent: string;
 }
 
+/**
+ * Preset prompt examples demonstrating conversational intake for various event archetypes.
+ */
 export const STARTER_PROMPTS: StarterPrompt[] = [
   {
     title: "PUNE BIRTHDAY SPECIFICATION",
@@ -31,6 +34,9 @@ interface IntakeStarterPresetsProps {
   onSelectPrompt: (query: string) => void;
 }
 
+/**
+ * Quick-start prompt buttons populating the intake prompt with realistic event scenarios.
+ */
 export function IntakeStarterPresets({ onSelectPrompt }: IntakeStarterPresetsProps) {
   return (
     <div className="space-y-3">

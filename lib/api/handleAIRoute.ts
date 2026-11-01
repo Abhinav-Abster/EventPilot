@@ -1,7 +1,16 @@
+/**
+ * Standardized Next.js App Router POST handler providing schema validation, error mapping, and consistent status codes.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { ZodType } from "zod";
 import { AIServiceError } from "../ai/aiService";
 
+/**
+ * Factory wrapping Next.js route handlers with JSON parsing, Zod validation, and structured error responses.
+ * @param schema Zod schema for request validation.
+ * @param handler Async worker handling validated request data.
+ * @returns Next.js route handler function.
+ */
 export function handleAIRoute<T>(schema: ZodType<T>, handler: (data: T) => Promise<unknown>) {
   return async function (request: NextRequest): Promise<NextResponse> {
     let body: unknown;

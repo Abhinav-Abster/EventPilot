@@ -1,3 +1,6 @@
+/**
+ * Deterministic budget computation and constraint-satisfaction optimization engine using integer minor units.
+ */
 import { BudgetItem, BudgetCategory, BudgetSummary, EventProfile } from "../types/event";
 import { subtractMoney, formatINR, addMoney } from "./moneyUtils";
 import { computeCategoryBreakdown, buildBudgetWarningsAndTips } from "./summaryHelpers";
@@ -7,6 +10,9 @@ import {
   computeItemReduction,
 } from "./optimizationHelpers";
 
+/**
+ * Ordered list of canonical budget categories used across financial calculations.
+ */
 export const ALL_BUDGET_CATEGORIES: BudgetCategory[] = [
   "venue",
   "food_beverage",
@@ -19,6 +25,9 @@ export const ALL_BUDGET_CATEGORIES: BudgetCategory[] = [
   "contingency_reserve",
 ];
 
+/**
+ * User-facing display names for each canonical budget category.
+ */
 export const CATEGORY_LABELS: Record<BudgetCategory, string> = {
   venue: "Venue & Permits",
   food_beverage: "Food, Drinks & Cake",

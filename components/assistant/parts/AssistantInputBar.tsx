@@ -8,6 +8,9 @@ interface AssistantInputBarProps {
   isEvaluating: boolean;
 }
 
+/**
+ * Interactive prompt input box for conversational AI event assistance and intent replanning.
+ */
 export function AssistantInputBar({
   inputQuery,
   onInputChange,

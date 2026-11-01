@@ -1,6 +1,12 @@
+/**
+ * General audit strategy proposing health improvements for unbalanced or unoptimized plans.
+ */
 import { EventPlan, ReplanningProposal } from "../../types/event";
 import { calculateBudgetSummary } from "../../budget/budgetEngine";
 
+/**
+ * Generates a baseline health audit proposal addressing existing warnings in the plan.
+ */
 export function createGeneralAuditProposal(currentPlan: EventPlan): ReplanningProposal[] {
   const summary = calculateBudgetSummary(
     currentPlan.profile.totalBudgetMinor,

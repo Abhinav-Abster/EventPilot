@@ -1,3 +1,6 @@
+/**
+ * Strategy reallocating budget and flagging blocked tasks when a vendor booking is cancelled.
+ */
 import {
   EventPlan,
   VendorRecord,
@@ -31,6 +34,9 @@ function vendorCategoryToTaskCategory(category: string): TaskCategory {
   }
 }
 
+/**
+ * Generates a proposal unlinking cancelled vendors and scheduling replacement procurement.
+ */
 export function createVendorCancellationProposal(
   currentPlan: EventPlan,
   changeIntent: ParsedConstraintChange

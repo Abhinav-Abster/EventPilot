@@ -11,6 +11,9 @@ interface EventToolbarProps {
   onToggleCreating: () => void;
 }
 
+/**
+ * Header actions toolbar providing event switching, duplication, creation, and reset triggers.
+ */
 export function EventToolbar({
   searchQuery,
   onSearchChange,

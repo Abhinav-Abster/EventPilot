@@ -1,3 +1,6 @@
+/**
+ * Normalizes and validates raw LLM budget allocations into structured domain items in integer minor units (paise).
+ */
 import { BudgetItem, BudgetCategory, BUDGET_CATEGORIES } from "../../types/event";
 import { isOneOf } from "../../utils/guards";
 import { asRecord, text, integer } from "../parsingHelpers";
@@ -33,6 +36,13 @@ function balanceBudgetExcess(items: BudgetItem[], totalBudgetMinor: number): voi
   }
 }
 
+/**
+ * Validates and normalizes raw budget items into structured BudgetItem domain records in integer minor units (paise).
+ * @param rawItems Untrusted item array from LLM response.
+ * @param totalBudgetMinor Target total budget in minor units (paise).
+ * @param guestCount Total guest count used for per-guest scaling flags.
+ * @returns Validated BudgetItem records.
+ */
 export function normalizeBudgetItems(rawList: unknown[], totalBudgetMinor: number): BudgetItem[] {
   const fallbackList = [
     {

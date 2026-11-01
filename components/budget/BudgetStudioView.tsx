@@ -15,6 +15,9 @@ import { BudgetItemAddModal } from "./parts/BudgetItemAddModal";
 import { BudgetItemEditModal } from "./parts/BudgetItemEditModal";
 import { useBudgetForm } from "./hooks/useBudgetForm";
 
+/**
+ * Primary budget dashboard providing financial breakdown, optimizer actions, and category summaries.
+ */
 export function BudgetStudioView() {
   const { plan, addBudgetItem, updateBudgetItem, deleteBudgetItem, setActiveProposal } = usePlan();
 

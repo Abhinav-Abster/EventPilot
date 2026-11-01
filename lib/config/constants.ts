@@ -1,3 +1,6 @@
+/**
+ * Application-wide configuration defaults, reference constants, and fallback parameters.
+ */
 import { DietaryPreference } from "../types/event";
 
 /**

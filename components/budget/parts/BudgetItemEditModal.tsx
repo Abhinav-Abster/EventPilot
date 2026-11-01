@@ -10,6 +10,9 @@ interface BudgetItemEditModalProps {
   onChange: (updated: BudgetItem) => void;
 }
 
+/**
+ * Modal dialog allowing users to adjust costs, estimates, and protected flags for budget items.
+ */
 export function BudgetItemEditModal({
   editingItem,
   onClose,

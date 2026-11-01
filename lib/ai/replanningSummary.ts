@@ -1,3 +1,6 @@
+/**
+ * Generates compact plan summaries to fit within strict replanning prompt token budgets.
+ */
 import { EventPlan } from "../types/event";
 
 export interface CompactReplanningSummary {

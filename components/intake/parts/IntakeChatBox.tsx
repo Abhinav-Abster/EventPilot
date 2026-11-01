@@ -16,6 +16,9 @@ interface IntakeChatBoxProps {
   onSendMessage: () => void;
 }
 
+/**
+ * Text area and submission controls for free-form conversational event requirements.
+ */
 export function IntakeChatBox({
   messages,
   inputMessage,

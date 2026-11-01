@@ -24,6 +24,9 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   },
 ];
 
+/**
+ * Conversational intake workspace allowing users to generate event plans from natural language descriptions.
+ */
 export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeViewProps) {
   const { plan, setFullPlan } = usePlan();
 

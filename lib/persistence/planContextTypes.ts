@@ -1,3 +1,6 @@
+/**
+ * Type definitions for the PlanContext state store and available state dispatchers.
+ */
 import {
   EventPlan,
   BudgetItem,

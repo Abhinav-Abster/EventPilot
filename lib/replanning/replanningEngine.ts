@@ -1,3 +1,6 @@
+/**
+ * Core replanning engine evaluating constraint violations and coordinating proposal generation strategies.
+ */
 import { EventPlan, ReplanningProposal } from "../types/event";
 import { ParsedConstraintChange } from "./types";
 import {

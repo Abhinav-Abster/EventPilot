@@ -1,3 +1,6 @@
+/**
+ * Transforms unstructured AI task lists into dependency-linked tasks with relative day offsets.
+ */
 import {
   Task,
   TaskPriority,
@@ -26,6 +29,12 @@ function resolveTaskStatus(raw: unknown): TaskStatus {
   return isOneOf(TASK_STATUSES, str) ? str : "todo";
 }
 
+/**
+ * Converts raw AI task specifications into structured Task records with verified dependencies.
+ * @param rawTasks Untrusted task array from LLM response.
+ * @param eventDate Target event date in YYYY-MM-DD format for computing absolute deadlines.
+ * @returns Array of validated Task objects.
+ */
 export function normalizeTasks(rawList: unknown[], planDate: string): Task[] {
   const fallbackList = [
     { title: "Confirm venue booking", category: "venue", relativeDays: -20 },

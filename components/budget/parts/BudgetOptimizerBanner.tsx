@@ -7,6 +7,9 @@ interface BudgetOptimizerBannerProps {
   onSimulate: () => void;
 }
 
+/**
+ * Call-to-action banner highlighting automated budget optimization when overspending occurs.
+ */
 export function BudgetOptimizerBanner({
   targetOptimizationRupees,
   setTargetOptimizationRupees,

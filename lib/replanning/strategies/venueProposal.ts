@@ -1,3 +1,6 @@
+/**
+ * Strategy adapting logistics, setup tasks, and weather contingencies when venue type switches.
+ */
 import {
   EventPlan,
   EventProfile,
@@ -8,6 +11,9 @@ import {
 import { formatINR, addMoney } from "../../budget/moneyUtils";
 import { ParsedConstraintChange } from "../types";
 
+/**
+ * Generates a proposal switching logistics and tasks between indoor and outdoor venues.
+ */
 export function createVenueChangeProposal(
   currentPlan: EventPlan,
   changeIntent: ParsedConstraintChange

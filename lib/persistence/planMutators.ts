@@ -1,3 +1,6 @@
+/**
+ * Pure state transformation functions updating event entities immutably.
+ */
 import {
   EventPlan,
   BudgetItem,
@@ -9,6 +12,9 @@ import {
 import { recalculateSchedule } from "../timeline/timelineEngine";
 import { createId } from "../utils/id";
 
+/**
+ * Deep clones an existing plan with a new unique ID and updated timestamp.
+ */
 export function duplicatePlan(source: EventPlan): EventPlan {
   const newId = createId("ep");
   return {
@@ -24,6 +30,9 @@ export function duplicatePlan(source: EventPlan): EventPlan {
   };
 }
 
+/**
+ * Immutably updates event profile metadata and touches updatedAt timestamp.
+ */
 export function applyProfileUpdates(
   prev: EventPlan,
   profileUpdates: Partial<EventProfile>
@@ -45,6 +54,9 @@ export function applyProfileUpdates(
   };
 }
 
+/**
+ * Inserts a new budget item into the plan immutably.
+ */
 export function addBudgetItemToPlan(prev: EventPlan, item: Omit<BudgetItem, "id">): EventPlan {
   const newItem: BudgetItem = {
     ...item,
@@ -58,6 +70,9 @@ export function addBudgetItemToPlan(prev: EventPlan, item: Omit<BudgetItem, "id"
   };
 }
 
+/**
+ * Modifies an existing budget item by ID within the plan.
+ */
 export function updateBudgetItemInPlan(
   prev: EventPlan,
   id: string,
@@ -71,6 +86,9 @@ export function updateBudgetItemInPlan(
   };
 }
 
+/**
+ * Removes a budget item by ID from the plan.
+ */
 export function deleteBudgetItemFromPlan(prev: EventPlan, id: string): EventPlan {
   return {
     ...prev,
@@ -80,6 +98,9 @@ export function deleteBudgetItemFromPlan(prev: EventPlan, id: string): EventPlan
   };
 }
 
+/**
+ * Inserts a new milestone task into the plan immutably.
+ */
 export function addTaskToPlan(prev: EventPlan, task: Omit<Task, "id">): EventPlan {
   const newTask: Task = {
     ...task,
@@ -95,6 +116,9 @@ export function addTaskToPlan(prev: EventPlan, task: Omit<Task, "id">): EventPla
   };
 }
 
+/**
+ * Modifies an existing task by ID within the plan.
+ */
 export function updateTaskInPlan(prev: EventPlan, id: string, updates: Partial<Task>): EventPlan {
   const newTasks = prev.tasks.map((task) => (task.id === id ? { ...task, ...updates } : task));
   const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
@@ -106,6 +130,9 @@ export function updateTaskInPlan(prev: EventPlan, id: string, updates: Partial<T
   };
 }
 
+/**
+ * Removes a task by ID from the plan.
+ */
 export function deleteTaskFromPlan(prev: EventPlan, id: string): EventPlan {
   const filtered = prev.tasks.filter((t) => t.id !== id);
   const { updatedTasks } = recalculateSchedule(filtered, prev.profile.date);
@@ -117,6 +144,9 @@ export function deleteTaskFromPlan(prev: EventPlan, id: string): EventPlan {
   };
 }
 
+/**
+ * Toggles a task status between todo, in_progress, and completed.
+ */
 export function toggleTaskStatusInPlan(prev: EventPlan, id: string): EventPlan {
   const target = prev.tasks.find((t) => t.id === id);
   if (!target) return prev;
@@ -133,6 +163,9 @@ export function toggleTaskStatusInPlan(prev: EventPlan, id: string): EventPlan {
   };
 }
 
+/**
+ * Inserts a new vendor record into the plan immutably.
+ */
 export function addVendorToPlan(prev: EventPlan, vendor: Omit<VendorRecord, "id">): EventPlan {
   const newVendor: VendorRecord = {
     ...vendor,
@@ -146,6 +179,9 @@ export function addVendorToPlan(prev: EventPlan, vendor: Omit<VendorRecord, "id"
   };
 }
 
+/**
+ * Modifies an existing vendor record by ID within the plan.
+ */
 export function updateVendorInPlan(
   prev: EventPlan,
   id: string,
@@ -159,6 +195,9 @@ export function updateVendorInPlan(
   };
 }
 
+/**
+ * Removes a vendor record by ID from the plan.
+ */
 export function deleteVendorFromPlan(prev: EventPlan, id: string): EventPlan {
   return {
     ...prev,
@@ -168,6 +207,9 @@ export function deleteVendorFromPlan(prev: EventPlan, id: string): EventPlan {
   };
 }
 
+/**
+ * Toggles the saved bookmark status of a creative idea card.
+ */
 export function toggleSaveIdeaInPlan(prev: EventPlan, id: string): EventPlan {
   return {
     ...prev,

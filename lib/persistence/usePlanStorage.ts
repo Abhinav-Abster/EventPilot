@@ -1,7 +1,13 @@
+/**
+ * Custom React hook synchronizing in-memory event plans with browser local storage.
+ */
 import { useEffect, useRef, useCallback } from "react";
 import { EventPlan } from "../types/event";
 import { loadStoredPlans, saveStoredPlans } from "./storage";
 
+/**
+ * React hook managing synchronized storage reads, writes, and initial plan hydration.
+ */
 export function usePlanStorage(
   plans: EventPlan[],
   activePlanId: string,

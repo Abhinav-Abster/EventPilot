@@ -8,6 +8,9 @@ interface BudgetTableProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * Tabular ledger presenting event budget line items with sorting, category filtering, and item controls.
+ */
 export function BudgetTable({ items, onEdit, onDelete }: BudgetTableProps) {
   return (
     <div className="border-4 border-black bg-white shadow-hard-8 overflow-hidden">

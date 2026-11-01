@@ -25,6 +25,9 @@ interface NavbarProps {
   onOpenEventManager?: () => void;
 }
 
+/**
+ * Application top navigation bar providing tab switching, event selection, and responsive menu controls.
+ */
 export function Navbar({ activeTab, onTabChange, onOpenEventManager }: NavbarProps) {
   const { plan, plans, activePlanId, switchEvent } = usePlan();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

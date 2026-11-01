@@ -23,6 +23,9 @@ interface VendorAddModalProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+/**
+ * Modal dialog allowing registration of new vendors with category, quotes, and contact details.
+ */
 export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: VendorAddModalProps) {
   if (!isOpen) return null;
 

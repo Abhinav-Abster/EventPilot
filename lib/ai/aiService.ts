@@ -1,3 +1,7 @@
+/**
+ * Orchestrates end-to-end AI workflows: natural-language intake parsing, full event plan generation,
+ * and constraint-driven replanning, backed by structured LLM responses and deterministic fallbacks.
+ */
 import { DEFAULT_GEMINI_MODEL } from "./geminiClient";
 import {
   EVENT_INTAKE_SYSTEM_PROMPT,
@@ -38,6 +42,12 @@ export interface ReplanningResult {
   explanation: string;
 }
 
+/**
+ * Parses free-form conversational event descriptions into normalized profile fields.
+ * @param rawText User's unconstrained description of their event.
+ * @param currentPlan Optional active plan to preserve existing constraints and preferences.
+ * @returns Partially populated, sanitized event profile fields.
+ */
 export async function processEventIntake(
   userMessage: string,
   currentProfile: Partial<EventProfile> = {}
@@ -88,6 +98,11 @@ Only include fields that were stated or can be inferred safely in extractedProfi
   };
 }
 
+/**
+ * Synthesizes a comprehensive, cohesive event plan with budget items, timeline tasks, and vendor recommendations.
+ * @param profile Validated event profile specifying parameters and constraints.
+ * @returns A fully populated, schema-valid EventPlan object.
+ */
 export async function generateFullEventPlan(
   profile: Partial<EventProfile>
 ): Promise<PlanGenerationResult> {
@@ -138,6 +153,12 @@ Strict Formatting and Constraints:
   return { plan, modelUsed: DEFAULT_GEMINI_MODEL };
 }
 
+/**
+ * Evaluates natural-language constraint updates against the current plan to generate actionable replanning proposals.
+ * @param currentPlan The active event plan prior to modification.
+ * @param requestedChange Natural language description of requested modifications (e.g., budget cuts, date changes).
+ * @returns Array of structured replanning proposals with before/after diffs and impact scores.
+ */
 export async function executeReplanning(
   userQuery: string,
   currentPlan: EventPlan

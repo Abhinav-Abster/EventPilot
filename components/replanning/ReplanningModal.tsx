@@ -5,6 +5,9 @@ import { Check, AlertTriangle, ArrowRight, ShieldCheck } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { formatINR } from "../../lib/budget/moneyUtils";
 
+/**
+ * Review dialog presenting replanning proposals with before/after diffs and compromise analysis.
+ */
 export function ReplanningModal() {
   const { activeProposal, applyProposal, rejectProposal } = usePlan();
 

@@ -1,3 +1,6 @@
+/**
+ * Domain types for constraint changes, proposal diffs, and trade-off assessments in replanning.
+ */
 import { BudgetCategory } from "../types/event";
 
 export interface ParsedConstraintChange {

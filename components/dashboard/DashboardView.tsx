@@ -26,6 +26,9 @@ const SAMPLE_SCENARIOS = [
   "The caterer cancelled",
 ];
 
+/**
+ * Executive event overview displaying key metrics, critical tasks, budget status, and replanning triggers.
+ */
 export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewProps) {
   const { plan, plans, toggleTaskStatus, setActiveProposal } = usePlan();
   const [quickAssistantQuery, setQuickAssistantQuery] = useState("");

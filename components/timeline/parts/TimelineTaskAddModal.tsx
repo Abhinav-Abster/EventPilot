@@ -19,6 +19,9 @@ interface TimelineTaskAddModalProps {
   availableTasks: Task[];
 }
 
+/**
+ * Modal dialog allowing creation of new timeline tasks with custom dependencies and relative days.
+ */
 export function TimelineTaskAddModal({
   isOpen,
   onClose,

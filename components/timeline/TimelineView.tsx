@@ -18,6 +18,9 @@ const INITIAL_TASK_FORM: NewTaskFormData = {
   dependencies: [],
 };
 
+/**
+ * Dependency-aware project timeline view organizing tasks by execution sequence and status.
+ */
 export function TimelineView() {
   const { plan, addTask, updateTask, deleteTask, toggleTaskStatus, updateProfile } = usePlan();
 

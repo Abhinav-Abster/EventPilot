@@ -23,6 +23,9 @@ const INITIAL_FORM: NewEventFormState = {
   budgetRupees: 50000,
 };
 
+/**
+ * Modal interface allowing users to switch active plans, create new events, or duplicate existing plans.
+ */
 export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: EventManagerModalProps) {
   const {
     plans,

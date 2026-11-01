@@ -12,6 +12,9 @@ export interface TimelineTaskCardProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * Card displaying task details, priority badge, due date, and dependency block status.
+ */
 export const TimelineTaskCard = React.memo(function TimelineTaskCard({
   task,
   depTasks,

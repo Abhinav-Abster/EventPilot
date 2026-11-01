@@ -1,3 +1,6 @@
+/**
+ * Assembles composite event plans from parsed AI payloads with schema validation and default fallbacks.
+ */
 import { EventProfile } from "../../types/event";
 import { AIServiceError } from "../transport";
 import { asRecord, asArray } from "../parsingHelpers";
@@ -7,6 +10,12 @@ import { normalizeTasks } from "./normalizeTasks";
 import { normalizeVendors } from "./normalizeVendors";
 import { normalizeIdeas } from "./normalizeIdeas";
 
+/**
+ * Combines independently normalized AI sections into a validated EventPlan conforming to Zod schema.
+ * @param raw Untrusted JSON object parsed from AI response text.
+ * @param fallbackProfile Base profile used when AI omitted mandatory fields.
+ * @returns Fully formed, validated EventPlan.
+ */
 export function normalizePlanOutput(output: unknown, profile: Partial<EventProfile>) {
   const root = asRecord(output);
   const generated =
