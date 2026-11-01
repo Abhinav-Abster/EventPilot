@@ -3,8 +3,6 @@ import {
   detectCircularDependencies,
   sortTasksByExecutionOrder,
   recalculateSchedule,
-  addDaysToDate,
-  formatISODate,
 } from "../lib/timeline/timelineEngine";
 import { Task } from "../lib/types/event";
 
@@ -137,7 +135,6 @@ describe("Timeline & Dependency Engine", () => {
   });
 
   it("recalculates all deadlines when event date is postponed or shifted", () => {
-    const initialDate = "2026-11-20";
     const shiftedDate = "2026-12-05"; // postponed by 15 days
 
     const { updatedTasks } = recalculateSchedule(baseTasks, shiftedDate, "2026-10-25");

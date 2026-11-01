@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  EventProfileSchema,
-  BudgetItemSchema,
-  TaskSchema,
-  EventPlanSchema,
-} from "../lib/schemas/eventSchemas";
+import { EventProfileSchema, EventPlanSchema } from "../lib/schemas/eventSchemas";
 import {
   processEventIntake,
   generateFullEventPlan,

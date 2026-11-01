@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  createCustomEventPlan,
-  createReferenceEventPlan,
-  createEmptyEventPlan,
-} from "../lib/persistence/defaultEvent";
+import { createCustomEventPlan, createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 import { EventPlanSchema } from "../lib/schemas/eventSchemas";
 import { paiseToRupees, rupeesToPaise } from "../lib/budget/moneyUtils";
 import { EventPlan } from "../lib/types/event";

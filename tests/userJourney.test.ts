@@ -45,6 +45,7 @@ describe("Phase 6 End-to-End User Journey Audit", () => {
 
     // Downstream tasks depending on venue should now be unblocked
     const decorTask = currentPlan.tasks.find((t) => t.id === "task-decor-plan");
+    expect(decorTask?.isBlocked).toBe(true);
     const { updatedTasks } = recalculateSchedule(currentPlan.tasks, currentPlan.profile.date);
     const updatedDecor = updatedTasks.find((t) => t.id === "task-decor-plan");
     expect(updatedDecor?.isBlocked).toBe(false);

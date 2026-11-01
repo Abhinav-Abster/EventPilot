@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Check, X, AlertTriangle, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, AlertTriangle, ArrowRight, ShieldCheck } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { formatINR } from "../../lib/budget/moneyUtils";
 

@@ -1,9 +1,4 @@
-import {
-  VendorRecord,
-  VendorCategory,
-  VendorBookingStatus,
-  VendorPaymentStatus,
-} from "../types/event";
+import { VendorRecord, VendorCategory, VendorBookingStatus } from "../types/event";
 
 export const VENDOR_CATEGORY_LABELS: Record<VendorCategory, string> = {
   venue: "Venue",
