@@ -48,54 +48,101 @@ EventPilot bridges generative creativity and software engineering rigor: **GenAI
 - **Vendor Directory & Quote Tracker:** Track contact persons, estimated vs. actual quotes, booking statuses, and payment states with transparent disclosures.
 - **Personalized Creative Studio:** Tailored anime-fusion themes, 100% vegetarian menus, interactive party games, and return gifts with explicit trade-offs and cost ranges.
 - **Adaptive Replanning Engine (Core Differentiator):** Modify any constraint in natural language (e.g., _"My budget is now ₹30,000"_, _"Move party indoors"_, _"The caterer cancelled"_). Generates ranked proposals with side-by-side diff previews, preserved non-negotiables, and consequential Accept/Reject controls.
-- **Live Gemini Integration:** Intake, plan generation, and replanning analysis run through server-side Gemini API routes. Missing configuration and provider failures are shown in the interface.
+- **Live Gemini Integration:** Intake, plan generation, and replanning analysis run through server-side Gemini API routes. Missing configuration and provider failures are handled gracefully with clear user guidance.
 
 ---
 
 ## 4. System Architecture & Module Responsibilities
 
-EventPilot follows a clean boundary between generative language models and deterministic business logic:
+EventPilot follows a clean architectural separation between generative language models and deterministic business logic:
 
 ```
 EventPilot/
+├── .github/
+│   └── workflows/ci.yml         # GitHub Actions CI workflow (lint, typecheck, format, test, build)
 ├── app/
-│   ├── globals.css              # Custom Tailwind styling & accessible focus rings
+│   ├── api/ai/                  # Next.js App Router API endpoints
+│   │   ├── intake/route.ts      # Conversational intake parsing endpoint
+│   │   ├── plan/route.ts        # Comprehensive event plan generation endpoint
+│   │   └── replanning/route.ts  # Constraint replanning endpoint
+│   ├── globals.css              # Bauhaus design system styling & accessible focus rings
 │   ├── layout.tsx               # Root layout with PlanProvider & ReplanningModal
 │   └── page.tsx                 # View orchestrator (Dashboard, Intake, Budget, etc.)
 ├── components/
-│   ├── assistant/               # AIAssistantView (Replanning conversation & diff cards)
-│   ├── budget/                  # BudgetStudioView (Category breakdown, expense tables, optimizer)
-│   ├── dashboard/               # DashboardView (KPIs, countdown, progress, quick replanning)
-│   ├── ideas/                   # CreativeIdeasView (Themes, decor, menus, weather contingency)
-│   ├── intake/                  # EventIntakeView (Chat intake & live profile builder)
-│   ├── layout/                  # Navbar and tab switching
-│   ├── replanning/              # ReplanningModal (Side-by-side Before/After change preview)
-│   ├── timeline/                # TimelineView (Topological task list & date recalculations)
-│   └── vendors/                 # VendorManagementView (Directory, quotes & booking status)
+│   ├── assistant/               # AIAssistantView & parts (input bar, proposal card, presets)
+│   ├── budget/                  # BudgetStudioView, useBudgetForm hook & parts (table, modals, filters)
+│   ├── dashboard/               # DashboardView & parts (KPI cards, hero poster, directive register)
+│   ├── events/                  # EventManagerModal & parts (create drawer, dossier card, toolbar)
+│   ├── ideas/                   # CreativeIdeasView (themes, decor, menus, weather contingency)
+│   ├── intake/                  # EventIntakeView & parts (chat box, must-haves, profile form, presets)
+│   ├── layout/                  # Navbar and event switcher dropdown
+│   ├── replanning/              # ReplanningModal (side-by-side before/after change preview)
+│   ├── timeline/                # TimelineView & parts (task cards, header, add/edit modals, filter tabs)
+│   └── vendors/                 # VendorManagementView & parts (vendor card, modals, category filter)
 ├── lib/
-│   ├── ai/                      # Gemini SDK integration and browser API client
-│   ├── budget/                  # Integer money utilities & budget optimization engine
-│   ├── ideas/                   # Personalized creative idea generation
-│   ├── persistence/             # LocalStorage state provider and empty-plan initializer
-│   ├── replanning/              # Constraint intent parser & proposal generator
-│   ├── schemas/                 # Zod validation schemas for all domain entities
-│   ├── timeline/                # Cycle detection, topological sorting & schedule recalculation
-│   ├── types/                   # Strict TypeScript domain interfaces
-│   └── vendor/                  # Vendor records and status configurations
-└── tests/                       # Vitest unit and integration test suites
+│   ├── ai/                      # Gemini SDK integration, client transport & normalizers
+│   │   ├── normalizers/         # Modular normalizers (budget items, ideas, plan, profile, tasks, vendors)
+│   │   ├── aiService.ts         # High-level AI orchestration with structured schemas
+│   │   ├── categoryMaps.ts      # Domain category mapping and alias resolution tables
+│   │   ├── client.ts            # Client HTTP transport with timeout AbortController
+│   │   ├── geminiClient.ts      # Singleton Google GenAI client
+│   │   ├── normalizers.ts       # Dietary preference normalization
+│   │   ├── parsingHelpers.ts    # Defensive parsing primitives for LLM outputs
+│   │   ├── prompts.ts           # Schema-guided Gemini system and user prompts
+│   │   ├── replanningSummary.ts # Token-efficient plan summarization for prompts
+│   │   └── transport.ts         # Low-level GenAI JSON schema transport
+│   ├── api/
+│   │   └── handleAIRoute.ts     # Higher-order API route wrapper for validation and error handling
+│   ├── budget/
+│   │   ├── budgetEngine.ts      # Deterministic budget computation & constraint optimization
+│   │   ├── moneyUtils.ts        # Integer Paise minor unit arithmetic utilities
+│   │   ├── optimizationHelpers.ts # Trimming order heuristics & reduction algorithms
+│   │   └── summaryHelpers.ts    # Categorical breakdown aggregations & financial warnings
+│   ├── config/
+│   │   └── constants.ts         # Defaults and canonical reference constants
+│   ├── ideas/
+│   │   └── ideaEngine.ts        # Deterministic personalized creative idea generator
+│   ├── persistence/
+│   │   ├── PlanContext.tsx      # React context provider managing multi-event planning state
+│   │   ├── defaultEvent.ts      # Seed data generators for reference and blank events
+│   │   ├── planContextTypes.ts  # State store type definitions and action dispatches
+│   │   ├── planMutators.ts      # Pure state transformation mutators
+│   │   ├── storage.ts           # LocalStorage persistence with legacy migration & corruption recovery
+│   │   └── usePlanStorage.ts    # Synchronized browser storage hook
+│   ├── replanning/
+│   │   ├── intentParsers.ts     # Natural language intent classifiers for constraint changes
+│   │   ├── replanningEngine.ts  # Core replanning coordinator evaluating violations
+│   │   ├── strategies/          # Dedicated replanning strategies (budget, date, venue, guest count, vendor)
+│   │   └── types.ts             # Replanning domain interfaces and proposal types
+│   ├── schemas/
+│   │   └── eventSchemas.ts      # Zod validation schemas establishing data boundary contracts
+│   ├── timeline/
+│   │   ├── dateUtils.ts         # Deterministic date calculations and ISO 8601 formatting
+│   │   ├── defaultTasks.ts      # Milestone templates and dependency graphs
+│   │   └── timelineEngine.ts    # Cycle detection, topological sorting & schedule recalculation
+│   ├── types/
+│   │   └── event.ts             # Strict TypeScript domain interfaces
+│   ├── utils/
+│   │   ├── guards.ts            # Type guards for readonly collection membership
+│   │   ├── id.ts                # Collision-resistant deterministic ID generator
+│   │   └── priorityQueue.ts     # Generic binary min-heap priority queue
+│   └── vendor/
+│       └── vendorEngine.ts      # Vendor catalog management & benchmark generators
+└── tests/                       # 13 Vitest unit and integration test suites (70 passed tests)
 ```
 
 ### Module Responsibilities
 
-| Responsibility                      | Responsible Module                   | Design Pattern / Mechanism                                      |
-| :---------------------------------- | :----------------------------------- | :-------------------------------------------------------------- |
-| **Natural Language Interpretation** | `lib/ai/aiService.ts`                | Gemini (`@google/genai`) through server-side route handlers     |
-| **Schema Validation**               | `lib/schemas/eventSchemas.ts`        | Zod runtime schema validation on all inputs & outputs           |
-| **Monetary Calculations**           | `lib/budget/moneyUtils.ts`           | Integer Paise (Minor units); 0 floating-point arithmetic        |
-| **Budget Optimization**             | `lib/budget/budgetEngine.ts`         | Deterministic priority-inversion reduction algorithm            |
-| **Task Dependency Resolution**      | `lib/timeline/timelineEngine.ts`     | Depth-First Search cycle detection & topological sorting        |
-| **Constraint Shift Analysis**       | `lib/replanning/replanningEngine.ts` | Deep state cloning, diff extraction, and invariant verification |
-| **State Persistence**               | `lib/persistence/PlanContext.tsx`    | React Context + validated browser LocalStorage with fallback    |
+| Responsibility                      | Responsible Module                              | Design Pattern / Mechanism                                     |
+| :---------------------------------- | :---------------------------------------------- | :------------------------------------------------------------- |
+| **Natural Language Interpretation** | `lib/ai/aiService.ts`, `lib/ai/transport.ts`    | Gemini (`@google/genai`) with schema-guided generation         |
+| **Schema Validation**               | `lib/schemas/eventSchemas.ts`                   | Zod runtime schema validation on all inputs, outputs, & stores |
+| **API Route Standardization**       | `lib/api/handleAIRoute.ts`                      | Higher-order function with JSON parsing & error mapping        |
+| **Monetary Calculations**           | `lib/budget/moneyUtils.ts`                      | Integer Paise (Minor units); 0 floating-point arithmetic       |
+| **Budget Optimization**             | `lib/budget/budgetEngine.ts`                    | Deterministic priority-inversion reduction algorithm           |
+| **Task Dependency Resolution**      | `lib/timeline/timelineEngine.ts`                | Depth-First Search cycle detection & topological sorting       |
+| **Constraint Shift Analysis**       | `lib/replanning/replanningEngine.ts`            | Strategy pattern with immutable cloning & diff extraction      |
+| **State Persistence**               | `lib/persistence/PlanContext.tsx`, `storage.ts` | React Context + validated browser LocalStorage with migration  |
 
 ---
 
@@ -152,7 +199,7 @@ When a budget reduction is requested:
 
 ## 7. Security & Responsible AI Considerations
 
-- **Zero Client-Side Secret Leakage:** Provider API keys (`GEMINI_API_KEY`) are accessed strictly on the server or in secure API abstractions. No API keys are bundled into client JavaScript.
+- **Zero Client-Side Secret Leakage:** Provider API keys (`GEMINI_API_KEY`) are accessed strictly on the server in Next.js App Router API routes. No API keys are bundled into client JavaScript.
 - **Untrusted Input Sanitation:** All model responses and user inputs are passed through Zod schemas with bounded string lengths and type coercion.
 - **Prompt Injection Defense:** Business logic constraints (e.g. budget totals, task prerequisites) are evaluated in pure TypeScript code. Prompt injection cannot bypass deterministic math or violate protected constraints.
 - **Truthfulness & Provenance:** EventPilot never claims to have booked live vendors or processed credit card payments. All sample vendors are explicitly labeled as benchmark data.
@@ -161,7 +208,7 @@ When a budget reduction is requested:
 
 ## 8. Accessibility & UX Design
 
-- **Visual Identity:** Warm off-white backgrounds (`#FAF8F5`), deep forest green primary accent (`#143D30`), and restrained warm gold accents (`#D97706`).
+- **Visual Identity:** Bauhaus modern design system featuring crisp geometry, bold high-contrast accents (`#D02020` red, `#1040C0` blue, `#F0C020` yellow, `#121212` black), and tangible tactile hard shadow offsets.
 - **Semantic HTML:** Landmarks (`<header>`, `<main>`, `<nav>`, `<table>`, `<dialog>`), explicit ARIA attributes (`aria-current`, `aria-label`, `aria-modal`), and visible keyboard focus rings.
 - **Information Architecture:** Clear tabbed views ensuring users always know their location and can navigate between Dashboard, Intake, Budget, Timeline, Vendors, and Ideas.
 - **Responsive Layouts:** Mobile navigation drawer, fluid grid systems, and touch-friendly tap targets.
@@ -173,10 +220,12 @@ When a budget reduction is requested:
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript 5.6 (Strict Mode)
 - **Styling:** Tailwind CSS 3.4
+- **Formatting:** Prettier 3.9
 - **Icons:** Lucide React
 - **Validation:** Zod 3.23
 - **GenAI SDK:** `@google/genai` (Google GenAI SDK)
 - **Test Runner:** Vitest 4.1
+- **CI / Automation:** GitHub Actions
 
 ---
 
@@ -185,7 +234,7 @@ When a budget reduction is requested:
 ### Prerequisites
 
 - Node.js v20.x or higher
-- npm or pnpm
+- npm
 
 ### Installation
 
@@ -194,8 +243,8 @@ When a budget reduction is requested:
 git clone https://github.com/Abhinav-Abster/EventPilot.git
 cd EventPilot
 
-# Install dependencies
-npm install
+# Install dependencies (reproducible install via package-lock.json)
+npm ci
 ```
 
 ---
@@ -216,7 +265,7 @@ cp .env.example .env.local
 | `GEMINI_MODEL`         | Gemini Model identifier | Optional  | `gemini-2.0-flash` |
 | `NEXT_PUBLIC_APP_NAME` | Application Name        | Optional  | `EventPilot`       |
 
-> **Note:** Add `GEMINI_API_KEY` to `.env.local` and restart the application. If it is missing or Gemini returns an error, the interface displays the error and does not substitute generated sample data.
+> **Note:** Add `GEMINI_API_KEY` to `.env.local` and restart the application. If it is missing or Gemini returns an error, the interface displays the error and does not substitute fabricated sample data.
 
 ---
 
@@ -226,11 +275,20 @@ cp .env.example .env.local
 # Start local development server
 npm run dev
 
-# Run TypeScript typecheck
+# Run TypeScript type checking
 npm run typecheck
 
 # Run ESLint validation
 npm run lint
+
+# Check code formatting with Prettier
+npm run format:check
+
+# Automatically format code with Prettier
+npm run format
+
+# Run all verification checks (typecheck + lint + format:check + test)
+npm run verify
 
 # Run automated Vitest test suites
 npm run test
@@ -249,19 +307,29 @@ npm start
 
 ## 13. Testing & Verification
 
-EventPilot includes automated unit and integration tests covering all critical paths:
+EventPilot includes comprehensive automated unit, characterization, and integration test suites covering all critical computational and business logic paths:
 
 ```bash
 npm run test
 ```
 
-### Test Suites Overview
+### Complete Test Suites (13 files, 70 passed tests)
 
-- **`tests/budget.test.ts`**: Verifies minor unit calculations, overspending detection, deficit calculation, protected requirement preservation during budget reduction, and infeasibility flagging.
-- **`tests/timeline.test.ts`**: Verifies topological ordering, circular dependency detection, blocked status propagation, overdue identification, and date shift recalculation.
-- **`tests/replanning.test.ts`**: Verifies natural language intent parsing, constraint preservation, diff generation, and proposal staging.
-- **`tests/validation.test.ts`**: Verifies Zod schema validation rules, rejection of malformed inputs, and missing Gemini configuration errors.
-- **`tests/userJourney.test.ts`**: Simulates the complete 11-step end-to-end competition audit workflow.
+| Test File                             | Passed Tests | Description                                                                                                                                          |
+| :------------------------------------ | :----------: | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`tests/budget.test.ts`**            |      6       | Integer minor unit calculations, overspending detection, deficit calculation, protected requirement preservation, and infeasibility flagging.        |
+| **`tests/timeline.test.ts`**          |      7       | Topological task ordering, cycle detection, blocked status cascade, overdue detection, and schedule recalculation.                                   |
+| **`tests/replanning.test.ts`**        |      7       | Natural language intent parsing (budget, date, venue, guest count, cancellation), diff generation, and proposal staging.                             |
+| **`tests/validation.test.ts`**        |      12      | Zod schema validation rules, boundary contracts, invalid input rejection, and Gemini missing-key error states.                                       |
+| **`tests/characterization.test.ts`**  |      12      | Invariant input/output characterization tests capturing exact baseline behavior of all core engines.                                                 |
+| **`tests/storage.test.ts`**           |      4       | LocalStorage persistence, multi-event plan serialization, legacy schema migration, and corrupt JSON recovery.                                        |
+| **`tests/multiEvent.test.ts`**        |      4       | Multi-event plan isolation, independent IDs, state mutation boundaries, and schema integrity across events.                                          |
+| **`tests/apiHandler.test.ts`**        |      5       | Standardized `handleAIRoute` wrapper verifying valid execution, JSON parse errors, schema failures, and error codes.                                 |
+| **`tests/priorityQueue.test.ts`**     |      4       | Generic binary min-heap priority queue ordering, FIFO tie-breaking, empty extraction, and peek operations.                                           |
+| **`tests/guards.test.ts`**            |      3       | `isOneOf` type guard validation for positive matches, negative matches, and empty collections.                                                       |
+| **`tests/replanningSummary.test.ts`** |      3       | Compact replanning summary builder, constraint preservation formatting, and token budget compression.                                                |
+| **`tests/id.test.ts`**                |      2       | Collision-resistant deterministic ID generator format, uniqueness, and domain prefixing.                                                             |
+| **`tests/userJourney.test.ts`**       |      1       | Complete 11-step end-to-end competition audit user journey with 100% integrity across budget edits, task updates, replanning, and state persistence. |
 
 ---
 
@@ -296,6 +364,7 @@ npm run test
 
 ## 17. Repository Hygiene & Compliance
 
+- **Continuous Integration:** Automated GitHub Actions workflow (`.github/workflows/ci.yml`) runs type checking, linting, code formatting checks, unit tests, and production build on every push and pull request.
 - **Single Branch:** All commits exist solely on `main`. No additional branches created.
 - **Repository Size:** Entire repository (excluding gitignored node_modules and build artifacts) remains under **2 MB**, well below the 10 MB competition limit.
 - **No Committed Secrets:** No `.env` or credentials committed. Only `.env.example` is tracked.
