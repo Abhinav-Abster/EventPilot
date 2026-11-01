@@ -16,6 +16,7 @@ import { normalizeDiets } from "./dietNormalizer";
 import { AIServiceError, generateJson } from "./transport";
 import { normalizeProfile } from "./normalizers/normalizeProfile";
 import { normalizePlanOutput } from "./normalizers/normalizePlanOutput";
+import { logger } from "../utils/logger";
 
 export {
   buildCompactReplanningSummary,
@@ -140,7 +141,7 @@ Strict Formatting and Constraints:
   });
 
   if (!validation.success) {
-    console.error(
+    logger.error(
       "Plan validation failed with issues:",
       JSON.stringify(validation.error.issues, null, 2)
     );

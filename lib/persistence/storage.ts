@@ -4,6 +4,7 @@
 import { EventPlan } from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { createReferenceEventPlan } from "./defaultEvent";
+import { logger } from "../utils/logger";
 
 /**
  * localStorage key under which the collection of event plans is persisted.
@@ -40,7 +41,7 @@ export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string 
           }
         }
       } catch (e) {
-        console.warn("Failed to parse stored events collection:", e);
+        logger.warn("Failed to parse stored events collection:", e);
       }
     }
 
@@ -59,7 +60,7 @@ export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string 
             }
           }
         } catch (e) {
-          console.warn("Failed to parse legacy stored plan:", e);
+          logger.warn("Failed to parse legacy stored plan:", e);
         }
       }
     }
@@ -75,7 +76,7 @@ export function loadStoredPlans(): { loadedPlans: EventPlan[]; activeId: string 
 
     return { loadedPlans, activeId };
   } catch (e) {
-    console.error("Failed to load plans from localStorage, using fallback:", e);
+    logger.error("Failed to load plans from localStorage, using fallback:", e);
     const fallback = createReferenceEventPlan();
     return { loadedPlans: [fallback], activeId: fallback.profile.id };
   }
@@ -89,6 +90,6 @@ export function saveStoredPlans(plans: EventPlan[], activeId: string): void {
     localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(plans));
     localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activeId);
   } catch (e) {
-    console.error("Failed to persist events to localStorage:", e);
+    logger.error("Failed to persist events to localStorage:", e);
   }
 }

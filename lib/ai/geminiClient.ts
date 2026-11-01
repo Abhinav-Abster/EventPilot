@@ -2,6 +2,7 @@
  * Singleton Google GenAI client factory and model configuration for server-side generation.
  */
 import { GoogleGenAI } from "@google/genai";
+import { logger } from "../utils/logger";
 
 let geminiClientInstance: GoogleGenAI | null = null;
 
@@ -28,7 +29,7 @@ export function getGeminiClient(): GoogleGenAI {
     try {
       geminiClientInstance = new GoogleGenAI({ apiKey });
     } catch (e) {
-      console.error("Failed to initialize GoogleGenAI client:", e);
+      logger.error("Failed to initialize GoogleGenAI client:", e);
       throw new GeminiConfigurationError(
         "Gemini could not be initialized. Check GEMINI_API_KEY and restart EventPilot."
       );
