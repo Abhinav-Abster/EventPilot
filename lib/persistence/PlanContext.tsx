@@ -78,15 +78,19 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     [activePlanId]
   );
 
+  const resetProposalState = useCallback(() => {
+    setActiveProposal(null);
+    setLastAppliedProposalId(null);
+  }, []);
+
   const switchEvent = useCallback(
     (id: string) => {
       if (plansRef.current.some((p) => p.profile.id === id)) {
         setActivePlanId(id);
-        setActiveProposal(null);
-        setLastAppliedProposalId(null);
+        resetProposalState();
       }
     },
-    [plansRef]
+    [plansRef, resetProposalState]
   );
 
   const createEvent = useCallback(
@@ -98,11 +102,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       const newPlan = createCustomEventPlan(name, type, overrides);
       setPlans((prev) => [...prev, newPlan]);
       setActivePlanId(newPlan.profile.id);
-      setActiveProposal(null);
-      setLastAppliedProposalId(null);
+      resetProposalState();
       return newPlan.profile.id;
     },
-    []
+    [resetProposalState]
   );
 
   const duplicateEvent = useCallback(
@@ -115,11 +118,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       const clone = duplicatePlan(source);
       setPlans((prev) => [...prev, clone]);
       setActivePlanId(clone.profile.id);
-      setActiveProposal(null);
-      setLastAppliedProposalId(null);
+      resetProposalState();
       return clone.profile.id;
     },
-    [plansRef]
+    [plansRef, resetProposalState]
   );
 
   const deleteEvent = useCallback(
@@ -136,10 +138,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
           setActivePlanId(remaining[0].profile.id);
         }
       }
-      setActiveProposal(null);
-      setLastAppliedProposalId(null);
+      resetProposalState();
     },
-    [activePlanId, plansRef]
+    [activePlanId, plansRef, resetProposalState]
   );
 
   const updateEventName = useCallback((id: string, name: string) => {
@@ -282,10 +283,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         });
         setActivePlanId(newPlan.profile.id);
       }
-      setLastAppliedProposalId(null);
-      setActiveProposal(null);
+      resetProposalState();
     },
-    [activePlanId]
+    [activePlanId, resetProposalState]
   );
 
   const contextValue = useMemo<PlanContextType>(
