@@ -5,7 +5,7 @@ import { EventPlan, EventType } from "../types/event";
 import { generateDefaultTasks, addDaysToDate, formatISODate } from "../timeline/timelineEngine";
 import { generateDefaultVendors } from "../vendor/vendorEngine";
 import { generatePersonalizedIdeas } from "../ideas/ideaEngine";
-import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES } from "../config/constants";
+import { DEFAULT_CITY, DEFAULT_DIETARY_PREFERENCES, REFERENCE_PLAN_ID } from "../config/constants";
 
 /**
  * Creates a clean starter event plan initialized with default properties and no line items.
@@ -50,7 +50,7 @@ export function createReferenceEventPlan(): EventPlan {
   const targetDate = addDaysToDate(formatISODate(new Date()), 25);
 
   const profile = {
-    id: "ep-aanya-18th-anime",
+    id: REFERENCE_PLAN_ID,
     name: "Aanya's 18th Anime Birthday Bash",
     type: "birthday" as const,
     date: targetDate,

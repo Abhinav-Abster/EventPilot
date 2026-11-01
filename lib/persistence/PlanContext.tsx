@@ -33,6 +33,7 @@ import {
 } from "./planMutators";
 import { usePlanStorage } from "./usePlanStorage";
 import { PlanContextType } from "./planContextTypes";
+import { REFERENCE_PLAN_ID } from "../config/constants";
 
 export type { PlanContextType };
 
@@ -43,7 +44,7 @@ const PlanContext = createContext<PlanContextType | undefined>(undefined);
  */
 export function PlanProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<EventPlan[]>([createReferenceEventPlan()]);
-  const [activePlanId, setActivePlanId] = useState<string>("ep-aanya-18th-anime");
+  const [activePlanId, setActivePlanId] = useState<string>(REFERENCE_PLAN_ID);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [activeProposal, setActiveProposal] = useState<ReplanningProposal | null>(null);
   const [lastAppliedProposalId, setLastAppliedProposalId] = useState<string | null>(null);

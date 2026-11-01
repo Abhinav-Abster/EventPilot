@@ -4,6 +4,11 @@
 import { DietaryPreference } from "../types/event";
 
 /**
+ * Canonical identifier for the built-in reference event plan ("Aanya's 18th Birthday").
+ */
+export const REFERENCE_PLAN_ID = "ep-aanya-18th-anime";
+
+/**
  * Demo default city used as fallback when location is omitted in user intake.
  * Retained for backward compatibility with pre-configured reference events.
  */
