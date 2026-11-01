@@ -44,7 +44,9 @@ export function IntakeStarterPresets({ onSelectPrompt }: IntakeStarterPresetsPro
             onClick={() => onSelectPrompt(starter.query)}
             className="card-bauhaus text-left p-6 bg-white border-4 border-black shadow-[6px_6px_0px_0px_black] hover:bg-[#FFF9C4] transition-all flex flex-col justify-between space-y-4 relative"
           >
-            <span className={`w-3 h-3 ${starter.accent} border-2 border-black absolute top-4 right-4`} />
+            <span
+              className={`w-3 h-3 ${starter.accent} border-2 border-black absolute top-4 right-4`}
+            />
             <div className="border-b-2 border-black pb-2">
               <span className="font-display font-black text-sm uppercase tracking-tight text-black block">
                 {starter.title}

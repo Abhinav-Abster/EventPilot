@@ -68,8 +68,8 @@ export function EventDossierCard({
                 index % 3 === 0
                   ? "bg-[#D02020] rounded-full"
                   : index % 3 === 1
-                  ? "bg-[#1040C0]"
-                  : "bg-[#F0C020] shape-triangle"
+                    ? "bg-[#1040C0]"
+                    : "bg-[#F0C020] shape-triangle"
               }`}
             />
             <span className="font-mono text-[10px] uppercase tracking-widest border border-black bg-white px-2 py-0.5 text-black font-black">

@@ -4,10 +4,12 @@ import { asRecord, text, integer } from "../parsingHelpers";
 import { VALID_BUDGET_CATEGORIES_SET, BUDGET_CATEGORY_MAP } from "../categoryMaps";
 
 function resolveBudgetCategory(raw: unknown): BudgetCategory {
-  const normalized = text(raw, "miscellaneous").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+  const normalized = text(raw, "miscellaneous")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_");
   const candidate = VALID_BUDGET_CATEGORIES_SET.has(normalized)
     ? normalized
-    : BUDGET_CATEGORY_MAP[normalized] ?? "miscellaneous";
+    : (BUDGET_CATEGORY_MAP[normalized] ?? "miscellaneous");
   return isOneOf(BUDGET_CATEGORIES, candidate) ? candidate : "miscellaneous";
 }
 
@@ -31,15 +33,28 @@ function balanceBudgetExcess(items: BudgetItem[], totalBudgetMinor: number): voi
   }
 }
 
-export function normalizeBudgetItems(
-  rawList: unknown[],
-  totalBudgetMinor: number
-): BudgetItem[] {
+export function normalizeBudgetItems(rawList: unknown[], totalBudgetMinor: number): BudgetItem[] {
   const fallbackList = [
-    { name: "Venue Booking", category: "venue", estimatedCostMinor: Math.round(totalBudgetMinor * 0.25) },
-    { name: "Food & Catering", category: "food_beverage", estimatedCostMinor: Math.round(totalBudgetMinor * 0.45) },
-    { name: "Decorations & Theme", category: "decorations", estimatedCostMinor: Math.round(totalBudgetMinor * 0.15) },
-    { name: "Contingency Buffer", category: "contingency_reserve", estimatedCostMinor: Math.round(totalBudgetMinor * 0.15) },
+    {
+      name: "Venue Booking",
+      category: "venue",
+      estimatedCostMinor: Math.round(totalBudgetMinor * 0.25),
+    },
+    {
+      name: "Food & Catering",
+      category: "food_beverage",
+      estimatedCostMinor: Math.round(totalBudgetMinor * 0.45),
+    },
+    {
+      name: "Decorations & Theme",
+      category: "decorations",
+      estimatedCostMinor: Math.round(totalBudgetMinor * 0.15),
+    },
+    {
+      name: "Contingency Buffer",
+      category: "contingency_reserve",
+      estimatedCostMinor: Math.round(totalBudgetMinor * 0.15),
+    },
   ];
 
   const source = rawList.length > 0 ? rawList : fallbackList;

@@ -20,9 +20,7 @@ describe("buildCompactReplanningSummary", () => {
 
   it("identifies protected budget items", () => {
     const summary = buildCompactReplanningSummary(plan);
-    const expectedProtected = plan.budgetItems
-      .filter((b) => b.isProtected)
-      .map((b) => b.name);
+    const expectedProtected = plan.budgetItems.filter((b) => b.isProtected).map((b) => b.name);
     expect(summary.protectedBudgetItems).toEqual(expectedProtected);
   });
 
@@ -36,8 +34,8 @@ describe("buildCompactReplanningSummary", () => {
     ).toBe(true);
 
     const decorSummary = buildCompactReplanningSummary(plan, "decor stage balloons");
-    expect(
-      decorSummary.relevantBudgetItems.some((b) => b.toLowerCase().includes("decor"))
-    ).toBe(true);
+    expect(decorSummary.relevantBudgetItems.some((b) => b.toLowerCase().includes("decor"))).toBe(
+      true
+    );
   });
 });

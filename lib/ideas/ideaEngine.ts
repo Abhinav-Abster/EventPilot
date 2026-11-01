@@ -5,8 +5,8 @@ import { CreativeIdea, EventProfile } from "../types/event";
  * customized to the specific event profile, guest count, and theme.
  */
 export function generatePersonalizedIdeas(profile: EventProfile): CreativeIdea[] {
-  const isAnime = profile.theme.toLowerCase().includes("anime") ||
-    profile.notes.toLowerCase().includes("anime");
+  const isAnime =
+    profile.theme.toLowerCase().includes("anime") || profile.notes.toLowerCase().includes("anime");
   const isOutdoor = profile.location.venueType === "outdoor";
   const isVeg = profile.dietaryPreferences.includes("vegetarian");
 
@@ -74,9 +74,7 @@ export function generatePersonalizedIdeas(profile: EventProfile): CreativeIdea[]
         "Fold origami cranes using colored craft paper with friends as a pre-event activity.",
       ],
       constraints: ["Must be sheltered from high wind if placed outdoors"],
-      tradeOffs: [
-        "Paper prints must be shielded from direct moisture or lawn sprinklers.",
-      ],
+      tradeOffs: ["Paper prints must be shielded from direct moisture or lawn sprinklers."],
       isSaved: false,
     },
     {
@@ -114,7 +112,9 @@ export function generatePersonalizedIdeas(profile: EventProfile): CreativeIdea[]
         "Send 2 weeks in advance with a reminder broadcast 3 days prior.",
       ],
       constraints: ["Guests must have WhatsApp or email"],
-      tradeOffs: ["Saves ₹3,000 on physical cards, but older family may appreciate a phone call follow-up."],
+      tradeOffs: [
+        "Saves ₹3,000 on physical cards, but older family may appreciate a phone call follow-up.",
+      ],
       isSaved: false,
     },
     {
@@ -145,7 +145,8 @@ export function generatePersonalizedIdeas(profile: EventProfile): CreativeIdea[]
       description: isOutdoor
         ? "Arrangement with venue management to have the covered concrete pavilion pre-reserved in case of sudden evening drizzle or dew on Pune lawns."
         : "Ensure high-volume fans and AC temperature set at 22°C to keep the 60-person room fresh during games.",
-      whyItFits: "Eliminates panic if Pune weather shifts during the 5:30 PM - 10:00 PM party window.",
+      whyItFits:
+        "Eliminates panic if Pune weather shifts during the 5:30 PM - 10:00 PM party window.",
       estimatedCostMinor: 150000, // ₹1,500
       costRangeText: "₹0 - ₹2,000 (citronella diffusers & tarp standby)",
       implementationSteps: [
@@ -154,7 +155,9 @@ export function generatePersonalizedIdeas(profile: EventProfile): CreativeIdea[]
         "Keep 10 large clear umbrellas on standby for guest arrival.",
       ],
       constraints: ["Requires upfront written agreement with lawn owner"],
-      tradeOffs: ["Standby arrangement costs minimal advance deposit but guarantees peace of mind."],
+      tradeOffs: [
+        "Standby arrangement costs minimal advance deposit but guarantees peace of mind.",
+      ],
       isSaved: true,
     },
   ];

@@ -5,7 +5,9 @@ import { ParsedConstraintChange } from "./types";
 
 export function parseBudgetIntent(q: string, query: string): ParsedConstraintChange | null {
   const budgetMatch =
-    q.match(/(?:budget|spend|cost)\s*(?:is|now|to|=|reduced to)?\s*₹?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|lakh|thousand)?/i) ||
+    q.match(
+      /(?:budget|spend|cost)\s*(?:is|now|to|=|reduced to)?\s*₹?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|lakh|thousand)?/i
+    ) ||
     q.match(/₹\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|lakh|thousand)?/i) ||
     q.match(/reduce\s*(?:to)?\s*₹?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|lakh)?/i);
 
@@ -41,7 +43,8 @@ export function parseGuestCountIntent(
   if (!guestMatch) return null;
 
   const rawVal = parseInt(guestMatch[1], 10);
-  const isAdditional = q.includes("additional") || q.includes("more") || q.includes("extra") || q.includes("add");
+  const isAdditional =
+    q.includes("additional") || q.includes("more") || q.includes("extra") || q.includes("add");
   const isLess = q.includes("less") || q.includes("fewer") || q.includes("decrease");
 
   let finalGuestCount = currentPlan.profile.guestCount;
@@ -68,7 +71,8 @@ export function parseVenueIntent(q: string, query: string): ParsedConstraintChan
       changeType: "venue_change",
       rawQuery: query,
       newVenueType: "indoor",
-      explanation: "Relocating celebration from outdoor lawn to indoor hall due to rain/preference.",
+      explanation:
+        "Relocating celebration from outdoor lawn to indoor hall due to rain/preference.",
     };
   }
   if (q.includes("outdoor") || q.includes("lawn") || q.includes("terrace")) {
@@ -82,16 +86,26 @@ export function parseVenueIntent(q: string, query: string): ParsedConstraintChan
   return null;
 }
 
-export function parseVendorCancellationIntent(q: string, query: string): ParsedConstraintChange | null {
-  if (q.includes("cater") && (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))) {
+export function parseVendorCancellationIntent(
+  q: string,
+  query: string
+): ParsedConstraintChange | null {
+  if (
+    q.includes("cater") &&
+    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
+  ) {
     return {
       changeType: "vendor_cancellation",
       rawQuery: query,
       cancelledVendorCategory: "caterer",
-      explanation: "Primary caterer cancelled reservation. Immediate replacement and menu review required.",
+      explanation:
+        "Primary caterer cancelled reservation. Immediate replacement and menu review required.",
     };
   }
-  if (q.includes("photo") && (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))) {
+  if (
+    q.includes("photo") &&
+    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
+  ) {
     return {
       changeType: "vendor_cancellation",
       rawQuery: query,
@@ -99,7 +113,10 @@ export function parseVendorCancellationIntent(q: string, query: string): ParsedC
       explanation: "Photographer cancelled booking.",
     };
   }
-  if (q.includes("decor") && (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))) {
+  if (
+    q.includes("decor") &&
+    (q.includes("cancel") || q.includes("backed out") || q.includes("unavailable"))
+  ) {
     return {
       changeType: "vendor_cancellation",
       rawQuery: query,
@@ -137,7 +154,10 @@ export function parseDateChangeIntent(
   return null;
 }
 
-export function parsePriorityReductionIntent(q: string, query: string): ParsedConstraintChange | null {
+export function parsePriorityReductionIntent(
+  q: string,
+  query: string
+): ParsedConstraintChange | null {
   if (q.includes("keep") && (q.includes("decor") || q.includes("food") || q.includes("photo"))) {
     const protectedCats: BudgetCategory[] = [];
     if (q.includes("decor")) protectedCats.push("decorations");

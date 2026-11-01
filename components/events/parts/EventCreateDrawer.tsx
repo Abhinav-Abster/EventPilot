@@ -98,9 +98,7 @@ export function EventCreateDrawer({
             min="1"
             max="5000"
             value={form.guestCount}
-            onChange={(e) =>
-              onChange({ ...form, guestCount: parseInt(e.target.value, 10) || 1 })
-            }
+            onChange={(e) => onChange({ ...form, guestCount: parseInt(e.target.value, 10) || 1 })}
             className="w-full px-3 py-2 bg-white border-2 border-black text-xs font-mono font-bold text-black focus:outline-none"
           />
         </div>
@@ -108,15 +106,15 @@ export function EventCreateDrawer({
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t-2 border-black">
         <div className="w-full sm:w-auto flex items-center gap-3">
-          <label className="text-black font-black uppercase tracking-wider text-[11px]">BUDGET (₹):</label>
+          <label className="text-black font-black uppercase tracking-wider text-[11px]">
+            BUDGET (₹):
+          </label>
           <input
             type="number"
             step="1000"
             min="500"
             value={form.budgetRupees}
-            onChange={(e) =>
-              onChange({ ...form, budgetRupees: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(e) => onChange({ ...form, budgetRupees: parseFloat(e.target.value) || 0 })}
             className="w-36 px-3 py-1.5 bg-white border-2 border-black text-xs font-mono font-black"
           />
         </div>

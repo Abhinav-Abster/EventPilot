@@ -140,9 +140,7 @@ export function recalculateSchedule(
     );
   }
 
-  const completedTaskIds = new Set(
-    tasks.filter((t) => t.status === "completed").map((t) => t.id)
-  );
+  const completedTaskIds = new Set(tasks.filter((t) => t.status === "completed").map((t) => t.id));
 
   const updatedTasks: Task[] = tasks.map((task) => {
     let effectiveRelativeDays = task.relativeDays;
@@ -161,8 +159,7 @@ export function recalculateSchedule(
     );
 
     const isBlocked = hasUnmetDependencies && task.status !== "completed";
-    const isOverdue =
-      task.status !== "completed" && calculatedDueDate.localeCompare(today) < 0;
+    const isOverdue = task.status !== "completed" && calculatedDueDate.localeCompare(today) < 0;
 
     let priority: TaskPriority = task.priority;
     if (isOverdue) {

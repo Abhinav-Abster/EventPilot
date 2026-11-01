@@ -1,14 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Check,
-  X,
-  AlertTriangle,
-  ArrowRight,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { Check, X, AlertTriangle, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { formatINR } from "../../lib/budget/moneyUtils";
 
@@ -42,7 +35,10 @@ export function ReplanningModal() {
             </span>
           </div>
 
-          <h2 id="proposal-title" className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight">
+          <h2
+            id="proposal-title"
+            className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight"
+          >
             {activeProposal.title}
           </h2>
 
@@ -74,9 +70,7 @@ export function ReplanningModal() {
               <div className="text-xl font-black text-black">
                 {formatINR(activeProposal.impact.newTotalEstimatedMinor)}
               </div>
-              <p className="text-[10px] text-gray-600 font-bold uppercase">
-                SYNCHRONIZED TOTAL
-              </p>
+              <p className="text-[10px] text-gray-600 font-bold uppercase">SYNCHRONIZED TOTAL</p>
             </div>
 
             <div className="border-2 border-black bg-white p-4 space-y-1.5 shadow-[4px_4px_0px_0px_black]">
@@ -146,13 +140,9 @@ export function ReplanningModal() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-xs mb-1.5 font-bold">
-                    <span className="line-through text-gray-500">
-                      {diff.before}
-                    </span>
+                    <span className="line-through text-gray-500">{diff.before}</span>
                     <ArrowRight size={14} strokeWidth={2} />
-                    <span className="text-[#1040C0]">
-                      {diff.after}
-                    </span>
+                    <span className="text-[#1040C0]">{diff.after}</span>
                   </div>
                   <p className="font-sans font-medium text-xs text-gray-700 leading-relaxed">
                     {diff.impactReason}

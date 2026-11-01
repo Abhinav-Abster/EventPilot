@@ -45,10 +45,7 @@ export function applyProfileUpdates(
   };
 }
 
-export function addBudgetItemToPlan(
-  prev: EventPlan,
-  item: Omit<BudgetItem, "id">
-): EventPlan {
+export function addBudgetItemToPlan(prev: EventPlan, item: Omit<BudgetItem, "id">): EventPlan {
   const newItem: BudgetItem = {
     ...item,
     id: createId("bi"),
@@ -68,9 +65,7 @@ export function updateBudgetItemInPlan(
 ): EventPlan {
   return {
     ...prev,
-    budgetItems: prev.budgetItems.map((item) =>
-      item.id === id ? { ...item, ...updates } : item
-    ),
+    budgetItems: prev.budgetItems.map((item) => (item.id === id ? { ...item, ...updates } : item)),
     updatedAt: new Date().toISOString(),
     version: prev.version + 1,
   };
@@ -100,14 +95,8 @@ export function addTaskToPlan(prev: EventPlan, task: Omit<Task, "id">): EventPla
   };
 }
 
-export function updateTaskInPlan(
-  prev: EventPlan,
-  id: string,
-  updates: Partial<Task>
-): EventPlan {
-  const newTasks = prev.tasks.map((task) =>
-    task.id === id ? { ...task, ...updates } : task
-  );
+export function updateTaskInPlan(prev: EventPlan, id: string, updates: Partial<Task>): EventPlan {
+  const newTasks = prev.tasks.map((task) => (task.id === id ? { ...task, ...updates } : task));
   const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
   return {
     ...prev,
@@ -133,9 +122,7 @@ export function toggleTaskStatusInPlan(prev: EventPlan, id: string): EventPlan {
   if (!target) return prev;
 
   const newStatus: TaskStatus = target.status === "completed" ? "todo" : "completed";
-  const newTasks = prev.tasks.map((t) =>
-    t.id === id ? { ...t, status: newStatus } : t
-  );
+  const newTasks = prev.tasks.map((t) => (t.id === id ? { ...t, status: newStatus } : t));
   const { updatedTasks } = recalculateSchedule(newTasks, prev.profile.date);
 
   return {
@@ -146,10 +133,7 @@ export function toggleTaskStatusInPlan(prev: EventPlan, id: string): EventPlan {
   };
 }
 
-export function addVendorToPlan(
-  prev: EventPlan,
-  vendor: Omit<VendorRecord, "id">
-): EventPlan {
+export function addVendorToPlan(prev: EventPlan, vendor: Omit<VendorRecord, "id">): EventPlan {
   const newVendor: VendorRecord = {
     ...vendor,
     id: createId("v"),
@@ -187,8 +171,6 @@ export function deleteVendorFromPlan(prev: EventPlan, id: string): EventPlan {
 export function toggleSaveIdeaInPlan(prev: EventPlan, id: string): EventPlan {
   return {
     ...prev,
-    ideas: prev.ideas.map((idea) =>
-      idea.id === id ? { ...idea, isSaved: !idea.isSaved } : idea
-    ),
+    ideas: prev.ideas.map((idea) => (idea.id === id ? { ...idea, isSaved: !idea.isSaved } : idea)),
   };
 }

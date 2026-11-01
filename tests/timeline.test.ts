@@ -100,11 +100,7 @@ describe("Timeline & Dependency Engine", () => {
   });
 
   it("marks dependent tasks as blocked when prerequisites are incomplete", () => {
-    const { updatedTasks } = recalculateSchedule(
-      baseTasks,
-      "2026-11-21",
-      "2026-10-25"
-    );
+    const { updatedTasks } = recalculateSchedule(baseTasks, "2026-11-21", "2026-10-25");
 
     const decorTask = updatedTasks.find((t) => t.id === "t-decor");
     const setupTask = updatedTasks.find((t) => t.id === "t-setup");
@@ -120,11 +116,7 @@ describe("Timeline & Dependency Engine", () => {
       t.id === "t-venue" ? { ...t, status: "completed" as const } : t
     );
 
-    const { updatedTasks } = recalculateSchedule(
-      venueCompleted,
-      "2026-11-21",
-      "2026-10-25"
-    );
+    const { updatedTasks } = recalculateSchedule(venueCompleted, "2026-11-21", "2026-10-25");
 
     const decorTask = updatedTasks.find((t) => t.id === "t-decor");
     expect(decorTask?.isBlocked).toBe(false);
@@ -132,11 +124,7 @@ describe("Timeline & Dependency Engine", () => {
 
   it("identifies overdue tasks accurately when past due date", () => {
     // Current date is 2026-11-15
-    const { updatedTasks } = recalculateSchedule(
-      baseTasks,
-      "2026-11-21",
-      "2026-11-15"
-    );
+    const { updatedTasks } = recalculateSchedule(baseTasks, "2026-11-21", "2026-11-15");
 
     // t-venue was due 2026-11-01 (relative -20d from 2026-11-21)
     const venueTask = updatedTasks.find((t) => t.id === "t-venue");
@@ -152,11 +140,7 @@ describe("Timeline & Dependency Engine", () => {
     const initialDate = "2026-11-20";
     const shiftedDate = "2026-12-05"; // postponed by 15 days
 
-    const { updatedTasks } = recalculateSchedule(
-      baseTasks,
-      shiftedDate,
-      "2026-10-25"
-    );
+    const { updatedTasks } = recalculateSchedule(baseTasks, shiftedDate, "2026-10-25");
 
     const venue = updatedTasks.find((t) => t.id === "t-venue");
     // relativeDays: -20 from 2026-12-05 = 2026-11-15
@@ -171,11 +155,7 @@ describe("Timeline & Dependency Engine", () => {
     const today = "2026-10-22";
     const emergencyEventDate = "2026-10-25"; // only 3 days away!
 
-    const { updatedTasks, warnings } = recalculateSchedule(
-      baseTasks,
-      emergencyEventDate,
-      today
-    );
+    const { updatedTasks, warnings } = recalculateSchedule(baseTasks, emergencyEventDate, today);
 
     expect(warnings.length).toBeGreaterThan(0);
     expect(warnings[0]).toContain("Event is only 3 day(s) away");

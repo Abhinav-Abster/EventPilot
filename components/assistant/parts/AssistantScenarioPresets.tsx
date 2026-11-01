@@ -61,8 +61,8 @@ export function AssistantScenarioPresets({ onSelectScenario }: AssistantScenario
                   idx % 3 === 0
                     ? "bg-[#D02020] rounded-full"
                     : idx % 3 === 1
-                    ? "bg-[#1040C0]"
-                    : "bg-[#F0C020] shape-triangle"
+                      ? "bg-[#1040C0]"
+                      : "bg-[#F0C020] shape-triangle"
                 }`}
               />
             </div>

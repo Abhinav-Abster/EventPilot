@@ -1,4 +1,9 @@
-import { VendorRecord, VendorCategory, VendorBookingStatus, VendorPaymentStatus } from "../types/event";
+import {
+  VendorRecord,
+  VendorCategory,
+  VendorBookingStatus,
+  VendorPaymentStatus,
+} from "../types/event";
 
 export const VENDOR_CATEGORY_LABELS: Record<VendorCategory, string> = {
   venue: "Venue",
@@ -41,7 +46,8 @@ export function generateDefaultVendors(): VendorRecord[] {
       actualQuoteMinor: 800000,
       bookingStatus: "shortlisted",
       paymentStatus: "unpaid",
-      notes: "Pune Kothrud lawn with seating for up to 80 guests. Lighting and lawn chairs included in rental.",
+      notes:
+        "Pune Kothrud lawn with seating for up to 80 guests. Lighting and lawn chairs included in rental.",
       relatedTaskIds: ["task-venue-lock", "task-weather-check"],
     },
     {
@@ -57,7 +63,8 @@ export function generateDefaultVendors(): VendorRecord[] {
       actualQuoteMinor: 1750000,
       bookingStatus: "quote_received",
       paymentStatus: "unpaid",
-      notes: "Specializes in Pune vegetarian events. Quote includes 2 mocktails, 2 starters, 3 main course dishes, live chaat, and gulab jamun.",
+      notes:
+        "Specializes in Pune vegetarian events. Quote includes 2 mocktails, 2 starters, 3 main course dishes, live chaat, and gulab jamun.",
       relatedTaskIds: ["task-caterer-lock"],
     },
     {
@@ -73,7 +80,8 @@ export function generateDefaultVendors(): VendorRecord[] {
       actualQuoteMinor: 500000,
       bookingStatus: "contacted",
       paymentStatus: "unpaid",
-      notes: "Experienced in anime & manga themed setups: customized Naruto/Ghibli standees, LED fairy light tunnels, and balloon arch.",
+      notes:
+        "Experienced in anime & manga themed setups: customized Naruto/Ghibli standees, LED fairy light tunnels, and balloon arch.",
       relatedTaskIds: ["task-decor-plan", "task-day-setup"],
     },
     {
@@ -89,7 +97,8 @@ export function generateDefaultVendors(): VendorRecord[] {
       actualQuoteMinor: 350000,
       bookingStatus: "shortlisted",
       paymentStatus: "unpaid",
-      notes: "3 hours coverage for birthday. Delivers 100 color-graded digital photos + 1 reel within 4 days.",
+      notes:
+        "3 hours coverage for birthday. Delivers 100 color-graded digital photos + 1 reel within 4 days.",
       relatedTaskIds: ["task-photo-vendor"],
     },
     {

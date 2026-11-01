@@ -1,4 +1,10 @@
-import { EventPlan, EventProfile, BudgetItem, ReplanningProposal, PlanChangeDiff } from "../../types/event";
+import {
+  EventPlan,
+  EventProfile,
+  BudgetItem,
+  ReplanningProposal,
+  PlanChangeDiff,
+} from "../../types/event";
 import { calculateBudgetSummary } from "../../budget/budgetEngine";
 import { formatINR, subtractMoney, addMoney } from "../../budget/moneyUtils";
 import { ParsedConstraintChange } from "../types";

@@ -51,8 +51,12 @@ export function normalizeTasks(rawList: unknown[], planDate: string): Task[] {
       dependencies: Array.isArray(task.dependencies)
         ? task.dependencies.filter((d): d is string => typeof d === "string")
         : [],
-      estimatedCostMinor: task.estimatedCostMinor != null ? integer(task.estimatedCostMinor) : undefined,
-      vendorId: typeof task.vendorId === "string" && task.vendorId.trim() ? task.vendorId.trim() : undefined,
+      estimatedCostMinor:
+        task.estimatedCostMinor != null ? integer(task.estimatedCostMinor) : undefined,
+      vendorId:
+        typeof task.vendorId === "string" && task.vendorId.trim()
+          ? task.vendorId.trim()
+          : undefined,
       isOverdue: typeof task.isOverdue === "boolean" ? task.isOverdue : false,
       isBlocked: typeof task.isBlocked === "boolean" ? task.isBlocked : false,
     };

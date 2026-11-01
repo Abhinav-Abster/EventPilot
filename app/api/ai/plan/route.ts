@@ -12,6 +12,4 @@ const planSchema = z.object({
   ),
 });
 
-export const POST = handleAIRoute(planSchema, ({ profile }) =>
-  generateFullEventPlan(profile)
-);
+export const POST = handleAIRoute(planSchema, ({ profile }) => generateFullEventPlan(profile));

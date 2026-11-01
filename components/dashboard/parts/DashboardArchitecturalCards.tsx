@@ -39,7 +39,10 @@ export function DashboardArchitecturalCards({
     <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
       {/* Card 1: Budget Ledger */}
       <div className="card-bauhaus bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col justify-between relative">
-        <span className="w-4 h-4 rounded-full bg-[#D02020] border-2 border-black absolute top-4 right-4" title="Circle Accent" />
+        <span
+          className="w-4 h-4 rounded-full bg-[#D02020] border-2 border-black absolute top-4 right-4"
+          title="Circle Accent"
+        />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b-4 border-black pb-3">
@@ -75,18 +78,25 @@ export function DashboardArchitecturalCards({
         <div className="grid grid-cols-2 gap-4 pt-6 border-t-4 border-black text-xs font-mono mt-6">
           <div>
             <span className="text-black/60 block text-[10px] uppercase font-bold">REMAINING</span>
-            <span className="font-black text-black text-sm">{formatINR(budgetSummary.remainingEstimatedMinor)}</span>
+            <span className="font-black text-black text-sm">
+              {formatINR(budgetSummary.remainingEstimatedMinor)}
+            </span>
           </div>
           <div>
             <span className="text-black/60 block text-[10px] uppercase font-bold">CONTINGENCY</span>
-            <span className="font-black text-black text-sm">{budgetSummary.contingencyPercent}%</span>
+            <span className="font-black text-black text-sm">
+              {budgetSummary.contingencyPercent}%
+            </span>
           </div>
         </div>
       </div>
 
       {/* Card 2: Execution Directives */}
       <div className="card-bauhaus bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col justify-between relative">
-        <span className="w-4 h-4 rounded-none bg-[#1040C0] border-2 border-black absolute top-4 right-4" title="Square Accent" />
+        <span
+          className="w-4 h-4 rounded-none bg-[#1040C0] border-2 border-black absolute top-4 right-4"
+          title="Square Accent"
+        />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b-4 border-black pb-3">
@@ -122,7 +132,9 @@ export function DashboardArchitecturalCards({
         <div className="grid grid-cols-2 gap-4 pt-6 border-t-4 border-black text-xs font-mono mt-6">
           <div>
             <span className="text-black/60 block text-[10px] uppercase font-bold">OVERDUE</span>
-            <span className="font-black text-[#D02020] text-sm">{overdueTasksCount} DIRECTIVES</span>
+            <span className="font-black text-[#D02020] text-sm">
+              {overdueTasksCount} DIRECTIVES
+            </span>
           </div>
           <div>
             <span className="text-black/60 block text-[10px] uppercase font-bold">BLOCKED</span>
@@ -133,7 +145,10 @@ export function DashboardArchitecturalCards({
 
       {/* Card 3: Vendor Roster */}
       <div className="card-bauhaus bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col justify-between relative">
-        <span className="w-4 h-4 shape-triangle bg-[#F0C020] border-b-2 border-black absolute top-4 right-4" title="Triangle Accent" />
+        <span
+          className="w-4 h-4 shape-triangle bg-[#F0C020] border-b-2 border-black absolute top-4 right-4"
+          title="Triangle Accent"
+        />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b-4 border-black pb-3">
@@ -165,8 +180,12 @@ export function DashboardArchitecturalCards({
 
         <div className="grid grid-cols-2 gap-4 pt-6 border-t-4 border-black text-xs font-mono mt-6">
           <div>
-            <span className="text-black/60 block text-[10px] uppercase font-bold">TOTAL QUOTES</span>
-            <span className="font-black text-black text-sm">{formatINR(totalVendorQuotesMinor)}</span>
+            <span className="text-black/60 block text-[10px] uppercase font-bold">
+              TOTAL QUOTES
+            </span>
+            <span className="font-black text-black text-sm">
+              {formatINR(totalVendorQuotesMinor)}
+            </span>
           </div>
           <div>
             <span className="text-black/60 block text-[10px] uppercase font-bold">COVERAGE</span>

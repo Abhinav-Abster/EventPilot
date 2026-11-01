@@ -40,7 +40,12 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
   }, []);
 
   const budgetSummary = useMemo(
-    () => calculateBudgetSummary(plan.profile.totalBudgetMinor, plan.budgetItems, plan.profile.guestCount),
+    () =>
+      calculateBudgetSummary(
+        plan.profile.totalBudgetMinor,
+        plan.budgetItems,
+        plan.profile.guestCount
+      ),
     [plan.profile.totalBudgetMinor, plan.budgetItems, plan.profile.guestCount]
   );
 
@@ -96,7 +101,10 @@ export function DashboardView({ onNavigate, onOpenEventManager }: DashboardViewP
 
   const percentSpent =
     plan.profile.totalBudgetMinor > 0
-      ? Math.min(100, Math.round((budgetSummary.totalEstimatedMinor / plan.profile.totalBudgetMinor) * 100))
+      ? Math.min(
+          100,
+          Math.round((budgetSummary.totalEstimatedMinor / plan.profile.totalBudgetMinor) * 100)
+        )
       : 0;
 
   const handleQuickSubmit = async (e: React.FormEvent) => {

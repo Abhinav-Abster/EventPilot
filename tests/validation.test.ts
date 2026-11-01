@@ -86,7 +86,13 @@ describe("Validation & Gemini configuration", () => {
         { name: "Catering", category: "catering", estimatedCostMinor: 3500000 }, // Total 59.5k > 50k budget!
       ],
       tasks: [
-        { title: "Book DJ", category: "entertainment", relativeDays: -10, vendorId: null, estimatedCostMinor: null },
+        {
+          title: "Book DJ",
+          category: "entertainment",
+          relativeDays: -10,
+          vendorId: null,
+          estimatedCostMinor: null,
+        },
         { title: "Order Cake", category: "catering", relativeDays: -5 },
       ],
       vendors: [
@@ -98,7 +104,14 @@ describe("Validation & Gemini configuration", () => {
         },
       ],
       ideas: [
-        { title: "Anime Trivia Quiz", category: "games", description: "Fun quiz", whyItFits: "Anime theme", estimatedCostMinor: 0, costRangeText: null },
+        {
+          title: "Anime Trivia Quiz",
+          category: "games",
+          description: "Fun quiz",
+          whyItFits: "Anime theme",
+          estimatedCostMinor: 0,
+          costRangeText: null,
+        },
       ],
     };
 
@@ -118,8 +131,12 @@ describe("Validation & Gemini configuration", () => {
     expect(planValidation.success).toBe(true);
 
     // Verify category mapping
-    expect(normalizedPlan.budgetItems.find((b) => b.name === "Custom Anime Cake")?.category).toBe("food_beverage");
-    expect(normalizedPlan.budgetItems.find((b) => b.name === "Live DJ & Sound")?.category).toBe("entertainment");
+    expect(normalizedPlan.budgetItems.find((b) => b.name === "Custom Anime Cake")?.category).toBe(
+      "food_beverage"
+    );
+    expect(normalizedPlan.budgetItems.find((b) => b.name === "Live DJ & Sound")?.category).toBe(
+      "entertainment"
+    );
 
     // Verify vendor phone became string and bookingStatus defaulted safely
     const bakeryVendor = normalizedPlan.vendors.find((v) => v.name === "Sugar Bakery");
@@ -131,7 +148,10 @@ describe("Validation & Gemini configuration", () => {
     expect(djTask?.vendorId).toBeUndefined();
 
     // Verify total budget was auto-balanced to not exceed totalBudgetMinor
-    const totalEst = normalizedPlan.budgetItems.reduce((acc, item) => acc + item.estimatedCostMinor, 0);
+    const totalEst = normalizedPlan.budgetItems.reduce(
+      (acc, item) => acc + item.estimatedCostMinor,
+      0
+    );
     expect(totalEst).toBeLessThanOrEqual(normalizedProf.totalBudgetMinor);
   });
 });
@@ -186,4 +206,3 @@ describe("Dietary Normalization & Vegan Classification Fix", () => {
     expect(defaultProfile.dietaryPreferences).toEqual(["vegetarian"]);
   });
 });
-

@@ -6,7 +6,10 @@ import { Navbar, type NavTab } from "../components/layout/Navbar";
 import { DashboardView } from "../components/dashboard/DashboardView";
 
 const TabLoadingFallback = () => (
-  <small role="status" className="font-mono text-xs uppercase tracking-widest font-bold text-black/60 p-6 block">
+  <small
+    role="status"
+    className="font-mono text-xs uppercase tracking-widest font-bold text-black/60 p-6 block"
+  >
     LOADING DIRECTIVE...
   </small>
 );
@@ -116,7 +119,8 @@ export default function HomePage() {
               </span>
             </div>
             <p className="text-sm font-medium text-white/70 max-w-md">
-              Form follows function. Deterministic constraint validation, budget optimization, and adaptive replanning architected through pure geometry and primary color theory.
+              Form follows function. Deterministic constraint validation, budget optimization, and
+              adaptive replanning architected through pure geometry and primary color theory.
             </p>
           </div>
 

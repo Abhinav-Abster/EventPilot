@@ -61,7 +61,10 @@ export function TimelineView() {
   const handleToggleTask = useCallback((id: string) => toggleTaskStatus(id), [toggleTaskStatus]);
   const handleEditTask = useCallback((task: Task) => setEditingTask(task), []);
   const handleDeleteTask = useCallback((id: string) => deleteTask(id), [deleteTask]);
-  const handleUpdateEventDate = useCallback((newDate: string) => updateProfile({ date: newDate }), [updateProfile]);
+  const handleUpdateEventDate = useCallback(
+    (newDate: string) => updateProfile({ date: newDate }),
+    [updateProfile]
+  );
 
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();

@@ -17,13 +17,7 @@ import { usePlan } from "../../lib/persistence/PlanContext";
 import { EventSwitcherDropdown } from "./EventSwitcherDropdown";
 
 export type NavTab =
-  | "dashboard"
-  | "intake"
-  | "budget"
-  | "timeline"
-  | "vendors"
-  | "ideas"
-  | "assistant";
+  "dashboard" | "intake" | "budget" | "timeline" | "vendors" | "ideas" | "assistant";
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -62,9 +56,18 @@ export function Navbar({ activeTab, onTabChange, onOpenEventManager }: NavbarPro
               aria-label="EventPilot Home"
             >
               <div className="flex items-center gap-1.5 shrink-0 p-1 border-2 border-black bg-white shadow-[3px_3px_0px_0px_black] group-hover:translate-x-[1px] group-hover:translate-y-[1px] group-hover:shadow-[2px_2px_0px_0px_black] transition-all">
-                <span className="w-4 h-4 rounded-full bg-[#D02020] inline-block border border-black" title="Circle" />
-                <span className="w-4 h-4 rounded-none bg-[#1040C0] inline-block border border-black" title="Square" />
-                <span className="w-4 h-4 shape-triangle bg-[#F0C020] inline-block border-b-2 border-black" title="Triangle" />
+                <span
+                  className="w-4 h-4 rounded-full bg-[#D02020] inline-block border border-black"
+                  title="Circle"
+                />
+                <span
+                  className="w-4 h-4 rounded-none bg-[#1040C0] inline-block border border-black"
+                  title="Square"
+                />
+                <span
+                  className="w-4 h-4 shape-triangle bg-[#F0C020] inline-block border-b-2 border-black"
+                  title="Triangle"
+                />
               </div>
 
               <div>
@@ -132,7 +135,11 @@ export function Navbar({ activeTab, onTabChange, onOpenEventManager }: NavbarPro
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X size={20} strokeWidth={2.5} /> : <Menu size={20} strokeWidth={2.5} />}
+              {mobileMenuOpen ? (
+                <X size={20} strokeWidth={2.5} />
+              ) : (
+                <Menu size={20} strokeWidth={2.5} />
+              )}
             </button>
           </div>
         </div>

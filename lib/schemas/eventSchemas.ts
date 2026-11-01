@@ -83,11 +83,13 @@ export const VendorRecordSchema = z.object({
   id: z.string().default(() => "v-" + Math.random().toString(36).substring(2, 9)),
   name: z.string().min(1),
   category: VendorCategorySchema,
-  contact: z.object({
-    contactPerson: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.string().optional(),
-  }).default({}),
+  contact: z
+    .object({
+      contactPerson: z.string().optional(),
+      phone: z.string().optional(),
+      email: z.string().optional(),
+    })
+    .default({}),
   estimatedQuoteMinor: z.number().int().min(0),
   actualQuoteMinor: z.number().int().min(0).default(0),
   bookingStatus: VendorBookingStatusSchema.default("planned"),

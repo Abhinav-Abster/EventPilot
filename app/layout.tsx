@@ -27,11 +27,7 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={outfit.variable}>
       <body className="min-h-screen flex flex-col bg-[#F0F0F0] text-[#121212] antialiased font-sans relative selection:bg-[#D02020] selection:text-white">

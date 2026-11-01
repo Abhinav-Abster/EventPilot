@@ -59,7 +59,10 @@ export function normalizeProfile(
   const dietaryPreferences =
     sanitizedDiets.length > 0 ? sanitizedDiets : [...DEFAULT_DIETARY_PREFERENCES];
 
-  const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<string, unknown>;
+  const loc = (p.location && typeof p.location === "object" ? p.location : {}) as Record<
+    string,
+    unknown
+  >;
   const city = typeof loc.city === "string" && loc.city.trim() ? loc.city.trim() : DEFAULT_CITY;
   const rawVenue = typeof loc.venueType === "string" ? loc.venueType.toLowerCase() : "";
   const venueType: VenueType = isOneOf(VENUE_TYPES, rawVenue) ? rawVenue : "outdoor";
@@ -70,15 +73,20 @@ export function normalizeProfile(
     : 50;
 
   return {
-    id: typeof p.id === "string" && p.id ? p.id : "ep-" + Math.random().toString(36).substring(2, 9),
-    name: typeof p.name === "string" && p.name.trim().length >= 2 ? p.name.trim() : "Celebration Event",
+    id:
+      typeof p.id === "string" && p.id ? p.id : "ep-" + Math.random().toString(36).substring(2, 9),
+    name:
+      typeof p.name === "string" && p.name.trim().length >= 2 ? p.name.trim() : "Celebration Event",
     type,
     date,
     time: typeof p.time === "string" && p.time.trim() ? p.time.trim() : "18:00",
     location: {
       city,
       venueType,
-      venueName: typeof loc.venueName === "string" && loc.venueName.trim() ? loc.venueName.trim() : undefined,
+      venueName:
+        typeof loc.venueName === "string" && loc.venueName.trim()
+          ? loc.venueName.trim()
+          : undefined,
     },
     guestCount,
     totalBudgetMinor: parseBudgetMinor(p.totalBudgetMinor),

@@ -57,11 +57,7 @@ export function createReferenceEventPlan(): EventPlan {
     theme: "Anime & Manga Aesthetics (Studio Ghibli & Shonen)",
     dietaryPreferences: ["vegetarian" as const],
     accessibilityRequirements: ["Ground level wheelchair access to lawn"],
-    mustHaves: [
-      "Anime-Themed Decor & Cake",
-      "100% Pure Vegetarian Food",
-      "Outdoor Evening Setup",
-    ],
+    mustHaves: ["Anime-Themed Decor & Cake", "100% Pure Vegetarian Food", "Outdoor Evening Setup"],
     excludedFeatures: ["Alcohol", "Loud Firecrackers"],
     priorities: ["food" as const, "decor" as const, "budget" as const],
     notes:
@@ -257,4 +253,3 @@ export function createCustomEventPlan(
     version: 1,
   };
 }
-

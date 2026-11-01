@@ -12,7 +12,8 @@ export function createGeneralAuditProposal(currentPlan: EventPlan): ReplanningPr
     {
       id: "prop-audit",
       title: "Comprehensive Event Feasibility Audit",
-      summary: "Audit verifies that all financial calculations, task dependencies, and vendor quotes are in balance.",
+      summary:
+        "Audit verifies that all financial calculations, task dependencies, and vendor quotes are in balance.",
       strategy: "balanced",
       impact: {
         budgetDeltaMinor: 0,

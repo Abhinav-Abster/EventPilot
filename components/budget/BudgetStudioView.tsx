@@ -23,15 +23,32 @@ export function BudgetStudioView() {
   const [editingItem, setEditingItem] = useState<BudgetItem | null>(null);
   const [targetOptimizationRupees, setTargetOptimizationRupees] = useState("30000");
 
-  const { form, setName, setCategory, setEstimatedRupees, setFlexible, setIsProtected, setNotes, resetForm } = useBudgetForm();
+  const {
+    form,
+    setName,
+    setCategory,
+    setEstimatedRupees,
+    setFlexible,
+    setIsProtected,
+    setNotes,
+    resetForm,
+  } = useBudgetForm();
 
   const summary = useMemo(
-    () => calculateBudgetSummary(plan.profile.totalBudgetMinor, plan.budgetItems, plan.profile.guestCount),
+    () =>
+      calculateBudgetSummary(
+        plan.profile.totalBudgetMinor,
+        plan.budgetItems,
+        plan.profile.guestCount
+      ),
     [plan.profile.totalBudgetMinor, plan.budgetItems, plan.profile.guestCount]
   );
 
   const filteredItems = useMemo(
-    () => (selectedCategory === "all" ? plan.budgetItems : plan.budgetItems.filter((i) => i.category === selectedCategory)),
+    () =>
+      selectedCategory === "all"
+        ? plan.budgetItems
+        : plan.budgetItems.filter((i) => i.category === selectedCategory),
     [plan.budgetItems, selectedCategory]
   );
 
@@ -125,7 +142,8 @@ export function BudgetStudioView() {
             BUDGET STUDIO
           </h1>
           <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
-            Deterministic minor-unit integer arithmetic prevents precision drift. Every category constraint is strictly verified against event mandates.
+            Deterministic minor-unit integer arithmetic prevents precision drift. Every category
+            constraint is strictly verified against event mandates.
           </p>
         </div>
 

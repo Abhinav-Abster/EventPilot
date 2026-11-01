@@ -31,7 +31,10 @@ export function VendorManagementView() {
   const [vendorForm, setVendorForm] = useState<NewVendorFormData>(INITIAL_VENDOR_FORM);
 
   const filteredVendors = useMemo(
-    () => (selectedCategory === "all" ? plan.vendors : plan.vendors.filter((v) => v.category === selectedCategory)),
+    () =>
+      selectedCategory === "all"
+        ? plan.vendors
+        : plan.vendors.filter((v) => v.category === selectedCategory),
     [plan.vendors, selectedCategory]
   );
 
@@ -108,7 +111,8 @@ export function VendorManagementView() {
             VENDOR DIRECTORY
           </h1>
           <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
-            Curated index of verified suppliers, caterers, decorators, and venues. Track contractual quotations and execution commitments.
+            Curated index of verified suppliers, caterers, decorators, and venues. Track contractual
+            quotations and execution commitments.
           </p>
         </div>
 
@@ -125,7 +129,9 @@ export function VendorManagementView() {
       <div className="bg-[#FFF9C4] border-4 border-black p-5 shadow-[4px_4px_0px_0px_black] text-xs font-mono text-black flex items-start gap-3">
         <AlertCircle size={18} strokeWidth={2.5} className="text-[#D02020] shrink-0 mt-0.5" />
         <span className="leading-relaxed">
-          <strong className="uppercase font-black">BENCHMARK DISCLOSURE:</strong> Initial vendor profiles reflect market calibrations for Pune venues and services. EventPilot conducts verified deterministic constraint scoring for quotes and timelines.
+          <strong className="uppercase font-black">BENCHMARK DISCLOSURE:</strong> Initial vendor
+          profiles reflect market calibrations for Pune venues and services. EventPilot conducts
+          verified deterministic constraint scoring for quotes and timelines.
         </span>
       </div>
 

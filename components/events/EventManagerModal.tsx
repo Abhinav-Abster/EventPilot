@@ -23,11 +23,7 @@ const INITIAL_FORM: NewEventFormState = {
   budgetRupees: 50000,
 };
 
-export function EventManagerModal({
-  isOpen,
-  onClose,
-  onNavigateToIntake,
-}: EventManagerModalProps) {
+export function EventManagerModal({ isOpen, onClose, onNavigateToIntake }: EventManagerModalProps) {
   const {
     plans,
     activePlanId,
@@ -86,8 +82,7 @@ export function EventManagerModal({
     const matchesSearch =
       p.profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.profile.location.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType =
-      selectedTypeFilter === "all" || p.profile.type === selectedTypeFilter;
+    const matchesType = selectedTypeFilter === "all" || p.profile.type === selectedTypeFilter;
     return matchesSearch && matchesType;
   });
 
@@ -188,7 +183,9 @@ export function EventManagerModal({
         <div className="px-8 py-5 bg-white border-t-4 border-black flex items-center justify-between font-mono text-xs">
           <div className="uppercase tracking-widest font-bold text-black flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-black inline-block" />
-            <span>DOSSIER ARCHIVE: <span className="font-black">{plans.length} REGISTERED</span></span>
+            <span>
+              DOSSIER ARCHIVE: <span className="font-black">{plans.length} REGISTERED</span>
+            </span>
           </div>
           <button
             onClick={onClose}

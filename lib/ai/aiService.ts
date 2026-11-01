@@ -1,5 +1,9 @@
 import { DEFAULT_GEMINI_MODEL } from "./geminiClient";
-import { EVENT_INTAKE_SYSTEM_PROMPT, PLAN_GENERATION_SYSTEM_PROMPT, REPLANNING_SYSTEM_PROMPT } from "./prompts";
+import {
+  EVENT_INTAKE_SYSTEM_PROMPT,
+  PLAN_GENERATION_SYSTEM_PROMPT,
+  REPLANNING_SYSTEM_PROMPT,
+} from "./prompts";
 import { EventPlan, EventProfile, ReplanningProposal } from "../types/event";
 import { EventPlanSchema } from "../schemas/eventSchemas";
 import { parseConstraintIntent, generateReplanningProposals } from "../replanning/replanningEngine";
@@ -57,7 +61,11 @@ Only include fields that were stated or can be inferred safely in extractedProfi
   }
 
   const result = parsed as Partial<IntakeResult>;
-  if (typeof result.reply !== "string" || !result.extractedProfile || typeof result.extractedProfile !== "object") {
+  if (
+    typeof result.reply !== "string" ||
+    !result.extractedProfile ||
+    typeof result.extractedProfile !== "object"
+  ) {
     throw new AIServiceError("Gemini returned an incomplete intake result. Please try again.");
   }
 
@@ -117,7 +125,10 @@ Strict Formatting and Constraints:
   });
 
   if (!validation.success) {
-    console.error("Plan validation failed with issues:", JSON.stringify(validation.error.issues, null, 2));
+    console.error(
+      "Plan validation failed with issues:",
+      JSON.stringify(validation.error.issues, null, 2)
+    );
     throw new AIServiceError(
       `Gemini returned a plan that did not pass validation: ${validation.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ")}`
     );
@@ -139,7 +150,11 @@ Requested change: ${JSON.stringify(userQuery)}
 
 Identify the requested change and return only { "explanation": "a concise explanation of the request and its relevant planning trade-offs" }.`);
 
-  if (!parsed || typeof parsed !== "object" || typeof (parsed as { explanation?: unknown }).explanation !== "string") {
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    typeof (parsed as { explanation?: unknown }).explanation !== "string"
+  ) {
     throw new AIServiceError("Gemini returned an invalid replanning analysis. Please try again.");
   }
 

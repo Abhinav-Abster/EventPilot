@@ -39,7 +39,8 @@ export function usePlanStorage(
 
   useEffect(() => {
     if (!isHydrated || plans.length === 0) return;
-    if (plans === lastSavedPlansRef.current && activePlanId === lastSavedActiveIdRef.current) return;
+    if (plans === lastSavedPlansRef.current && activePlanId === lastSavedActiveIdRef.current)
+      return;
 
     const timer = setTimeout(() => {
       flushSave();

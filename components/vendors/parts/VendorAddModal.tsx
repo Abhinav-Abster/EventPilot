@@ -23,13 +23,7 @@ interface VendorAddModalProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-export function VendorAddModal({
-  isOpen,
-  onClose,
-  form,
-  onChange,
-  onSubmit,
-}: VendorAddModalProps) {
+export function VendorAddModal({ isOpen, onClose, form, onChange, onSubmit }: VendorAddModalProps) {
   if (!isOpen) return null;
 
   return (

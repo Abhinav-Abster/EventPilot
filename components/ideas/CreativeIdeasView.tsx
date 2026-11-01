@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Bookmark,
-  Sparkles,
-  Info,
-  AlertTriangle,
-} from "lucide-react";
+import { Bookmark, Sparkles, Info, AlertTriangle } from "lucide-react";
 import { usePlan } from "../../lib/persistence/PlanContext";
 import { CreativeIdeaCategory } from "../../lib/types/event";
 import { formatINR } from "../../lib/budget/moneyUtils";
@@ -43,7 +38,8 @@ export function CreativeIdeasView() {
           CREATIVE ATELIER
         </h1>
         <p className="font-medium text-base text-[#121212] max-w-2xl leading-relaxed">
-          Bespoke thematic installations, artisanal culinary pairings, and geometric entertainment designed exclusively around non-negotiable constraints.
+          Bespoke thematic installations, artisanal culinary pairings, and geometric entertainment
+          designed exclusively around non-negotiable constraints.
         </p>
       </div>
 
@@ -94,8 +90,8 @@ export function CreativeIdeasView() {
             idx % 3 === 0
               ? "bg-[#D02020] text-white"
               : idx % 3 === 1
-              ? "bg-[#1040C0] text-white"
-              : "bg-[#F0C020] text-black";
+                ? "bg-[#1040C0] text-white"
+                : "bg-[#F0C020] text-black";
 
           return (
             <div
@@ -103,7 +99,9 @@ export function CreativeIdeasView() {
               className="card-bauhaus bg-white border-4 border-black shadow-[8px_8px_0px_0px_black] flex flex-col justify-between overflow-hidden"
             >
               {/* Poster Color-Blocked Top Bar */}
-              <div className={`p-4 border-b-4 border-black flex items-center justify-between ${headerBg}`}>
+              <div
+                className={`p-4 border-b-4 border-black flex items-center justify-between ${headerBg}`}
+              >
                 <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest font-black">
                   <span>CONCEPT 0{idx + 1}</span>
                   <span>/</span>
@@ -116,7 +114,11 @@ export function CreativeIdeasView() {
                   }`}
                   title={idea.isSaved ? "Curated Concept" : "Bookmark this concept"}
                 >
-                  <Bookmark size={15} strokeWidth={2.5} className={idea.isSaved ? "fill-white" : ""} />
+                  <Bookmark
+                    size={15}
+                    strokeWidth={2.5}
+                    className={idea.isSaved ? "fill-white" : ""}
+                  />
                 </button>
               </div>
 
@@ -169,7 +171,8 @@ export function CreativeIdeasView() {
                   {idea.tradeOffs.length > 0 && (
                     <div className="text-black">
                       <span className="text-[10px] uppercase tracking-wider font-black text-black block mb-0.5 flex items-center gap-1">
-                        <AlertTriangle size={12} strokeWidth={2.5} className="text-[#D02020]" /> TRADE-OFF:
+                        <AlertTriangle size={12} strokeWidth={2.5} className="text-[#D02020]" />{" "}
+                        TRADE-OFF:
                       </span>
                       <span className="font-bold">{idea.tradeOffs[0]}</span>
                     </div>

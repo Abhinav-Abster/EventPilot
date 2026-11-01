@@ -39,10 +39,7 @@ export class PriorityQueue<T> {
     return top;
   }
 
-  private internalCompare(
-    a: { item: T; seq: number },
-    b: { item: T; seq: number }
-  ): number {
+  private internalCompare(a: { item: T; seq: number }, b: { item: T; seq: number }): number {
     const cmp = this.compare(a.item, b.item);
     if (cmp !== 0) return cmp;
     return a.seq - b.seq;

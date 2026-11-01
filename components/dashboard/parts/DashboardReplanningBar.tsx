@@ -29,12 +29,16 @@ export function DashboardReplanningBar({
           WHAT-IF ADAPTATION SOLVER
         </h2>
         <p className="text-sm font-medium text-white/90 max-w-3xl leading-relaxed">
-          Instruct the deterministic solver in natural language. Trade-offs are evaluated against non-negotiable boundaries and visualized in a side-by-side diff matrix.
+          Instruct the deterministic solver in natural language. Trade-offs are evaluated against
+          non-negotiable boundaries and visualized in a side-by-side diff matrix.
         </p>
       </div>
 
       {error && (
-        <div role="alert" className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black]">
+        <div
+          role="alert"
+          className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black]"
+        >
           ERROR: {error}
         </div>
       )}

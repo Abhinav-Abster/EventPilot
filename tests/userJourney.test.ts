@@ -37,9 +37,7 @@ describe("Phase 6 End-to-End User Journey Audit", () => {
         t.id === venueTaskId ? { ...t, status: "completed" as const } : t
       ),
       vendors: currentPlan.vendors.map((v) =>
-        v.category === "caterer"
-          ? { ...v, actualQuoteMinor: rupeesToPaise(17500) }
-          : v
+        v.category === "caterer" ? { ...v, actualQuoteMinor: rupeesToPaise(17500) } : v
       ),
     };
     const completedVenueTask = currentPlan.tasks.find((t) => t.id === venueTaskId);

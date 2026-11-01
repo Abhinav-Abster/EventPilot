@@ -1,7 +1,11 @@
 import { BudgetItem, BudgetCategory, BudgetSummary, EventProfile } from "../types/event";
 import { subtractMoney, formatINR, addMoney } from "./moneyUtils";
 import { computeCategoryBreakdown, buildBudgetWarningsAndTips } from "./summaryHelpers";
-import { markProtectedItems, determineTrimOrder, computeItemReduction } from "./optimizationHelpers";
+import {
+  markProtectedItems,
+  determineTrimOrder,
+  computeItemReduction,
+} from "./optimizationHelpers";
 
 export const ALL_BUDGET_CATEGORIES: BudgetCategory[] = [
   "venue",
@@ -153,7 +157,8 @@ export function optimizeBudget(
     (sum, item) => addMoney(sum, item.estimatedCostMinor),
     0
   );
-  const initialDeficit = currentTotal > targetBudgetMinor ? subtractMoney(currentTotal, targetBudgetMinor) : 0;
+  const initialDeficit =
+    currentTotal > targetBudgetMinor ? subtractMoney(currentTotal, targetBudgetMinor) : 0;
 
   if (initialDeficit <= 0) {
     return {

@@ -44,8 +44,8 @@ describe("PriorityQueue", () => {
   });
 
   it("maintains FIFO stability for equal priority elements", () => {
-    const pq = new PriorityQueue<{ name: string; priority: number }>((a, b) =>
-      a.priority - b.priority
+    const pq = new PriorityQueue<{ name: string; priority: number }>(
+      (a, b) => a.priority - b.priority
     );
 
     pq.push({ name: "first-10", priority: 10 });

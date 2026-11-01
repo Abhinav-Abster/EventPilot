@@ -107,12 +107,17 @@ export function AIAssistantView() {
           REPLANNING TERMINAL
         </h1>
         <p className="font-sans font-medium text-base text-black max-w-3xl leading-relaxed">
-          Evaluate what-if scenarios in real-time. Trade-offs and resource adjustments are tested against non-negotiable architectural constraints before any plan modifications are committed.
+          Evaluate what-if scenarios in real-time. Trade-offs and resource adjustments are tested
+          against non-negotiable architectural constraints before any plan modifications are
+          committed.
         </p>
       </div>
 
       {error && (
-        <div role="alert" className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black] uppercase tracking-wider">
+        <div
+          role="alert"
+          className="border-4 border-black bg-[#D02020] text-white p-4 text-xs font-mono font-bold shadow-[4px_4px_0px_0px_black] uppercase tracking-wider"
+        >
           SYSTEM ERROR NOTICE: {error}
         </div>
       )}
@@ -129,7 +134,9 @@ export function AIAssistantView() {
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#F0C020] border-2 border-black inline-block" />
-            <span className="font-mono text-[10px] uppercase font-bold tracking-widest">ENGINE OPERATIONAL</span>
+            <span className="font-mono text-[10px] uppercase font-bold tracking-widest">
+              ENGINE OPERATIONAL
+            </span>
           </div>
         </div>
 
@@ -147,7 +154,11 @@ export function AIAssistantView() {
                     isUser ? "bg-[#D02020] text-white rounded-full" : "bg-[#121212] text-white"
                   }`}
                 >
-                  {isUser ? <MessageSquare size={16} strokeWidth={2} /> : <Bot size={16} strokeWidth={2} />}
+                  {isUser ? (
+                    <MessageSquare size={16} strokeWidth={2} />
+                  ) : (
+                    <Bot size={16} strokeWidth={2} />
+                  )}
                 </div>
 
                 <div className="space-y-4 max-w-2xl flex-1">

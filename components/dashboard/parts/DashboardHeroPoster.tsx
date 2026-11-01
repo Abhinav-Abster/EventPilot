@@ -100,11 +100,16 @@ export function DashboardHeroPoster({
           <div className="space-y-3 pt-2">
             <div className="bg-white text-black border-2 border-black p-3 shadow-[4px_4px_0px_0px_black] flex items-center gap-3 font-bold text-xs">
               <Calendar size={18} strokeWidth={2.5} className="text-[#D02020] shrink-0" />
-              <span>DATE: {plan.profile.date} AT {plan.profile.time} HRS</span>
+              <span>
+                DATE: {plan.profile.date} AT {plan.profile.time} HRS
+              </span>
             </div>
             <div className="bg-white text-black border-2 border-black p-3 shadow-[4px_4px_0px_0px_black] flex items-center gap-3 font-bold text-xs">
               <MapPin size={18} strokeWidth={2.5} className="text-[#1040C0] shrink-0" />
-              <span className="truncate">VENUE: {plan.profile.location.city} ({plan.profile.location.venueType.toUpperCase()})</span>
+              <span className="truncate">
+                VENUE: {plan.profile.location.city} ({plan.profile.location.venueType.toUpperCase()}
+                )
+              </span>
             </div>
             <div className="bg-white text-black border-2 border-black p-3 shadow-[4px_4px_0px_0px_black] flex items-center gap-3 font-bold text-xs">
               <Users size={18} strokeWidth={2.5} className="text-[#F0C020] shrink-0" />
@@ -126,8 +131,8 @@ export function DashboardHeroPoster({
               {daysRemaining > 0
                 ? `${daysRemaining} DAYS REMAINING`
                 : daysRemaining === 0
-                ? "EVENT COMMENCES TODAY"
-                : "EVENT CONCLUDED"}
+                  ? "EVENT COMMENCES TODAY"
+                  : "EVENT CONCLUDED"}
             </div>
           </div>
         </div>

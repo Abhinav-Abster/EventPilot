@@ -50,7 +50,10 @@ export function createDateChangeProposal(
       strategy: "balanced",
       impact: {
         budgetDeltaMinor: 0,
-        newTotalEstimatedMinor: currentPlan.budgetItems.reduce((s, i) => addMoney(s, i.estimatedCostMinor), 0),
+        newTotalEstimatedMinor: currentPlan.budgetItems.reduce(
+          (s, i) => addMoney(s, i.estimatedCostMinor),
+          0
+        ),
         tasksAffectedCount: updatedTasks.length,
         feasibilityScore: 92,
         preservedConstraints: [...currentPlan.profile.mustHaves],

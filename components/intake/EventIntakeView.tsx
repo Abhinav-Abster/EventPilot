@@ -137,12 +137,16 @@ export function EventIntakeView({ onNavigate, onOpenEventManager }: EventIntakeV
         </h1>
 
         <p className="font-medium text-base text-[#121212] max-w-3xl leading-relaxed">
-          State your requirements in free prose. EventPilot converts your requirements into structured Zod schemas, identifying bound trade-offs and verifying safety constraints.
+          State your requirements in free prose. EventPilot converts your requirements into
+          structured Zod schemas, identifying bound trade-offs and verifying safety constraints.
         </p>
       </div>
 
       {error && (
-        <div role="alert" className="border-4 border-black bg-[#D02020] text-white p-5 font-mono text-xs font-black shadow-[6px_6px_0px_0px_black]">
+        <div
+          role="alert"
+          className="border-4 border-black bg-[#D02020] text-white p-5 font-mono text-xs font-black shadow-[6px_6px_0px_0px_black]"
+        >
           SYSTEM AUDIT EXCEPTION: {error}
         </div>
       )}

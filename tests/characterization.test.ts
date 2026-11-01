@@ -3,10 +3,7 @@ import {
   parseConstraintIntent,
   generateReplanningProposals,
 } from "../lib/replanning/replanningEngine";
-import {
-  calculateBudgetSummary,
-  optimizeBudget,
-} from "../lib/budget/budgetEngine";
+import { calculateBudgetSummary, optimizeBudget } from "../lib/budget/budgetEngine";
 import { normalizePlanOutput } from "../lib/ai/aiService";
 import { createReferenceEventPlan } from "../lib/persistence/defaultEvent";
 import { EventPlan } from "../lib/types/event";
@@ -62,12 +59,17 @@ describe("Characterization Tests: Baseline Behavior Preservation", () => {
     });
 
     it("produces proposals for venue weather shift", () => {
-      const intent = parseConstraintIntent("Heavy rain expected, shift to indoor banquet hall", plan);
+      const intent = parseConstraintIntent(
+        "Heavy rain expected, shift to indoor banquet hall",
+        plan
+      );
       const proposals = generateReplanningProposals(plan, intent);
       expect(proposals.length).toBeGreaterThan(0);
       const proposal = proposals[0];
       expect(proposal.revisedPlan.profile.location.venueType).toBe("indoor");
-      expect(proposal.diffs.some((d) => d.type === "profile" && d.field === "venueType")).toBe(true);
+      expect(proposal.diffs.some((d) => d.type === "profile" && d.field === "venueType")).toBe(
+        true
+      );
     });
 
     it("produces proposals for vendor cancellation", () => {
@@ -110,15 +112,11 @@ describe("Characterization Tests: Baseline Behavior Preservation", () => {
           { name: "Catering", category: "catering", estimatedCostMinor: 2500000 },
           { name: "DJ", category: "music", estimatedCostMinor: 1000000 },
         ],
-        tasks: [
-          { title: "Book Hall", category: "venue", priority: "HIGH", relativeDays: -15 },
-        ],
+        tasks: [{ title: "Book Hall", category: "venue", priority: "HIGH", relativeDays: -15 }],
         vendors: [
           { name: "V1", category: "hall", bookingStatus: "booked", paymentStatus: "unpaid" },
         ],
-        ideas: [
-          { title: "Idea 1", category: "decor", description: "Nice decor" },
-        ],
+        ideas: [{ title: "Idea 1", category: "decor", description: "Nice decor" }],
       };
 
       const normalized = normalizePlanOutput(rawOutput, plan.profile);

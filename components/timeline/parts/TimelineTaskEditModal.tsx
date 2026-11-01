@@ -69,7 +69,9 @@ export function TimelineTaskEditModal({
               </label>
               <select
                 value={editingTask.priority}
-                onChange={(e) => onChange({ ...editingTask, priority: e.target.value as TaskPriority })}
+                onChange={(e) =>
+                  onChange({ ...editingTask, priority: e.target.value as TaskPriority })
+                }
                 className="w-full px-3 py-2 bg-[#F0F0F0] border-2 border-black text-xs font-mono font-bold text-black focus:bg-white focus:outline-none shadow-[2px_2px_0px_0px_black]"
               >
                 <option value="urgent">URGENT</option>

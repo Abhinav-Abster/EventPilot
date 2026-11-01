@@ -32,9 +32,7 @@ export function DashboardMetricGauges({ plan, percentSpent }: DashboardMetricGau
           <div className="font-display font-black text-2xl sm:text-3xl text-black">
             {plan.profile.date}
           </div>
-          <div className="font-mono text-xs font-bold text-black/80">
-            {plan.profile.time} HRS
-          </div>
+          <div className="font-mono text-xs font-bold text-black/80">{plan.profile.time} HRS</div>
         </div>
 
         {/* Stat 2: Location */}

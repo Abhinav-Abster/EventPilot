@@ -24,11 +24,7 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
   return (
     <div
       className={`card-bauhaus border-4 border-black p-6 shadow-[6px_6px_0px_0px_black] transition-all ${
-        isDone
-          ? "bg-[#F0F0F0] opacity-80"
-          : task.isOverdue
-          ? "bg-[#FFF9C4]"
-          : "bg-white"
+        isDone ? "bg-[#F0F0F0] opacity-80" : task.isOverdue ? "bg-[#FFF9C4]" : "bg-white"
       }`}
     >
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -40,15 +36,15 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
               isDone
                 ? "bg-[#D02020] text-white shadow-[2px_2px_0px_0px_black]"
                 : task.isBlocked
-                ? "bg-[#E0E0E0] text-black cursor-not-allowed border-dashed"
-                : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
+                  ? "bg-[#E0E0E0] text-black cursor-not-allowed border-dashed"
+                  : "bg-white hover:bg-[#F0C020] shadow-[2px_2px_0px_0px_black]"
             }`}
             title={
               task.isBlocked
                 ? "Prerequisite directive must be resolved first"
                 : isDone
-                ? "Mark as Pending"
-                : "Mark as Complete"
+                  ? "Mark as Pending"
+                  : "Mark as Complete"
             }
           >
             {isDone && <Check size={16} strokeWidth={3} />}
@@ -70,8 +66,8 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
                   task.priority === "urgent"
                     ? "bg-[#D02020] text-white"
                     : task.priority === "high"
-                    ? "bg-[#F0C020] text-black"
-                    : "bg-white text-black"
+                      ? "bg-[#F0C020] text-black"
+                      : "bg-white text-black"
                 }`}
               >
                 {task.priority}
@@ -92,9 +88,7 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
               )}
             </div>
 
-            <p className="font-medium text-xs text-black/80 leading-relaxed">
-              {task.description}
-            </p>
+            <p className="font-medium text-xs text-black/80 leading-relaxed">{task.description}</p>
 
             {/* Dependencies listing */}
             {depTasks.length > 0 && (
@@ -122,15 +116,11 @@ export const TimelineTaskCard = React.memo(function TimelineTaskCard({
         {/* Right metadata & actions */}
         <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-3 shrink-0 self-stretch sm:self-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-black font-mono">
           <div className="text-right">
-            <span className="text-xs font-black text-black block">
-              DUE {task.dueDate}
-            </span>
+            <span className="text-xs font-black text-black block">DUE {task.dueDate}</span>
             <span className="text-[10px] font-bold text-black/70 uppercase tracking-wider block">
               {task.relativeDays === 0
                 ? "EVENT DAY"
-                : `${Math.abs(task.relativeDays)}D ${
-                    task.relativeDays < 0 ? "PRIOR" : "POST"
-                  }`}
+                : `${Math.abs(task.relativeDays)}D ${task.relativeDays < 0 ? "PRIOR" : "POST"}`}
             </span>
           </div>
 

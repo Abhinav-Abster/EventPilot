@@ -9,15 +9,18 @@ EventPilot is a production-grade, GenAI-powered event planning assistant that pa
 ## 1. Challenge Vertical & Primary Persona
 
 ### Vertical
+
 GenAI Planning & Operational Automation for Celebrations & Gatherings (Weddings, Milestone Birthdays, Community Melas).
 
 ### Target Persona
+
 **Budget-Conscious Indian Birthday Organizer**
 
-* **Example User Story:**
-  > *"I'm planning my sister's 18th birthday in Pune for 60 people. My budget is ₹40,000. She loves anime, and I'd like an outdoor evening party with vegetarian food."*
+- **Example User Story:**
 
-* **Cultural & Practical Grounding:**
+  > _"I'm planning my sister's 18th birthday in Pune for 60 people. My budget is ₹40,000. She loves anime, and I'd like an outdoor evening party with vegetarian food."_
+
+- **Cultural & Practical Grounding:**
   - Strict adherence to 100% vegetarian culinary standards.
   - Realistic tier-2 Indian metro (Pune) pricing benchmarks across lawns, pure-veg catering, artisanal cake bakeries, and freelance event photography.
   - Extensible domain model that scales to weddings, corporate offsites, and community gatherings without code duplication.
@@ -28,6 +31,7 @@ GenAI Planning & Operational Automation for Celebrations & Gatherings (Weddings,
 ## 2. Problem Statement
 
 Organizing celebratory events is notoriously prone to chaotic failure modes:
+
 1. **Financial Float & Creep:** LLM chatbots often invent fictional vendor quotes or suffer from floating-point arithmetic errors that produce broken budgets.
 2. **Fragile Scheduling:** Traditional checklists fail to account for topological prerequisites (e.g., booking a venue before ordering venue-specific backdrop prints).
 3. **Inflexible Replanning:** When real-world disruptions strike (budget cuts, sudden rain, guest list expansion, vendor cancellation), organizers must rebuild plans from scratch without understanding the trade-offs.
@@ -43,7 +47,7 @@ EventPilot bridges generative creativity and software engineering rigor: **GenAI
 - **Dependency-Aware Timeline & Checklist:** Tasks sorted topologically with cycle detection, relative lead times (-21d, -14d, -7d, 0d), overdue detection, and prerequisite unblocking.
 - **Vendor Directory & Quote Tracker:** Track contact persons, estimated vs. actual quotes, booking statuses, and payment states with transparent disclosures.
 - **Personalized Creative Studio:** Tailored anime-fusion themes, 100% vegetarian menus, interactive party games, and return gifts with explicit trade-offs and cost ranges.
-- **Adaptive Replanning Engine (Core Differentiator):** Modify any constraint in natural language (e.g., *"My budget is now ₹30,000"*, *"Move party indoors"*, *"The caterer cancelled"*). Generates ranked proposals with side-by-side diff previews, preserved non-negotiables, and consequential Accept/Reject controls.
+- **Adaptive Replanning Engine (Core Differentiator):** Modify any constraint in natural language (e.g., _"My budget is now ₹30,000"_, _"Move party indoors"_, _"The caterer cancelled"_). Generates ranked proposals with side-by-side diff previews, preserved non-negotiables, and consequential Accept/Reject controls.
 - **Live Gemini Integration:** Intake, plan generation, and replanning analysis run through server-side Gemini API routes. Missing configuration and provider failures are shown in the interface.
 
 ---
@@ -83,27 +87,29 @@ EventPilot/
 
 ### Module Responsibilities
 
-| Responsibility | Responsible Module | Design Pattern / Mechanism |
-| :--- | :--- | :--- |
-| **Natural Language Interpretation** | `lib/ai/aiService.ts` | Gemini (`@google/genai`) through server-side route handlers |
-| **Schema Validation** | `lib/schemas/eventSchemas.ts` | Zod runtime schema validation on all inputs & outputs |
-| **Monetary Calculations** | `lib/budget/moneyUtils.ts` | Integer Paise (Minor units); 0 floating-point arithmetic |
-| **Budget Optimization** | `lib/budget/budgetEngine.ts` | Deterministic priority-inversion reduction algorithm |
-| **Task Dependency Resolution** | `lib/timeline/timelineEngine.ts`| Depth-First Search cycle detection & topological sorting |
-| **Constraint Shift Analysis** | `lib/replanning/replanningEngine.ts` | Deep state cloning, diff extraction, and invariant verification |
-| **State Persistence** | `lib/persistence/PlanContext.tsx` | React Context + validated browser LocalStorage with fallback |
+| Responsibility                      | Responsible Module                   | Design Pattern / Mechanism                                      |
+| :---------------------------------- | :----------------------------------- | :-------------------------------------------------------------- |
+| **Natural Language Interpretation** | `lib/ai/aiService.ts`                | Gemini (`@google/genai`) through server-side route handlers     |
+| **Schema Validation**               | `lib/schemas/eventSchemas.ts`        | Zod runtime schema validation on all inputs & outputs           |
+| **Monetary Calculations**           | `lib/budget/moneyUtils.ts`           | Integer Paise (Minor units); 0 floating-point arithmetic        |
+| **Budget Optimization**             | `lib/budget/budgetEngine.ts`         | Deterministic priority-inversion reduction algorithm            |
+| **Task Dependency Resolution**      | `lib/timeline/timelineEngine.ts`     | Depth-First Search cycle detection & topological sorting        |
+| **Constraint Shift Analysis**       | `lib/replanning/replanningEngine.ts` | Deep state cloning, diff extraction, and invariant verification |
+| **State Persistence**               | `lib/persistence/PlanContext.tsx`    | React Context + validated browser LocalStorage with fallback    |
 
 ---
 
 ## 5. How GenAI is Used vs. Deterministic Decision-Making
 
 ### Generative AI Responsibilities
+
 - Parsing unstructured natural language requests into structured profile attributes.
 - Brainstorming culturally authentic creative themes (e.g., Studio Ghibli enchanted garden decor, Japanese-Indian fusion live chaat counters).
 - Formulating human-readable trade-off explanations when constraints change.
 - Providing conversational guidance during the intake flow.
 
 ### Deterministic Application Responsibilities
+
 - **All financial arithmetic:** Subtotals, category sums, contingency percentages, remaining buffers, and deficits.
 - **Constraint validation:** Ensuring mandatory fields exist, guest counts are positive, and dates are valid.
 - **Dependency management:** Ensuring tasks are executed in topological order and detecting circular dependency loops.
@@ -115,7 +121,9 @@ EventPilot/
 ## 6. Budget Optimization & Replanning Algorithms
 
 ### Budget Optimization Algorithm (`optimizeBudget`)
+
 When a budget reduction is requested:
+
 1. **Deficit Calculation:** Computes `deficit = totalEstimated - targetBudget`. If `deficit <= 0`, returns immediately.
 2. **Constraint Protection:** Inspects `profile.mustHaves`. Items matching protected keywords are marked with `isProtected: true`.
 3. **Priority Inversion Sorting:** Categories are ranked for reduction based on the inverse of user priorities (e.g. entertainment → photography → decor → invitations → venue → food).
@@ -129,6 +137,7 @@ When a budget reduction is requested:
 5. **Feasibility Assertion:** If the target cannot be met without violating protected constraints or dropping below ₹200/guest for food, the engine flags explicit conflicts rather than fabricating impossible prices.
 
 ### Adaptive Replanning Pipeline (`generateReplanningProposals`)
+
 1. **Intent Parsing:** Extracts change intent (`budget_change`, `guest_count_change`, `venue_change`, `vendor_cancellation`, `date_change`).
 2. **State Cloning:** Clones the entire event state into an immutable working copy.
 3. **Cascade Propagation:**
@@ -174,10 +183,12 @@ When a budget reduction is requested:
 ## 10. Prerequisites & Installation
 
 ### Prerequisites
+
 - Node.js v20.x or higher
 - npm or pnpm
 
 ### Installation
+
 ```bash
 # Clone the repository (keep single main branch)
 git clone https://github.com/Abhinav-Abster/EventPilot.git
@@ -198,11 +209,12 @@ cp .env.example .env.local
 ```
 
 ### Environment Variables
-| Variable | Description | Required? | Default |
-| :--- | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Google Gemini API Key | Yes | None |
-| `GEMINI_MODEL` | Gemini Model identifier | Optional | `gemini-2.0-flash` |
-| `NEXT_PUBLIC_APP_NAME`| Application Name | Optional | `EventPilot` |
+
+| Variable               | Description             | Required? | Default            |
+| :--------------------- | :---------------------- | :-------- | :----------------- |
+| `GEMINI_API_KEY`       | Google Gemini API Key   | Yes       | None               |
+| `GEMINI_MODEL`         | Gemini Model identifier | Optional  | `gemini-2.0-flash` |
+| `NEXT_PUBLIC_APP_NAME` | Application Name        | Optional  | `EventPilot`       |
 
 > **Note:** Add `GEMINI_API_KEY` to `.env.local` and restart the application. If it is missing or Gemini returns an error, the interface displays the error and does not substitute generated sample data.
 
@@ -244,6 +256,7 @@ npm run test
 ```
 
 ### Test Suites Overview
+
 - **`tests/budget.test.ts`**: Verifies minor unit calculations, overspending detection, deficit calculation, protected requirement preservation during budget reduction, and infeasibility flagging.
 - **`tests/timeline.test.ts`**: Verifies topological ordering, circular dependency detection, blocked status propagation, overdue identification, and date shift recalculation.
 - **`tests/replanning.test.ts`**: Verifies natural language intent parsing, constraint preservation, diff generation, and proposal staging.
@@ -263,13 +276,13 @@ npm run test
 
 ## 15. Sample User Prompts for Live Evaluation
 
-- *"I'm planning my sister's birthday in Pune for 60 people. My budget is ₹40,000. She loves anime, and I'd like an outdoor evening party with vegetarian food."*
-- *"My budget is now ₹30,000."*
-- *"We have 20 additional guests."*
-- *"Move the party indoors due to rain."*
-- *"The caterer cancelled at the last minute."*
-- *"Keep the decorations but reduce other expenses."*
-- *"The event is now next Saturday."*
+- _"I'm planning my sister's birthday in Pune for 60 people. My budget is ₹40,000. She loves anime, and I'd like an outdoor evening party with vegetarian food."_
+- _"My budget is now ₹30,000."_
+- _"We have 20 additional guests."_
+- _"Move the party indoors due to rain."_
+- _"The caterer cancelled at the last minute."_
+- _"Keep the decorations but reduce other expenses."_
+- _"The event is now next Saturday."_
 
 ---
 

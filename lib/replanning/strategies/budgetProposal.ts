@@ -11,11 +11,7 @@ export function createBudgetChangeProposal(
   const oldBudgetMinor = currentPlan.profile.totalBudgetMinor;
   const budgetDelta = subtractMoney(targetBudgetMinor, oldBudgetMinor);
 
-  const optResult = optimizeBudget(
-    currentPlan.budgetItems,
-    targetBudgetMinor,
-    currentPlan.profile
-  );
+  const optResult = optimizeBudget(currentPlan.budgetItems, targetBudgetMinor, currentPlan.profile);
 
   const revisedProfile: EventProfile = {
     ...currentPlan.profile,

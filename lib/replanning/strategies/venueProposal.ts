@@ -1,4 +1,10 @@
-import { EventPlan, EventProfile, BudgetItem, ReplanningProposal, PlanChangeDiff } from "../../types/event";
+import {
+  EventPlan,
+  EventProfile,
+  BudgetItem,
+  ReplanningProposal,
+  PlanChangeDiff,
+} from "../../types/event";
 import { formatINR, addMoney } from "../../budget/moneyUtils";
 import { ParsedConstraintChange } from "../types";
 
@@ -25,14 +31,18 @@ export function createVenueChangeProposal(
     if (item.category === "venue") {
       return {
         ...item,
-        name: newVenueType === "indoor" ? "Indoor AC Banquet Hall Rental" : "Outdoor Garden Lawn Rental",
+        name:
+          newVenueType === "indoor"
+            ? "Indoor AC Banquet Hall Rental"
+            : "Outdoor Garden Lawn Rental",
         estimatedCostMinor: newVenueType === "indoor" ? 950000 : 800000,
       };
     }
     if (item.category === "decorations") {
       return {
         ...item,
-        name: newVenueType === "indoor" ? "Indoor Backdrop & LED Arch" : "Lawn Fairy Lights & Standees",
+        name:
+          newVenueType === "indoor" ? "Indoor Backdrop & LED Arch" : "Lawn Fairy Lights & Standees",
       };
     }
     return { ...item };
@@ -42,10 +52,14 @@ export function createVenueChangeProposal(
     if (task.id === "task-weather-check") {
       return {
         ...task,
-        title: newVenueType === "indoor" ? "Inspect Hall Air Conditioning & Sound Setup" : "Check Pune Evening Radar & Rain Tarp",
-        description: newVenueType === "indoor"
-          ? "Verify AC cooling capacity for 60 guests and hall acoustics."
-          : "Check Pune weather radar and confirm lawn drainage.",
+        title:
+          newVenueType === "indoor"
+            ? "Inspect Hall Air Conditioning & Sound Setup"
+            : "Check Pune Evening Radar & Rain Tarp",
+        description:
+          newVenueType === "indoor"
+            ? "Verify AC cooling capacity for 60 guests and hall acoustics."
+            : "Check Pune weather radar and confirm lawn drainage.",
       };
     }
     return { ...task };

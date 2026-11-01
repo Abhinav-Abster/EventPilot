@@ -22,9 +22,7 @@ export const BudgetItemRow = React.memo(function BudgetItemRow({
       <td className="py-4 px-6">
         <div className="font-display font-black text-sm uppercase text-black">{item.name}</div>
         {item.notes && (
-          <div className="font-sans text-xs text-black/70 mt-0.5 font-medium">
-            {item.notes}
-          </div>
+          <div className="font-sans text-xs text-black/70 mt-0.5 font-medium">{item.notes}</div>
         )}
       </td>
       <td className="py-4 px-4">

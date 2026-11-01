@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  calculateBudgetSummary,
-  optimizeBudget,
-} from "../lib/budget/budgetEngine";
+import { calculateBudgetSummary, optimizeBudget } from "../lib/budget/budgetEngine";
 import {
   rupeesToPaise,
   paiseToRupees,

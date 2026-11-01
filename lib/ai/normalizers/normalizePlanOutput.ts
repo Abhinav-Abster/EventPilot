@@ -9,7 +9,8 @@ import { normalizeIdeas } from "./normalizeIdeas";
 
 export function normalizePlanOutput(output: unknown, profile: Partial<EventProfile>) {
   const root = asRecord(output);
-  const generated = asRecord(root?.plan) ?? asRecord(root?.eventPlan) ?? asRecord(root?.data) ?? root;
+  const generated =
+    asRecord(root?.plan) ?? asRecord(root?.eventPlan) ?? asRecord(root?.data) ?? root;
   if (!generated) {
     throw new AIServiceError("Gemini returned an invalid plan format. Please try again.");
   }

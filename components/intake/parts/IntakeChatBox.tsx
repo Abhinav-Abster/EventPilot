@@ -57,7 +57,11 @@ export function IntakeChatBox({
                   isUser ? "bg-[#F0C020] text-black" : "bg-[#1040C0] text-white"
                 }`}
               >
-                {isUser ? <User size={16} strokeWidth={2.5} /> : <Bot size={16} strokeWidth={2.5} />}
+                {isUser ? (
+                  <User size={16} strokeWidth={2.5} />
+                ) : (
+                  <Bot size={16} strokeWidth={2.5} />
+                )}
               </div>
               <div
                 className={`p-4 max-w-[85%] text-xs sm:text-sm leading-relaxed border-2 border-black shadow-[4px_4px_0px_0px_black] ${

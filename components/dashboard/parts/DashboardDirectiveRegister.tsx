@@ -37,11 +37,7 @@ export function DashboardDirectiveRegister({
 
       <div className="divide-y-2 divide-black">
         {upcomingTasks.map((task) => (
-          <DashboardTaskItem
-            key={task.id}
-            task={task}
-            onToggle={onToggleTask}
-          />
+          <DashboardTaskItem key={task.id} task={task} onToggle={onToggleTask} />
         ))}
       </div>
     </section>

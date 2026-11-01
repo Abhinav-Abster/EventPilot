@@ -43,9 +43,7 @@ export function IntakeProfileForm({
           <h2 className="font-display font-black text-lg uppercase tracking-tight">
             STRUCTURED SPECIFICATION
           </h2>
-          <p className="font-mono text-[11px] font-bold uppercase">
-            VALIDATED SCHEMA PROFILES
-          </p>
+          <p className="font-mono text-[11px] font-bold uppercase">VALIDATED SCHEMA PROFILES</p>
         </div>
         <span className="font-mono text-[10px] uppercase font-black bg-black text-white px-2.5 py-1 border border-black shadow-[2px_2px_0px_0px_black]">
           SYNCHRONIZED

@@ -25,12 +25,7 @@ export function BudgetTable({ items, onEdit, onDelete }: BudgetTableProps) {
           </thead>
           <tbody className="divide-y-2 divide-black text-black">
             {items.map((item) => (
-              <BudgetItemRow
-                key={item.id}
-                item={item}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
+              <BudgetItemRow key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />
             ))}
           </tbody>
         </table>

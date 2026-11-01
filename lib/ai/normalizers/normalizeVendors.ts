@@ -12,10 +12,12 @@ import { asRecord, text, integer } from "../parsingHelpers";
 import { VALID_VENDOR_CATEGORIES_SET, VENDOR_CATEGORY_MAP } from "../categoryMaps";
 
 function resolveVendorCategory(raw: unknown): VendorCategory {
-  const normalized = text(raw, "other").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+  const normalized = text(raw, "other")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_");
   const candidate = VALID_VENDOR_CATEGORIES_SET.has(normalized)
     ? normalized
-    : VENDOR_CATEGORY_MAP[normalized] ?? "other";
+    : (VENDOR_CATEGORY_MAP[normalized] ?? "other");
   return isOneOf(VENDOR_CATEGORIES, candidate) ? candidate : "other";
 }
 
@@ -40,10 +42,16 @@ function resolveContact(raw: unknown) {
 export function normalizeVendors(rawList: unknown[]): VendorRecord[] {
   return rawList.map((value, index) => {
     const vendor = asRecord(value) ?? {};
-    const bookingStatus: VendorBookingStatus = isOneOf(VENDOR_BOOKING_STATUSES, vendor.bookingStatus)
+    const bookingStatus: VendorBookingStatus = isOneOf(
+      VENDOR_BOOKING_STATUSES,
+      vendor.bookingStatus
+    )
       ? vendor.bookingStatus
       : "planned";
-    const paymentStatus: VendorPaymentStatus = isOneOf(VENDOR_PAYMENT_STATUSES, vendor.paymentStatus)
+    const paymentStatus: VendorPaymentStatus = isOneOf(
+      VENDOR_PAYMENT_STATUSES,
+      vendor.paymentStatus
+    )
       ? vendor.paymentStatus
       : "unpaid";
 
@@ -52,7 +60,10 @@ export function normalizeVendors(rawList: unknown[]): VendorRecord[] {
       name: text(vendor.name, `Potential vendor ${index + 1}`),
       category: resolveVendorCategory(vendor.category),
       contact: resolveContact(vendor.contact),
-      estimatedQuoteMinor: integer(vendor.estimatedQuoteMinor ?? vendor.quoteMinor ?? vendor.estimatedCostMinor, 0),
+      estimatedQuoteMinor: integer(
+        vendor.estimatedQuoteMinor ?? vendor.quoteMinor ?? vendor.estimatedCostMinor,
+        0
+      ),
       actualQuoteMinor: integer(vendor.actualQuoteMinor, 0),
       bookingStatus,
       paymentStatus,

@@ -1,7 +1,10 @@
 import { DEFAULT_GEMINI_MODEL, getGeminiClient, GeminiConfigurationError } from "./geminiClient";
 
 export class AIServiceError extends Error {
-  constructor(message: string, public readonly status = 502) {
+  constructor(
+    message: string,
+    public readonly status = 502
+  ) {
     super(message);
     this.name = "AIServiceError";
   }

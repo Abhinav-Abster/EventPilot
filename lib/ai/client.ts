@@ -2,7 +2,10 @@ import type { EventPlan, EventProfile } from "../types/event";
 import type { IntakeResult, PlanGenerationResult, ReplanningResult } from "./aiService";
 
 export class AIRequestError extends Error {
-  constructor(message: string, public readonly isTimeout = false) {
+  constructor(
+    message: string,
+    public readonly isTimeout = false
+  ) {
     super(message);
     this.name = "AIRequestError";
   }
@@ -52,15 +55,9 @@ export async function requestAI<T>(
     return payload as T;
   } catch (error) {
     if (timedOut) {
-      throw new AIRequestError(
-        "The request timed out after 60 seconds. Please try again.",
-        true
-      );
+      throw new AIRequestError("The request timed out after 60 seconds. Please try again.", true);
     }
-    if (
-      externalSignal?.aborted ||
-      (error instanceof Error && error.name === "AbortError")
-    ) {
+    if (externalSignal?.aborted || (error instanceof Error && error.name === "AbortError")) {
       throw new AIRequestError("Request was cancelled.");
     }
     if (error instanceof AIRequestError) throw error;
@@ -83,17 +80,10 @@ export function requestIntake(
   return requestAI<IntakeResult>("/api/ai/intake", { message, currentProfile }, signal);
 }
 
-export function requestPlan(
-  profile: Partial<EventProfile>,
-  signal?: AbortSignal
-) {
+export function requestPlan(profile: Partial<EventProfile>, signal?: AbortSignal) {
   return requestAI<PlanGenerationResult>("/api/ai/plan", { profile }, signal);
 }
 
-export function requestReplanning(
-  query: string,
-  plan: EventPlan,
-  signal?: AbortSignal
-) {
+export function requestReplanning(query: string, plan: EventPlan, signal?: AbortSignal) {
   return requestAI<ReplanningResult>("/api/ai/replanning", { query, plan }, signal);
 }

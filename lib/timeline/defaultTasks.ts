@@ -1,7 +1,9 @@
 import { Task } from "../types/event";
 import { addDaysToDate } from "./dateUtils";
 
-export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate" | "isOverdue" | "isBlocked">> {
+export function getBaseEventTasks(
+  isOutdoor: boolean
+): Array<Omit<Task, "dueDate" | "isOverdue" | "isBlocked">> {
   return [
     {
       id: "task-venue-lock",
@@ -30,7 +32,8 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     {
       id: "task-caterer-lock",
       title: "Lock Vegetarian Catering Menu & Tasting",
-      description: "Finalize Pune caterer for 60 guests: starters, live chaat, main course, and beverages.",
+      description:
+        "Finalize Pune caterer for 60 guests: starters, live chaat, main course, and beverages.",
       category: "food_beverage",
       priority: "high",
       relativeDays: -14,
@@ -41,7 +44,8 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     {
       id: "task-anime-cake",
       title: "Order Custom Anime Themed Birthday Cake",
-      description: "Order 2kg fondant/cream cake featuring sister's favorite anime character with bakery in Pune.",
+      description:
+        "Order 2kg fondant/cream cake featuring sister's favorite anime character with bakery in Pune.",
       category: "food_beverage",
       priority: "high",
       relativeDays: -10,
@@ -52,7 +56,8 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     {
       id: "task-decor-plan",
       title: "Finalize Anime Decor, Photo Backdrop & Standees",
-      description: "Approve stage layout, character standees, fairy lights, and balloon garland design.",
+      description:
+        "Approve stage layout, character standees, fairy lights, and balloon garland design.",
       category: "decorations",
       priority: "medium",
       relativeDays: -7,
@@ -74,7 +79,8 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     {
       id: "task-sound-music",
       title: "Setup Sound System & Curate Anime Playlist",
-      description: "Arrange portable Bluetooth PA speaker and curate Japanese anime OSTs + party tracks.",
+      description:
+        "Arrange portable Bluetooth PA speaker and curate Japanese anime OSTs + party tracks.",
       category: "entertainment",
       priority: "medium",
       relativeDays: -4,
@@ -84,7 +90,9 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     },
     {
       id: "task-weather-check",
-      title: isOutdoor ? "Check Pune Evening Weather Forecast & Rain Plan" : "Verify AC & Power Backup",
+      title: isOutdoor
+        ? "Check Pune Evening Weather Forecast & Rain Plan"
+        : "Verify AC & Power Backup",
       description: isOutdoor
         ? "Inspect Pune IMD radar for evening rain/wind. Verify gazebo/waterproof canopy readiness."
         : "Check generator backup for lighting and sound system.",
@@ -97,7 +105,8 @@ export function getBaseEventTasks(isOutdoor: boolean): Array<Omit<Task, "dueDate
     {
       id: "task-day-setup",
       title: "Venue Handover & On-site Decoration Setup",
-      description: "Arrive 3 hours early at venue to supervise balloon setup, cake table, and sound check.",
+      description:
+        "Arrive 3 hours early at venue to supervise balloon setup, cake table, and sound check.",
       category: "coordination",
       priority: "urgent",
       relativeDays: 0,

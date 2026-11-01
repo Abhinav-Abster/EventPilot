@@ -38,14 +38,8 @@ describe("Storage persistence and migration", () => {
     const plan = createReferenceEventPlan();
     saveStoredPlans([plan], plan.profile.id);
 
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      STORAGE_EVENTS_KEY,
-      JSON.stringify([plan])
-    );
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      STORAGE_ACTIVE_ID_KEY,
-      plan.profile.id
-    );
+    expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_EVENTS_KEY, JSON.stringify([plan]));
+    expect(localStorage.setItem).toHaveBeenCalledWith(STORAGE_ACTIVE_ID_KEY, plan.profile.id);
 
     const { loadedPlans, activeId } = loadStoredPlans();
     expect(loadedPlans.length).toBe(1);

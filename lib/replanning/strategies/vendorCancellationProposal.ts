@@ -1,4 +1,11 @@
-import { EventPlan, VendorRecord, Task, TaskCategory, ReplanningProposal, PlanChangeDiff } from "../../types/event";
+import {
+  EventPlan,
+  VendorRecord,
+  Task,
+  TaskCategory,
+  ReplanningProposal,
+  PlanChangeDiff,
+} from "../../types/event";
 import { addMoney } from "../../budget/moneyUtils";
 import { addDaysToDate } from "../../timeline/timelineEngine";
 import { ParsedConstraintChange } from "../types";
@@ -84,7 +91,10 @@ export function createVendorCancellationProposal(
       strategy: "contingency",
       impact: {
         budgetDeltaMinor: 0,
-        newTotalEstimatedMinor: currentPlan.budgetItems.reduce((s, i) => addMoney(s, i.estimatedCostMinor), 0),
+        newTotalEstimatedMinor: currentPlan.budgetItems.reduce(
+          (s, i) => addMoney(s, i.estimatedCostMinor),
+          0
+        ),
         tasksAffectedCount: 1,
         feasibilityScore: 72,
         preservedConstraints: [...currentPlan.profile.mustHaves],

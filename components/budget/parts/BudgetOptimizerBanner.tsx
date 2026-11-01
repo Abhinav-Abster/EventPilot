@@ -23,15 +23,15 @@ export function BudgetOptimizerBanner({
           DETERMINISTIC REDUCTION SOLVER
         </h2>
         <p className="text-sm font-medium text-black/90 leading-relaxed">
-          Specify a target cap to simulate structured reductions. The deterministic engine protects non-negotiable items (e.g. pure vegetarian catering, core themes) while scaling flexible allocations.
+          Specify a target cap to simulate structured reductions. The deterministic engine protects
+          non-negotiable items (e.g. pure vegetarian catering, core themes) while scaling flexible
+          allocations.
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
         <div className="relative w-full sm:w-auto">
-          <span className="absolute left-3 top-3 text-black font-mono text-xs font-black">
-            ₹
-          </span>
+          <span className="absolute left-3 top-3 text-black font-mono text-xs font-black">₹</span>
           <input
             type="number"
             step="1000"

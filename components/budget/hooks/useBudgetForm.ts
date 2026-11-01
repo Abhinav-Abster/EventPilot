@@ -24,7 +24,8 @@ export function useBudgetForm() {
 
   const setName = (name: string) => setForm((prev) => ({ ...prev, name }));
   const setCategory = (category: BudgetCategory) => setForm((prev) => ({ ...prev, category }));
-  const setEstimatedRupees = (estimatedRupees: string) => setForm((prev) => ({ ...prev, estimatedRupees }));
+  const setEstimatedRupees = (estimatedRupees: string) =>
+    setForm((prev) => ({ ...prev, estimatedRupees }));
   const setActualRupees = (actualRupees: string) => setForm((prev) => ({ ...prev, actualRupees }));
   const setFlexible = (flexible: boolean) => setForm((prev) => ({ ...prev, flexible }));
   const setIsProtected = (isProtected: boolean) => setForm((prev) => ({ ...prev, isProtected }));

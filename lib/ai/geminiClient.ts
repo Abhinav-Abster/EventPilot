@@ -26,7 +26,9 @@ export function getGeminiClient(): GoogleGenAI {
       geminiClientInstance = new GoogleGenAI({ apiKey });
     } catch (e) {
       console.error("Failed to initialize GoogleGenAI client:", e);
-      throw new GeminiConfigurationError("Gemini could not be initialized. Check GEMINI_API_KEY and restart EventPilot.");
+      throw new GeminiConfigurationError(
+        "Gemini could not be initialized. Check GEMINI_API_KEY and restart EventPilot."
+      );
     }
   }
 

@@ -68,7 +68,8 @@ export function computeItemReduction(
   if (category === "invitations") {
     return {
       reductionMinor: Math.min(deficit, percentOfMoney(currentCost, 85)),
-      reason: "Switched to bespoke animated WhatsApp/digital invites instead of printed stationery.",
+      reason:
+        "Switched to bespoke animated WhatsApp/digital invites instead of printed stationery.",
     };
   }
   if (category === "photography") {

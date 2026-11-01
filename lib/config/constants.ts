@@ -9,9 +9,7 @@ export const DEFAULT_CITY = "Pune";
 /**
  * Demo default dietary preferences used when unspecified during profile creation.
  */
-export const DEFAULT_DIETARY_PREFERENCES: readonly DietaryPreference[] = [
-  "vegetarian",
-] as const;
+export const DEFAULT_DIETARY_PREFERENCES: readonly DietaryPreference[] = ["vegetarian"] as const;
 
 /**
  * Canonical list of supported event types across all modules and schemas.

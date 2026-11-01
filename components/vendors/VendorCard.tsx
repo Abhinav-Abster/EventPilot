@@ -2,13 +2,8 @@
 
 import React from "react";
 import { Users, Phone, Mail, Edit2, Trash2 } from "lucide-react";
-import {
-  VendorRecord,
-  VendorBookingStatus,
-} from "../../lib/types/event";
-import {
-  VENDOR_CATEGORY_LABELS,
-} from "../../lib/vendor/vendorEngine";
+import { VendorRecord, VendorBookingStatus } from "../../lib/types/event";
+import { VENDOR_CATEGORY_LABELS } from "../../lib/vendor/vendorEngine";
 import { formatINR } from "../../lib/budget/moneyUtils";
 
 export interface VendorCardProps {
@@ -31,8 +26,8 @@ export const VendorCard = React.memo(function VendorCard({
     index % 3 === 0
       ? "rounded-full bg-[#D02020]"
       : index % 3 === 1
-      ? "rounded-none bg-[#1040C0]"
-      : "shape-triangle bg-[#F0C020]";
+        ? "rounded-none bg-[#1040C0]"
+        : "shape-triangle bg-[#F0C020]";
 
   return (
     <div className="card-bauhaus bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_black] flex flex-col justify-between space-y-6 relative">
@@ -103,9 +98,7 @@ export const VendorCard = React.memo(function VendorCard({
         <div>
           <select
             value={vendor.bookingStatus}
-            onChange={(e) =>
-              onStatusChange(vendor.id, e.target.value as VendorBookingStatus)
-            }
+            onChange={(e) => onStatusChange(vendor.id, e.target.value as VendorBookingStatus)}
             className="text-xs font-mono font-black uppercase bg-[#F0F0F0] border-2 border-black px-3 py-1.5 text-black shadow-[2px_2px_0px_0px_black] focus:outline-none"
           >
             <option value="planned">PLANNED</option>

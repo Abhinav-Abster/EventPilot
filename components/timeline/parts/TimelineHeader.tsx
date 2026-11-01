@@ -28,7 +28,8 @@ export function TimelineHeader({
             TIMELINE MATRIX
           </h1>
           <p className="font-medium text-sm text-[#121212] max-w-2xl leading-relaxed">
-            Topologically sequenced directive matrix. Prerequisite completions automatically unblock downstream actions across all phases.
+            Topologically sequenced directive matrix. Prerequisite completions automatically unblock
+            downstream actions across all phases.
           </p>
         </div>
 
@@ -52,8 +53,10 @@ export function TimelineHeader({
           </div>
           <p className="font-mono text-xs font-bold text-white leading-relaxed">
             The directive sequence contains a circular dependency loop:{" "}
-            <span className="underline bg-black text-[#F0C020] px-1 py-0.5">{cycleCheck.cycleTaskIds.join(" → ")}</span>.
-            Topological sequence cannot resolve until cycles are eliminated.
+            <span className="underline bg-black text-[#F0C020] px-1 py-0.5">
+              {cycleCheck.cycleTaskIds.join(" → ")}
+            </span>
+            . Topological sequence cannot resolve until cycles are eliminated.
           </p>
         </div>
       )}
@@ -71,7 +74,9 @@ export function TimelineHeader({
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto font-mono text-xs">
-          <span className="font-black uppercase tracking-wider text-[11px] text-black">POSTPONE:</span>
+          <span className="font-black uppercase tracking-wider text-[11px] text-black">
+            POSTPONE:
+          </span>
           <button
             onClick={() => onUpdateEventDate(addDaysToDate(eventDate, 7))}
             className="btn-bauhaus px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-black uppercase tracking-wider text-[11px] shadow-[3px_3px_0px_0px_black]"

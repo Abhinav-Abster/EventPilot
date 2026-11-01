@@ -17,13 +17,7 @@ export const VENUE_TYPES = ["indoor", "outdoor", "hybrid", "unselected"] as cons
 export type VenueType = (typeof VENUE_TYPES)[number];
 
 export type DietaryPreference =
-  | "vegetarian"
-  | "non-vegetarian"
-  | "vegan"
-  | "jain"
-  | "halal"
-  | "gluten-free"
-  | "nut-allergy";
+  "vegetarian" | "non-vegetarian" | "vegan" | "jain" | "halal" | "gluten-free" | "nut-allergy";
 
 export const PLANNING_PRIORITIES = [
   "food",
@@ -112,11 +106,7 @@ export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 export const TASK_STATUSES = ["todo", "in_progress", "completed", "blocked"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export const TASK_CATEGORIES = [
-  ...BUDGET_CATEGORIES,
-  "general",
-  "coordination",
-] as const;
+export const TASK_CATEGORIES = [...BUDGET_CATEGORIES, "general", "coordination"] as const;
 export type TaskCategory = (typeof TASK_CATEGORIES)[number];
 
 export interface Task {
@@ -157,11 +147,7 @@ export const VENDOR_BOOKING_STATUSES = [
 ] as const;
 export type VendorBookingStatus = (typeof VENDOR_BOOKING_STATUSES)[number];
 
-export const VENDOR_PAYMENT_STATUSES = [
-  "unpaid",
-  "advance_paid",
-  "fully_paid",
-] as const;
+export const VENDOR_PAYMENT_STATUSES = ["unpaid", "advance_paid", "fully_paid"] as const;
 export type VendorPaymentStatus = (typeof VENDOR_PAYMENT_STATUSES)[number];
 
 export interface VendorRecord {

@@ -39,9 +39,7 @@ export const DashboardTaskItem = React.memo(function DashboardTaskItem({
           >
             {task.title}
           </h3>
-          <p className="text-xs text-black/70 font-medium line-clamp-1">
-            {task.description}
-          </p>
+          <p className="text-xs text-black/70 font-medium line-clamp-1">{task.description}</p>
         </div>
       </div>
 
@@ -51,15 +49,13 @@ export const DashboardTaskItem = React.memo(function DashboardTaskItem({
             task.priority === "urgent"
               ? "bg-[#D02020] text-white"
               : task.priority === "high"
-              ? "bg-[#F0C020] text-black"
-              : "bg-white text-black"
+                ? "bg-[#F0C020] text-black"
+                : "bg-white text-black"
           }`}
         >
           {task.priority}
         </span>
-        <span className="font-bold text-black uppercase">
-          DUE {task.dueDate}
-        </span>
+        <span className="font-bold text-black uppercase">DUE {task.dueDate}</span>
       </div>
     </div>
   );
